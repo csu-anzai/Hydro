@@ -1,7 +1,7 @@
 clc, clear all
 
 % define a function over the domain
-f = @(x,y) 2*x + y - 3;
+f = @(x,y) 0*x + 0.1*y + 1;
 
 % reference triangle vertices and area
 Tref{1,1}.vert(1,:) = [0 0];
@@ -25,7 +25,7 @@ Tref{2,2}.cellavg = intm2(f,Tref{2,2}.vert) / Tref{2,2}.area;
 
 Tref{2,3}.vert(1,:) = [.25 sqrt(3)/4];
 Tref{2,3}.vert(2,:) = [.75 sqrt(3)/4];
-Tref{2,3}.vert(3,:) = [.5 1];
+Tref{2,3}.vert(3,:) = [.5 sqrt(3)/2];
 Tref{2,3}.area = sqrt(3) / 16;
 Tref{2,3}.cellavg = intm2(f,Tref{2,3}.vert) / Tref{2,3}.area;
 
@@ -63,15 +63,15 @@ Tref{3,4}.cellavg = intm2(f,Tref{3,4}.vert) / Tref{3,4}.area;
 % predict values of subdivided cell averages
 Tref{3,1}.predict = Tref{2,4}.cellavg + ( Tref{2,1}.cellavg + ...
                                           Tref{2,3}.cellavg - ...
-                                        2*Tref{2,2}.cellavg ) / 6;
+                                         2.0*Tref{2,2}.cellavg ) / 6;
 
 Tref{3,2}.predict = Tref{2,4}.cellavg + ( Tref{2,1}.cellavg + ...
                                           Tref{2,2}.cellavg - ...
-                                        2*Tref{2,3}.cellavg ) / 6;
+                                        2.0*Tref{2,3}.cellavg ) / 6;
 
 Tref{3,3}.predict = Tref{2,4}.cellavg + ( Tref{2,2}.cellavg + ...
                                           Tref{2,3}.cellavg - ...
-                                        2*Tref{2,1}.cellavg ) / 6;
+                                        2.0*Tref{2,1}.cellavg ) / 6;
 
 Tref{3,4}.predict = Tref{2,4}.cellavg;
 
