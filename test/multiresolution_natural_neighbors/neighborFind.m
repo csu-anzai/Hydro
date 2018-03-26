@@ -1,7 +1,7 @@
 function vec = neighborFind(DT,index)
 
     k = 1;
-    vec = zeros(3,1);
+    vec = zeros(2,1);
     for i = 1:length(DT.ConnectivityList)
         p = ismember( DT.ConnectivityList(i,:) , index );
         if p(1) == 1 | p(2) == 1 | p(3) == 1
