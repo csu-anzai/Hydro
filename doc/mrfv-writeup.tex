@@ -1,0 +1,101 @@
+\documentclass[10.5pt]{article}
+
+% Packages:
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{pgfplots}
+\usepackage{bm}
+\usepackage{mathtools}          %loads amsmath as well
+\usepackage{titling}
+\usepackage{biblatex}
+\usepackage{indentfirst}
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+
+% Move title up:
+\setlength{\droptitle}{-10em}
+
+\begin{document}
+
+% Title information:
+\title{Average-Intepolating Wavelets with Lifting Scheme}
+\author{Brandon Gusto}
+\maketitle
+
+% first section on interpolating (predict) stage
+\section*{Predict Stage}
+We are interested in obtaining the difference between approximation spaces at varying levels of resolution. We are given cell-averaged
+values as input data to our wavelet transform. This data is considered at some maximum resolution level $J$, and the wavelet transform
+will produce details coefficients down to the coarsest level $j=0$. We consider an interpolating polynomial $p(x)$ such that
+\begin{align}
+    c^{j}_{k-1} &= \int_{x^{j}_{k-1}}^{x^{j}_{k}} p(x) dx \\
+    c^{j}_{k} &= \int_{x^{j}_{k}}^{x^{j}_{k+1}} p(x) dx \\
+    c^{j}_{k+1} &= \int_{x^{j}_{k+1}}^{x^{j}_{k+2}} p(x) dx.
+\end{align}
+However this can be cast in a more suitable form for interpolation algorithms by introducting $P(x) = \int_{0}^{x} p(y) dy$. The
+problem is then to interpolate the following data
+\begin{align}
+    0 &= P(x^{j}_{k-1}) \\
+    c^{j}_{k} &= P(x^{j}_{k}) \\
+    c^{j}_{k} + c^{j}_{k+1} &= P(x^{j}_{k+1}) \\
+    c^{j}_{k} + c^{j}_{k+1} + c^{j}_{k+2} &= P(x^{j}_{k+2}) \\
+\end{align}
+
+
+% cell average drawing
+\begin{figure}
+    \centering
+    \begin{tikzpicture}[thick,scale=0.7, every node/.style={scale=0.6}]
+        \draw (0,0) -- (0,2)-- (3,2);
+        \draw (3,0) -- (3,6) -- (6,6) -- (6,0);
+        \draw (6,0) -- (6,4) -- (9,4) -- (9,0);
+        \draw (-1,0) -- (10,0);
+        \node at (1.5,1) {\LARGE $c^{j}_{k-1}$};
+        \node at (4.5,3) {\LARGE $c^{j}_{k}$};
+        \node at (7.5,2) {\LARGE $c^{j}_{k+1}$};
+        \draw (0,0) -- (0,-0.25);
+        \draw (3,0) -- (3,-0.25);
+        \draw (6,0) -- (6,-0.25);
+        \draw (9,0) -- (9,-0.25);
+
+        % -8 is y-axis baseline for this one
+        \draw (0,-8) -- (0,-6.1) -- (1.5,-6.1) -- (1.5,-8);
+        \draw (1.5,-8) -- (1.5,-5.5) -- (3,-5.5) -- (3,-8);
+        \draw (3,-8) -- (3,-2.8) -- (4.5,-2.8) -- (4.5,-8);
+        \draw (4.5,-8) -- (4.5,-2.25) -- (6,-2.25) -- (6,-8);
+        \draw (6,-8) -- (6,-3.9) -- (7.5,-3.9) -- (7.5,-8);
+        \draw (7.5,-8) -- (7.5,-4.1) -- (9,-4.1) -- (9,-8);
+        \draw (-1,-8) -- (10,-8);
+        \node at (3.75,-5.5) {\LARGE $c^{j+1}_{2k}$};
+        \node at (5.25,-5.25) {\LARGE $c^{j+1}_{2k+1}$};
+        \draw (3,-8) -- (3,-8.25);
+        \draw (4.5,-8) -- (4.5,-8.25);
+        \draw (6,-8) -- (6,-8.25);
+
+        % arrows
+        \draw[red,dashed,->] (1.5,0) -- (3.75,-2.8);
+        \draw[blue,dashed,->] (1.5,0) -- (5.25,-2.25);
+        \draw[red,dashed,->] (4.5,0) -- (3.75,-2.8);
+        \draw[blue,dashed,->] (4.5,0) -- (5.25,-2.25);
+        \draw[red,dashed,->] (7.5,0) -- (3.75,-2.8);
+        \draw[blue,dashed,->] (7.5,0) -- (5.25,-2.25);
+
+        % tick text
+        \node[below] at (0,-0.25) {\LARGE $x^{j}_{k-1}$};
+        \node[below] at (3,-0.25) {\LARGE $x^{j}_{k}$};
+        \node[below] at (6,-0.25) {\LARGE $x^{j}_{k+1}$};
+        \node[below] at (9,-0.25) {\LARGE $x^{j}_{k+2}$};
+        \node[below] at (3,-8.25) {\LARGE $x^{j}_{k}$};
+        \node[below] at (4.5,-8.25) {\LARGE $x^{j}_{k+1/2}$};
+        \node[below] at (6,-8.25) {\LARGE $x^{j}_{k+1}$};
+
+    \end{tikzpicture}
+    \caption{Prediction operator from coarse-scale $j$ to fine-scale $j+1$, given cell-averaged data $\mathbf{c}^{j}$. Red and Blue
+            arrows indicate interpolation dependency for each cell at level $j+1$.}
+\end{figure}
+
+\section*{Lifting Scheme}
+
+\end{document}
