@@ -1,5 +1,5 @@
-\beamer@endinputifotherversion {3.26pt}
-\beamer@sectionintoc {1}{Finite Volume}{2}{0}{1}
-\beamer@sectionintoc {2}{Multiresolution}{4}{0}{2}
-\beamer@sectionintoc {3}{MR Code}{7}{0}{3}
-\beamer@sectionintoc {4}{Applications}{13}{0}{4}
+\beamer@sectionintoc {1}{Group Meeting}{1}{0}{1}
+\beamer@sectionintoc {2}{Finite Volume}{2}{0}{2}
+\beamer@sectionintoc {3}{Multiresolution}{4}{0}{3}
+\beamer@sectionintoc {4}{MR Code}{7}{0}{4}
+\beamer@sectionintoc {5}{Applications}{8}{0}{5}
