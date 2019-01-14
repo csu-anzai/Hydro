@@ -4,25 +4,15 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
+\usepackage{listings}
 \usepackage{tikz}
 \definecolor{mygray}{rgb}{0.92,0.92,0.92}
-\definecolor{FSUgarnet}{RGB}{120,47,64}
-\definecolor{FSUgold}{RGB}{206,184,136}
-\usetheme{CambridgeUS}
-\usefonttheme{professionalfonts}
+\usetheme{Montpellier}
+\usecolortheme{beaver}
 
-% set colors
-\setbeamercolor{palette primary}{bg=FSUgarnet,fg=white}
-\setbeamercolor{palette secondary}{bg=FSUgold,fg=white}
-\setbeamercolor{palette tertiary}{bg=FSUgold,fg=white}
-\setbeamercolor{palette quaternary}{bg=FSUgold,fg=white}
-\setbeamercolor{structure}{fg=FSUgold} % itemize, enumerate, etc
-\setbeamercolor{section in toc}{fg=FSUgold} % TOC sections
-
-% Override palette coloring with secondary
-\setbeamercolor{subsection in head/foot}{bg=FSUgarnet,fg=white}
 
 \begin{document}
+
 
 \section{Group Meeting}
 \title{Group Meeting \\ Week 2, Spring 2019}
@@ -33,57 +23,53 @@
 
 \section{Finite Volume}
 
-\begin{frame}[shrink=10]{Finite Volume Approach}
-	Here we consider the following one-dimensional refence PDE
-	\begin{equation*}
-		w_{t} + f(w)_{x} = s(w)
-	\end{equation*}
-	where $w = (\rho,\rho u,E)$ represents the primitive solution variables, and initial and boundary
-	conditions are supplied. The PDE in semi-discrete form (via finite volume w/ midpoint quadrature) is
-	\begin{equation*}
-        (w_{j})_{t} = -\frac{1}{\triangle x} \left( f_{j+\frac{1}{2}} - f_{j-\frac{1}{2}} \right) + s_{j} = R_{j}(w)
-	\end{equation*}
-	where the $j$ denotes spatial index. The solution is represented as cell averages
-	\begin{equation*}
-        w^{n}_{j} \approx \frac{1}{\triangle x} \int_{x_{j-\frac{1}{2}}}^{x_{j+\frac{1}{2}}} w(x,t_{n}) dx
-	\end{equation*}
+\begin{frame}[center]{Finite Volume Approach}
+    Here we consider the following one-dimensional reference PDE
+    \begin{equation*}
+      w_{t} + f(w)_{x} = s(w)
+    \end{equation*}
+    where $w = (\rho,\rho u,E)$ represents the primitive solution variables, and initial and boundary
+    conditions are supplied. The PDE in semi-discrete form (via finite volume w/ midpoint quadrature) is
+    \begin{equation*}
+          (w_{j})_{t} = -\frac{1}{h} \left( f_{j+\frac{1}{2}} - f_{j-\frac{1}{2}} \right) + s_{j}
+                      = R_{j}(w)
+    \end{equation*}
+    where the $j$ denotes spatial index.
 \end{frame}
 
-
-\begin{frame}[shrink=10]{Finite Volume Approach}
-	 The numerical flux at cell interface is a function of $2k$ local cells
-	\begin{equation*}
-        \hat{f}_{j+\frac{1}{2}} = f(w^{n}_{j-k+1},\dots,w^{n}_{j+k})
-	\end{equation*}
-	Computing the fluxes is bulk of computational effort.
-
+\begin{frame}[center]{Finite Volume Approach}
+    The numerical flux at cell interface is a function of $2k$ local cells
+    \begin{equation*}
+          \hat{f}_{j+\frac{1}{2}} = f(w^{n}_{j-k+1},\dots,w^{n}_{j+k})
+    \end{equation*}
+    The solution is represented as cell averages
+    \begin{equation*}
+          w^{n}_{j} \approx \frac{1}{\triangle x} \int_{x_{j-\frac{1}{2}}}^{x_{j+\frac{1}{2}}} w(x,t_{n}) dx
+    \end{equation*}
 \end{frame}
-
 
 \section{Multiresolution}
 
-\begin{frame}[shrink=10]{Multiresolution Representation}
-	Define multiple, nested grids
-	\begin{equation*}
-		G^{l} = \left\{ x^{l}_{j} \right\}_{j=0}^{N_{l}}
-	\end{equation*}
-	where the number of cells per level $l$ is $N_{l}$ and the cell width is
-	\begin{equation*}
-		h_{l} = \frac{b-a}{N_{l}}
-	\end{equation*}
-	The aim is to decompose the field at the finest (given) level of resolution into a representation at the
-	coarsest level plus a series of differences at each finer level. The differences provide information about the
-	function's regularity.
+\begin{frame}[center]{Multiresolution Representation}
+    Define multiple, nested grids
+    \begin{equation*}
+      G^{l} = \left\{ x^{l}_{j} \right\}_{j=0}^{N_{l}}
+    \end{equation*}
+    such that $x_{j}^{l} = x_{2j}^{l-1}$ for any $j,l$. The number of cells per level $l$ is $N_{l}$
+    and the cell width is
+    \begin{equation*}
+      h_{l} = \frac{b-a}{N_{l}}
+    \end{equation*}
 \end{frame}
 
 
-\begin{frame}[shrink=10]{Multiresolution Representation}
+\begin{frame}[center]{Multiresolution Representation}
 	Consider some quantity $c(x)$ represented as cell averages $c_{j}^{l}$ at each
 	level $l$. At some level $l$ (coarse) the field at level $l-1$ (fine) is represented by a prediction from
-	values at level $l$. An interpolating polynomial is used to preserve the cell averages.
+	values at level $l$.
 	\begin{figure}
-	    \centering
-	    \begin{tikzpicture}[thick,scale=0.40, every node/.style={scale=0.6}]
+    \centering
+    \begin{tikzpicture}[thick,scale=0.3, every node/.style={scale=0.6}]
 		\draw[fill=mygray] (0,0) -- (0,2)-- (3,2) -- (3,0);
 		\draw[fill=mygray] (3,0) -- (3,6) -- (6,6) -- (6,0);
 		\draw[fill=mygray] (6,0) -- (6,4) -- (9,4) -- (9,0);
@@ -133,25 +119,24 @@
 \end{frame}
 
 
-\begin{frame}[shrink=10]{Multiresolution Representation}
-	Using a standard third-order polynomial, the prediction in one-dimension is
-	\begin{align*}
-		\hat{c}^{l-1}_{2j} = c^{l}_{j} + \frac{1}{8} \left( c^{l}_{j-1} - c^{l}_{j+1} \right) \\
-		\hat{c}^{l-1}_{2j+1} = c^{l}_{j} - \frac{1}{8} \left( c^{l}_{j-1} - c^{l}_{j+1} \right)
-	\end{align*}
-	and the detail coefficient for the cell corresponding to $c^{l}_{j}$ is
-	\begin{equation*}
-		d^{l}_{j} = c_{2j+1}^{l-1} - \hat{c}_{2j+1}^{l-1}
-	\end{equation*}
-	The value of this coefficient is indicitive of the smoothness of the function in that vicinity. Doing this at
-	each level of resolution provides the desired information.
-
+\begin{frame}[center]{Multiresolution Representation}
+    Using a standard third-order polynomial, the prediction in one-dimension is
+    \begin{align*}
+      \hat{c}^{l-1}_{2j} = c^{l}_{j} + \frac{1}{8} \left( c^{l}_{j-1} - c^{l}_{j+1} \right) \\
+      \hat{c}^{l-1}_{2j+1} = c^{l}_{j} - \frac{1}{8} \left( c^{l}_{j-1} - c^{l}_{j+1} \right)
+    \end{align*}
+    and the detail coefficient for the cell corresponding to $c^{l}_{j}$ is
+    \begin{equation*}
+      d^{l}_{j} = c_{2j+1}^{l-1} - \hat{c}_{2j+1}^{l-1}
+    \end{equation*}
+    The value of this coefficient is indicitive of the smoothness of the function in that
+    vicinity.
 \end{frame}
 
 
-\section{MR Code}
+\section{Multiresolution Code}
 
-\begin{frame}[shrink=10]{Multiresolution Code - Examples}
+\begin{frame}[center]{Multiresolution Code - Examples}
 	\begin{figure}
 		\center
 		\includegraphics[scale=0.5]{plots/spike-med.png}
@@ -159,17 +144,57 @@
 	\end{figure}
 \end{frame}
 
-\section{Applications}
+\section{Multiresolution Finite Volume Scheme}
 
-\begin{frame}[shrink=10]{Multiresolution Scheme on AMR Patches}
-    Apply MR scheme on an AMR patch, use regularity information (detail coefficients) to reduce number of direct flux calculations.
-    Compute the residual $R_{L}$ at coarsest level of resolution. For smooth regions, the residual at next finer level will be
-    interpolated
-    \begin{align*}
-        R^{l-1}_{2j+1} = R^{l}_{j} - \frac{1}{8} \left( R^{l}_{j-1} - R^{l}_{j+1} \right) \\
-        R^{l-1}_{2j} = 2 R^{l}_{j} - R^{l-1}_{2j+1}
-    \end{align*}
-    For significant cells, compute flux at finest (given) level as usual.
+\begin{frame}[center]{Multiresolution Scheme on AMR Patches}
+	\begin{figure}
+		\center
+		\includegraphics[scale=0.5]{plots/patch-efficiency.png}
+		\caption{Increasing patch 'efficiency.'}
+	\end{figure}
+\end{frame}
+
+\begin{frame}[center]{Multiresolution Scheme on AMR Patches}
+      The steps of the scheme for one patch are
+      \begin{enumerate}
+        \item take given (finest level) data on patch, and coarsen it to desired coarsest level $L$
+        \item compute the forward wavelet transform to obtain $\left\{ \mathbf{d}^{l}\right\}_{l=L}^{l=1}$
+        \item on coarsest level $L$, compute the residuals $\left\{ R_{j}^{L} \right\}_{j=0}^{N_{L}}$
+        \item loop through one finer level at a time, and according to detail coefficients,
+              either interpolate or calculate remaining fluxes
+      \end{enumerate}
+\end{frame}
+
+\begin{frame}[center]{Multiresolution Scheme on AMR Patches}
+  The original (fine) data is coarsened by
+      \begin{equation*}
+        w_{j}^{l} = \frac{1}{2} \left( w_{2j}^{l-1} + w_{2j+1}^{l-1} \right)
+      \end{equation*}
+      Then the residual $R_{j}^{l}$ may be interpolated in smooth regions as
+      \begin{align*}
+        R^{l-1}_{2j+1} & = R^{l}_{j} - \frac{1}{8} \left( R^{l}_{j-1} - R^{l}_{j+1} \right) \\
+        R^{l-1}_{2j} & = 2 R^{l}_{j} - R^{l-1}_{2j+1}
+      \end{align*}
+\end{frame}
+
+\begin{frame}[fragile,center]{Progress in FLASH Implementation}
+  \begin{itemize}
+    \setlength\itemsep{1em}
+    \item created a new folder \texttt{source/flashUtilities/Wavelet/}
+    \item writing a program \texttt{Wavelet\_computeTransform.F90} which will be run 
+          in \texttt{Grid\_computeUserVars.F90}
+  \end{itemize}
+  \begin{verbatim}
+    function imap( l, i, j, k, nx, ny, nz ) result(x)
+      integer, intent(in) :: nx(:), ny(:), nz(:)
+      integer, intent(in) :: l, i, j, k
+      integer             :: x
+
+      ! compute the map
+      x = l + nx * ( i + ny * ( j + nz * k ) )
+
+    end function imap
+  \end{verbatim}
 \end{frame}
 
 
