@@ -1,0 +1,6 @@
+\beamer@endinputifotherversion {3.26pt}
+\beamer@sectionintoc {1}{Group Meeting}{1}{0}{1}
+\beamer@sectionintoc {2}{Finite Volume}{2}{0}{2}
+\beamer@sectionintoc {3}{Multiresolution}{4}{0}{3}
+\beamer@sectionintoc {4}{Multiresolution Code}{7}{0}{4}
+\beamer@sectionintoc {5}{Multiresolution Finite Volume Scheme}{8}{0}{5}
