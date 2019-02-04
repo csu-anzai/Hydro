@@ -1,0 +1,50 @@
+\documentclass{beamer}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{tikz}
+\definecolor{mygray}{rgb}{0.92,0.92,0.92}
+\usetheme{Montpellier}
+\usecolortheme{beaver}
+\beamerdefaultoverlayspecification{<+->}
+
+\begin{document}
+
+\section{Group Meeting}
+\title{Group Meeting \\ Week 5, Spring 2019}
+\author{Brandon Gusto} %
+\institute{Dept. of Scientific Computing \\ Florida State University}
+\date{\today}
+\frame{\titlepage}
+
+\begin{frame}[fragile]{Multiresolution Scheme Implementation}
+  The following items are functional, but not ready for general case. Currently hardcoded
+  for working on density variable only, only in one spatial dimension. 
+  \begin{itemize}
+    \setlength\itemsep{1em}
+    \item created a folder \texttt{source/flashUtilities/Wavelet/}
+    \item written several programs... 
+      \begin{itemize}
+        \item \texttt{Wavelet\_data.F90}
+        \item \texttt{Wavelet\_blockInit.F90}
+        \item \texttt{Wavelet\_forwardTransform.F90}
+        \item \texttt{Wavelet\_inverseTransform.F90}
+        \item \texttt{Wavelet\_blockClear.F90}
+      \end{itemize} 
+    \item implemented such functions inside \texttt{hy\_ppm\_block.F90}
+  \end{itemize}
+  Am successfully computing detail coefficients, but want to also plot them soon...
+\end{frame}
+
+\begin{frame}[fragile]{Multiresolution Scheme Implementation}
+  To-do list:
+  \begin{itemize}
+    \item need to pass a non-uniform array to \texttt{hydro\_1d.F90}
+    \item inverse transform requires cell width info
+    \item write output file for detail coefficients
+  \end{itemize}
+\end{frame}
+
+\end{document}
