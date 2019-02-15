@@ -1,0 +1,19 @@
+Notes for this week:
+
+Plot difference between fluxes obtained via wavelet algorithm an without.
+Normalize.
+
+FFMpeg package for compression/visualization. Also look at matlab movie
+properties.
+
+
+overlay actual solution with wavelet
+
+test on scalar advection problem, find 
+effect of thresholding on convergence
+
+
+bring up valivyev's results on error affect on smooth problems
+
+
+visualizations on overleaf

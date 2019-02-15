@@ -30,7 +30,8 @@
 
 \begin{frame}{Preliminary Results}
   The following movies show active cells in the hierarchy (top) and detail coefficients of the
-  density transform (black) and density flux transform(red) (bottom).
+  density transform (black) and density flux transform(red) (bottom). This is
+  Two Blast Waves problem.
   \begin{figure}
     \center
     \movie[width=0.5\textwidth,height=0.4\textwidth, poster]{}{detailcoeff_lores.avi}
@@ -38,6 +39,7 @@
 \end{frame}
 
 \begin{frame}{Preliminary Results}
+    Same data here but with a smaller tolerance.
   \begin{figure}
     \center
     \movie[width=0.5\textwidth,height=0.4\textwidth, poster]{}{detailcoeff_hires.avi}
@@ -45,6 +47,8 @@
 \end{frame}
 
 \begin{frame}{Preliminary Results}
+    Here is a plot of the density over time for the same problem (low
+    resolution).
   \begin{figure}
     \center
     \movie[width=0.5\textwidth,height=0.4\textwidth, poster]{}{density_lores.avi}
@@ -52,6 +56,7 @@
 \end{frame}
 
 \begin{frame}{Preliminary Results}
+    Density over time for higher resolution.
   \begin{figure}
     \center
     \movie[width=0.5\textwidth,height=0.4\textwidth, poster]{}{density_hires.avi}
@@ -78,15 +83,15 @@
   Several items needing attention are
   \begin{itemize}
     \setlength\itemsep{1em}
-    \item set wavelet threshold in \texttt{flash.par}
-    \item set refinement variables there as well
+    \item<2-> set wavelet threshold in \texttt{flash.par}
+    \item<3-> set refinement variables there as well
   \end{itemize}
   Later on will need to...
   \begin{itemize}
-    \item test a suite of problems
-    \item run on parallel blocks
-    \item compare solutions obtained via MR with non-MR
-    \item pass a non-uniform array to \texttt{hydro\_1d.F90}, test efficiency
+    \item<4-> test a suite of problems
+    \item<5-> run on parallel blocks
+    \item<6-> compare solutions obtained via MR with non-MR
+    \item<7-> pass a non-uniform array to \texttt{hydro\_1d.F90}, test efficiency
   \end{itemize}
 \end{frame}
 
