@@ -6,7 +6,6 @@ Normalize.
 FFMpeg package for compression/visualization. Also look at matlab movie
 properties.
 
-
 overlay actual solution with wavelet
 
 test on scalar advection problem, find 
