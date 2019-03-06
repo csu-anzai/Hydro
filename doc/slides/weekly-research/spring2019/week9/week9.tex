@@ -1,0 +1,70 @@
+\documentclass{beamer}
+\usepackage{graphicx,amsmath,amsfonts,amssymb,listings,tikz}
+\usepackage{multimedia}
+\usetheme{Montpellier}
+\usecolortheme{beaver}
+\beamerdefaultoverlayspecification{<+->}
+
+% user commands
+\newcommand{\weeknum}{9}
+
+\begin{document}
+
+\section{Group Meeting}
+\title{Group Meeting \\ Week \weeknum, Spring 2019}
+\author{Brandon Gusto} %
+\institute{Dept. of Scientific Computing \\ Florida State University}
+\date{\today}
+\frame{\titlepage}
+
+\section{Multiresolution Scheme}
+
+\begin{frame}{Hybrid Wavelet/AMR Scheme}
+    \begin{columns}
+        \begin{column}{0.58\textwidth}
+            The goal of this project is to marry the benefits of wavelet analysis with the more developed AMR strategies:
+            \begin{itemize}
+                \item can wavelet sensors augment LTE for refinement?
+                \item can regularity information reduce computational expense on fine grids?
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.44\textwidth}
+            \scalebox{0.4}{
+                \input{plots/detail_j3.tex}
+            }
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Harten's MR Scheme}
+    The one-dimensional reference system of conservation laws is
+    \begin{equation*}
+        \mathbf{U}_{t} + \mathbf{F}(\mathbf{U})_{x} = 0,
+    \end{equation*}
+    where $\mathbf{U} = (\rho,\rho u,E)$ is a vector of conserved quantities.
+    In semi-discrete form,
+    \begin{equation*}
+        \frac{\partial \mathbf{U}_{i}}{\partial t} = -\frac{1}{h} \left( \mathbf{F}_{i+\frac{1}{2}}
+            - \mathbf{F}_{i-\frac{1}{2}} \right) = \mathbf{R}_{i}
+    \end{equation*}
+    where the $i$ denotes spatial index, and $\mathbf{R}$ is residual.
+\end{frame}
+
+\begin{frame}{Harten's MR Scheme}
+    Define multiple, nested grids
+    \begin{equation*}
+        \mathbf{G}^{l} = \left\{ x^{l}_{i+\frac{1}{2}} \right\}_{i=0}^{N_{l}} =
+            \left\{ x^{l+1}_{i+\frac{1}{2}} \right\}_{i=0,\text{i even}}^{N^{l+1}}.
+    \end{equation*}
+    Coarsening of a cell done via
+    \begin{equation*}
+        \mathbf{U}^{l}_{i} = \frac{1}{2} \left( \mathbf{U}^{l+1}_{2i} + \mathbf{U}^{l+1}_{2i+1} \right)
+    \end{equation*}
+    and the prediction from coarse to fine is
+    \begin{equation*}
+        \mathbf{\hat{U}}^{l+1}_{2i+1} = \sum_{j=1-s}^{s-1} \gamma_{l} \mathbf{U}^{l}_{i+l}
+    \end{equation*}
+\end{frame}
+
+\begin{frame}{Harten's MR Scheme}
+\end{document}

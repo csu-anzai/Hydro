@@ -1,0 +1,86 @@
+\documentclass{beamer}
+\usepackage{graphicx,amsmath,amsfonts,amssymb,listings,tikz}
+\usepackage{multimedia}
+\usetheme{Montpellier}
+\usecolortheme{beaver}
+\beamerdefaultoverlayspecification{<+->}
+
+% user commands
+\newcommand{\weeknum}{9}
+
+\begin{document}
+
+\section{Introduction}
+\title{A Multiresolution Scheme for More Efficient Simulation on Adaptive Mesh Refinement Blocks?}
+\author{Brandon Gusto} %
+\institute{Dept. of Scientific Computing \\ Florida State University}
+\date{\today}
+\frame{\titlepage}
+
+\section{Introduction}
+
+\begin{frame}{Introduction}
+    The following project is concerned with the numerical solution of systems of conservation laws of the form
+    \begin{equation*}
+        \mathbf{U}_{t} + \mathbf{F}(\mathbf{U})_{x} = \mathbf{S}(\mathbf{U})
+    \end{equation*}
+    where $\mathbf{U} = (\rho,\rho u,E)$ is a vector of conserved quantities, $\mathbf{F}(\mathbf{U})$ is a flux vector,
+    and $\mathbf{S}$ denotes potential sources.
+    Consider a standard finite-volume discretization, with midpoint rule
+    \begin{equation*}
+        \frac{\partial \mathbf{U}_{i}}{\partial t} = -\frac{1}{h} \left( \mathbf{F}_{i+\frac{1}{2}}
+            - \mathbf{F}_{i-\frac{1}{2}} \right) + \mathbf{S}_{i}
+    \end{equation*}
+    where the $i$ denotes spatial index.
+\end{frame}
+
+\begin{frame}{Adaptivity}
+    The interest is in solution-adaptive methods:
+    \begin{itemize}
+        \item<2-> adaptive mesh refinement (AMR) based on local truncation error (or some other estimator)
+        \item<3-> computations typically done on blocks / patches for efficiency
+        \item<4-> inherent "overresolution" in some regions of the mesh by using blocks
+        \item<5-> can this be addressed by reducing block size? computational tradeoff?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{AMR Blocks}
+    \begin{figure}
+        \center
+        \includegraphics[scale=0.5]{amr1.png}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{AMR Blocks}
+    \begin{figure}
+        \center
+        \includegraphics[scale=0.5]{amr2.png}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{AMR Blocks}
+    \begin{figure}
+        \center
+        \includegraphics[scale=0.5]{amr3.png}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Harten's MR Scheme}
+    Define multiple, nested grids
+    \begin{equation*}
+        \mathbf{G}^{l} = \left\{ x^{l}_{i+\frac{1}{2}} \right\}_{i=0}^{N_{l}} =
+            \left\{ x^{l+1}_{i+\frac{1}{2}} \right\}_{i=0,\text{i even}}^{N^{l+1}}.
+    \end{equation*}
+    Coarsening of a cell done via
+    \begin{equation*}
+        \mathbf{U}^{l}_{i} = \frac{1}{2} \left( \mathbf{U}^{l+1}_{2i} + \mathbf{U}^{l+1}_{2i+1} \right)
+    \end{equation*}
+    and the prediction from coarse to fine is
+    \begin{equation*}
+        \mathbf{\hat{U}}^{l+1}_{2i+1} = \sum_{j=1-s}^{s-1} \gamma_{l} \mathbf{U}^{l}_{i+l}
+    \end{equation*}
+\end{frame}
+
+\begin{frame}{Harten's MR Scheme}
+
+\end{document}
