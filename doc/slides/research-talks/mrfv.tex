@@ -236,9 +236,24 @@
     \begin{itemize}
         \item<2-> utilize this regularity information to identify sufficiently smooth regions
             in which to interpolate the flux.
-        \item<3-> introduce big buffer zone around cells that were flagged at each level
+          \item<3-> introduce sufficiently large buffer region (why?) around flagged cells
         \item<4-> perform inverse transform and compute or interpolate fluxes
     \end{itemize}
+\end{frame}
+
+\begin{frame}{Convergence}
+  \begin{figure}
+    \center
+    \includegraphics[scale=0.5]{convergence.png}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{Outlook}
+  \begin{itemize}
+    \item weakly compressible turbulence (uniform mesh)
+    \item compressible turbulence (potentially adaptive)
+    \item turbulent combustion (adaptive)
+  \end{itemize}
 \end{frame}
 
 \end{document}
