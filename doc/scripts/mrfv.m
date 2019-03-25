@@ -6,8 +6,8 @@ f = @(x) -tanh( (x+1/3) / (2*1e-2) ) + exp( -64^2 * (x-1/3).^2 );
 I = @(x1,x2) integral(f,x1,x2);             % integral of function
 
 % wavelet params
-J = 8;                              % max level
-tol = 1e-6;                        % error tolerance
+J = 7;                              % max level
+tol = 1e-1;                        % error tolerance
 jcells = @(j) 2^(j+2);              % number of points at level j
 
 % grid params
@@ -48,9 +48,9 @@ for j = J-1:-1:0
 
     % loop through cells
     for k = 0 : jcells(j)-1
-        
+
         if k == 0
-            
+
             % vector of cell edges
             xvec = [ (a+0) (a+dx) (a+2*dx) (a+3*dx) ];
 
@@ -125,7 +125,7 @@ for k = 0:jcells(0)-1
 end
 for j = 1:J-1
     for k = 0:jcells(j)-1
-        if abs( d(j+1,k+1) ) > tol
+        if abs( d(j+1,k+1) ) >= tol
             plot(x(j+1,k+1),j,'k.');
             hold on
             quiver(x(j+1,k+1),j,0,abs(d(j+1,k+1)),'k','ShowArrowHead','off')
@@ -134,12 +134,13 @@ for j = 1:J-1
     end
 end
 axis( [ a b -0.25 J+1 ] );
-title(strcat('$\epsilon = $',sprintf('%0.2g',tol)),'fontsize',16);
+title(strcat('$\epsilon = $',sprintf('%2.2g',tol)),'fontsize',16);
 ylabel('$l$','fontsize',16);
 hold on
 
 subplot(212)
-plot(x(J+1,:),u(J+1,:),'b');
+%plot(x(J+1,:),u(J+1,:),'b');
+plot(linspace(-1,1,512),f(linspace(-1,1,512)),'b');
 hold on
 
 % inverse transform
@@ -150,9 +151,9 @@ for j = 0:J-1
 
     % loop through cells
     for k = 0 : jcells(j)-1
-        
+
         if k == 0
-            
+
             % vector of cell edges
             xvec = [ (a+0) (a+dx) (a+2*dx) (a+3*dx) ];
 
@@ -226,3 +227,4 @@ end
 plot(x(J+1,:),u(J+1,:),'r--');
 xlabel('$x$','fontsize',16);
 ylabel('$l$','fontsize',16);
+legend({'$f_{true}$','$f_{|d^{l}_{i}| \geq \epsilon}$'},'interpreter','latex');

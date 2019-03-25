@@ -6,9 +6,6 @@
 \beamerdefaultoverlayspecification{<+->}
 \definecolor{mygray}{rgb}{0.92,0.92,0.92}
 
-% user commands
-\newcommand{\weeknum}{9}
-
 \begin{document}
 
 \section{Introduction}
@@ -27,61 +24,77 @@
     \end{equation*}
     where $\mathbf{U} = (\rho,\rho u,E)$ is a vector of conserved quantities,
     $\mathbf{F}(\mathbf{U})$ is a flux vector, and $\mathbf{S}(\mathbf{U})$ is a
-    vector of source terms.
-\end{frame}
-
-\begin{frame}{Discretization}
-    The discretized solution are represented as averages over each cell
+    vector of source terms. The discretized solution are represented as
+    averages over each cell
     \begin{equation*}
         \mathbf{U}_{i} = \frac{1}{|V_{i}|} \int_{V_{i}} \mathbf{U} dV.
     \end{equation*}
     where the $i$ denotes spatial index.
-    \begin{equation*}
-        \frac{\partial \mathbf{U}_{i}}{\partial t} = -\frac{1}{h} \left( \mathbf{F}_{i+\frac{1}{2}}
-            - \mathbf{F}_{i-\frac{1}{2}} \right)
-    \end{equation*}
 \end{frame}
 
 \begin{frame}{Discretization}
+    The semi-discretized form of system of PDEs is
+    \begin{equation*}
+        \frac{\partial \mathbf{U}_{i}}{\partial t} = -\frac{1}{|V_{i}|} \left( \mathbf{F}_{i+\frac{1}{2}}
+            - \mathbf{F}_{i-\frac{1}{2}} \right) + \mathbf{S}_{i}
+    \end{equation*}
+    where the source terms are also averaged over each cell
+    \begin{equation*}
+        \mathbf{S}_{i} = \frac{1}{|V_{i}|} \int_{V_{i}} \mathbf{S} dV.
+    \end{equation*}
+
 \end{frame}
 
-\begin{frame}{}
-    The interest is in solution-adaptive methods:
+\begin{frame}{Solution Approaches}
+    These equations are typically solved on a cartesian grid with non-uniform sized cells:
     \begin{itemize}
-        \item<2-> adaptive mesh refinement (AMR) based on local truncation error (or some other estimator)
-        \item<3-> computations typically done on blocks / patches for efficiency
-        \item<4-> inherent ``overresolution" in some regions of the mesh by using blocks
-        \item<5-> can this be addressed by reducing block size? computational tradeoff?
+        \item<2-> the refinement needs to follow localized features
+        \item<3-> some type of estimator of the local error is needed
+        \item<4-> grid is typically refined in big groups (blocks) for efficiency
+        \item<5-> blocks introduce inherent ``overresolution" in some regions of the mesh
     \end{itemize}
 \end{frame}
 
-\begin{frame}{AMR}
+\section{Refinement}
+
+\begin{frame}{Block-Structured AMR}
     \begin{figure}
         \center
         \includegraphics[scale=0.4]{amr1.png}
     \end{figure}
-    \footnote{Introduction to Block-Structured Adaptive Mesh Refinement (AMR), Ann S. Almgren}
 \end{frame}
 
-\begin{frame}{AMR}
+\begin{frame}{Block-Structured AMR}
     \begin{figure}
         \center
         \includegraphics[scale=0.4]{amr2.png}
     \end{figure}
 \end{frame}
 
-\begin{frame}{AMR}
+\begin{frame}{Block-Structured AMR}
     \begin{figure}
         \center
         \includegraphics[scale=0.4]{amr3.png}
     \end{figure}
 \end{frame}
 
-\begin{frame}{Filling}
-    The filling factor is the number of cells in a block which were flagged, divided by the total.
+\begin{frame}{Block-Structured AMR}
     \begin{figure}
         \center
-        \includegraphics[scale=0.3]{filling.png}
+        \includegraphics[scale=0.4]{amr4.png}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Filling Factor}
+    The filling factor is the number of cells in a block which were flagged, divided by the total.
+    As one reduces the block sizes...
+    \begin{itemize}
+        \item blocks with multiple parents becomes complicated
+        \item communication between neighboring blocks becomes costly
+    \end{itemize}
+    \begin{figure}
+        \center
+        \includegraphics[scale=0.18]{filling.png}
     \end{figure}
 \end{frame}
 
@@ -89,11 +102,11 @@
 
 \begin{frame}{a la Harten}
     \begin{itemize}
-        \item<1-> Besides the AMR concepts, a multiresolution approach was also introduced by
+        \item<2-> Besides the AMR concepts, a multiresolution approach was also introduced by
             Harten. Grid is \textit{not} refined in space. Instead, a wavelet
-            transform is performed on the uniform grid, and the fluxes are 
+            transform is performed on the uniform grid, and the fluxes are
             interpolated in smooth regions. \\
-        \item<2->``The goal of a multi-scale decomposition of a discrete set of
+        \item<3->``The goal of a multi-scale decomposition of a discrete set of
             data is a "rearrangement" of its information content in such a way
             that the new discrete representation, exactly equivalent to the old
             one, is more "manageable" in some respects." - Arandiga, Donat
@@ -104,7 +117,7 @@
     Define multiple, nested grids
     \begin{equation*}
         \mathbf{G}^{l} = \left\{ x^{l}_{i+\frac{1}{2}} \right\}_{i=0}^{N_{l}} =
-            \left\{ x^{l+1}_{i+\frac{1}{2}} \right\}_{i=0,\text{i even}}^{N^{l+1}}.
+            \left\{ x^{l+1}_{i+\frac{1}{2}} \right\}_{i=0,\text{i even}}^{N_{l+1}}.
     \end{equation*}
     Coarsening of avarage data in cell done via
     \begin{equation*}
@@ -127,114 +140,35 @@
 \begin{frame}{Decomposition}
     \begin{figure}
         \center
-        \begin{tikzpicture}[thick,scale=0.35, every node/.style={scale=0.6}]
+        \input{predict_coarsen.tex}
+    \end{figure}
+\end{frame}
 
-        % variables
-        \def\x{-8.0}
-        \def\y{0.0}
-        \def\yl{-8.0}
+\begin{frame}{Multiresolution Representation}
+    \begin{figure}
+        \center
+        \includegraphics[scale=0.4]{eps0.png}
+    \end{figure}
+\end{frame}
 
-        % draw coarse level rectangles
-        \draw [fill=mygray] (\x,0) rectangle (\x+3,2);
-        \draw [fill=mygray] (\x+3,0) rectangle (\x+6,6);
-        \draw [fill=mygray] (\x+6,0) rectangle (\x+9,4);
+\begin{frame}{Multiresolution Representation}
+    \begin{figure}
+        \center
+        \includegraphics[scale=0.4]{eps1e6.png}
+    \end{figure}
+\end{frame}
 
-        % coarse level symbols
-        \node at (\x+1.5,1) {\Large $c^{j}_{k-1}$};
-        \node at (\x+4.5,3) {\Large $c^{j}_{k}$};
-        \node at (\x+7.5,2) {\Large $c^{j}_{k+1}$};
+\begin{frame}{Multiresolution Representation}
+    \begin{figure}
+        \center
+        \includegraphics[scale=0.4]{eps1e3.png}
+    \end{figure}
+\end{frame}
 
-        % coarse level axis
-        \draw (\x,0) -- (\x,-0.25);
-        \draw (\x+3,0) -- (\x+3,-0.25);
-        \draw (\x+6,0) -- (\x+6,-0.25);
-        \draw (\x+9,0) -- (\x+9,-0.25);
-
-        % fine level rectangles
-        \draw [fill=mygray] (\x,\yl) rectangle (\x+1.5,\yl+1);
-        \draw [fill=mygray] (\x+1.5,\yl) rectangle (\x+3,\yl+1.5);
-        \draw [fill=mygray] (\x+3,\yl) rectangle (\x+4.5,\yl+5.2);
-        \draw [fill=mygray] (\x+4.5,\yl) rectangle (\x+6,\yl+5.75);
-        \draw [fill=mygray] (\x+6,\yl) rectangle (\x+7.5,\yl+4.25);
-        \draw [fill=mygray] (\x+7.5,\yl) rectangle (\x+9,\yl+4.0);
-
-        % fine level symbols
-        \node at (\x+3.75,\yl+2.5) {\Large $c^{j+1}_{2k}$};
-        \node at (\x+5.25,\yl+2.75) {\Large $c^{j+1}_{2k+1}$};
-
-        % fine level axis
-	    \draw (\x,\yl) -- (\x,\yl-0.25);
-        \draw (\x+3,\yl) -- (\x+3,\yl-0.25);
-        \draw (\x+4.5,\yl) -- (\x+4.5,\yl-0.25);
-        \draw (\x+6,\yl) -- (\x+6,\yl-0.25);
-	    \draw (\x+9,\yl) -- (\x+9,\yl-0.25);
-
-        % arrows
-        \draw[red,dashed,->] (\x+1.5,\y) -- (\x+5.25,\y-2.20);
-        \draw[red,dashed,->] (\x+4.5,\y) -- (\x+5.25,\y-2.20);
-        \draw[red,dashed,->] (\x+7.5,\y) -- (\x+5.25,\y-2.20);
-
-        % tick text
-        \node[below] at (\x,\yl-0.25) {\Large $x^{j}_{k-1}$};
-        \node[below] at (\x+3,\yl-0.25) {\Large $x^{j}_{k}$};
-        \node[below] at (\x+4.5,\yl-0.25) {\Large $x^{j}_{k+1/2}$};
-        \node[below] at (\x+6,\yl-0.25) {\Large $x^{j}_{k+1}$};
-        \node[below] at (\x+9,\yl-0.25) {\Large $x^{j}_{k+2}$};
-
-        %----
-
-        % variables
-        \def\x{3.0}
-        \def\y{0.0}
-        \def\yl{-8.0}
-
-        % draw coarse level rectangles
-        \draw [fill=mygray] (\x,0) rectangle (\x+3,2);
-        \draw [fill=mygray] (\x+3,0) rectangle (\x+6,6);
-        \draw [fill=mygray] (\x+6,0) rectangle (\x+9,4);
-
-        % coarse level symbols
-        \node at (\x+1.5,1) {\Large $c^{j}_{k-1}$};
-        \node at (\x+4.5,3) {\Large $c^{j}_{k}$};
-        \node at (\x+7.5,2) {\Large $c^{j}_{k+1}$};
-
-        % coarse level axis
-        \draw (\x,0) -- (\x,-0.25);
-        \draw (\x+3,0) -- (\x+3,-0.25);
-        \draw (\x+6,0) -- (\x+6,-0.25);
-        \draw (\x+9,0) -- (\x+9,-0.25);
-
-        % fine level rectangles
-        \draw [fill=mygray] (\x,\yl) rectangle (\x+1.5,\yl+1);
-        \draw [fill=mygray] (\x+1.5,\yl) rectangle (\x+3,\yl+1.5);
-        \draw [fill=mygray] (\x+3,\yl) rectangle (\x+4.5,\yl+5.2);
-        \draw [fill=mygray] (\x+4.5,\yl) rectangle (\x+6,\yl+5.75);
-        \draw [fill=mygray] (\x+6,\yl) rectangle (\x+7.5,\yl+4.25);
-        \draw [fill=mygray] (\x+7.5,\yl) rectangle (\x+9,\yl+4.0);
-
-        % fine level symbols
-        \node at (\x+3.75,\yl+2.5) {\Large $c^{j+1}_{2k}$};
-        \node at (\x+5.25,\yl+2.75) {\Large $c^{j+1}_{2k+1}$};
-
-        % fine level axis
-	    \draw (\x,\yl) -- (\x,\yl-0.25);
-        \draw (\x+3,\yl) -- (\x+3,\yl-0.25);
-        \draw (\x+4.5,\yl) -- (\x+4.5,\yl-0.25);
-        \draw (\x+6,\yl) -- (\x+6,\yl-0.25);
-	    \draw (\x+9,\yl) -- (\x+9,\yl-0.25);
-
-        % arrows
-        \draw[blue,dashed,->] (\x+5.25,\y-2.25) -- (\x+4.5,\y);
-        \draw[blue,dashed,->] (\x+3.75,\y-2.8) -- (\x+4.5,\y);
-
-        % tick text
-        \node[below] at (\x,\yl-0.25) {\Large $x^{j}_{k-1}$};
-        \node[below] at (\x+3,\yl-0.25) {\Large $x^{j}_{k}$};
-        \node[below] at (\x+4.5,\yl-0.25) {\Large $x^{j}_{k+1/2}$};
-        \node[below] at (\x+6,\yl-0.25) {\Large $x^{j}_{k+1}$};
-        \node[below] at (\x+9,\yl-0.25) {\Large $x^{j}_{k+2}$};
-
-    \end{tikzpicture}
+\begin{frame}{Multiresolution Representation}
+    \begin{figure}
+        \center
+        \includegraphics[scale=0.4]{eps1e1.png}
     \end{figure}
 \end{frame}
 
