@@ -1,19 +1,12 @@
 Notes for this week:
 
-Plot difference between fluxes obtained via wavelet algorithm an without.
-Normalize.
-
 FFMpeg package for compression/visualization. Also look at matlab movie
 properties.
 
+Produce grid convergence study with buffer zone, wavelet thresholds
 
-overlay actual solution with wavelet
+Generalize scheme to two-dimensional simulation
 
-test on scalar advection problem, find 
-effect of thresholding on convergence
+How to setup uniform block refinement?
 
-
-bring up valivyev's results on error affect on smooth problems
-
-
-visualizations on overleaf
+Investigate LTE rp_runtime parameters

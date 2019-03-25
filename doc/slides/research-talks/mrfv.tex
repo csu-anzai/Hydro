@@ -12,7 +12,7 @@
 \begin{document}
 
 \section{Introduction}
-\title{A Multiresolution Scheme for More Efficient Simulation on Adaptive Mesh Refinement Blocks?}
+\title{A Multiresolution Scheme for More Efficient Computations on Adaptive Mesh Refinement Blocks}
 \author{Brandon Gusto} %
 \institute{Dept. of Scientific Computing \\ Florida State University}
 \date{\today}
@@ -21,20 +21,31 @@
 \section{Introduction}
 
 \begin{frame}{Introduction}
-    The following project is concerned with the numerical solution of systems of conservation laws of the form
+    Many engineering applications depend on numerically solving systems of conservation laws of the form
     \begin{equation*}
-        \mathbf{U}_{t} + \mathbf{F}(\mathbf{U})_{x} = 0
+        \mathbf{U}_{t} + \mathbf{F}(\mathbf{U})_{x} = \mathbf{S}(\mathbf{U})
     \end{equation*}
-    where $\mathbf{U} = (\rho,\rho u,E)$ is a vector of conserved quantities and $\mathbf{F}(\mathbf{U})$ is a flux vector.
-    Consider a standard finite-volume discretization, with midpoint rule
+    where $\mathbf{U} = (\rho,\rho u,E)$ is a vector of conserved quantities,
+    $\mathbf{F}(\mathbf{U})$ is a flux vector, and $\mathbf{S}(\mathbf{U})$ is a
+    vector of source terms.
+\end{frame}
+
+\begin{frame}{Discretization}
+    The discretized solution are represented as averages over each cell
+    \begin{equation*}
+        \mathbf{U}_{i} = \frac{1}{|V_{i}|} \int_{V_{i}} \mathbf{U} dV.
+    \end{equation*}
+    where the $i$ denotes spatial index.
     \begin{equation*}
         \frac{\partial \mathbf{U}_{i}}{\partial t} = -\frac{1}{h} \left( \mathbf{F}_{i+\frac{1}{2}}
             - \mathbf{F}_{i-\frac{1}{2}} \right)
     \end{equation*}
-    where the $i$ denotes spatial index.
 \end{frame}
 
-\begin{frame}{Adaptivity}
+\begin{frame}{Discretization}
+\end{frame}
+
+\begin{frame}{}
     The interest is in solution-adaptive methods:
     \begin{itemize}
         \item<2-> adaptive mesh refinement (AMR) based on local truncation error (or some other estimator)
