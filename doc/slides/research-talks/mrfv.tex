@@ -9,7 +9,7 @@
 \begin{document}
 
 \section{Introduction}
-\title{A Multiresolution Scheme for More Efficient Computations on Adaptive Mesh Refinement Blocks}
+\title{Harten's Multiresolution Scheme on Adaptive Mesh Refinement Blocks for More Efficient Simulation of Reactive Flows}
 \author{Brandon Gusto} %
 \institute{Dept. of Scientific Computing \\ Florida State University}
 \date{\today}
@@ -33,7 +33,7 @@
 \end{frame}
 
 \begin{frame}{Discretization}
-    The semi-discretized form of system of PDEs is
+    The semi-discretized form of the system of PDEs is
     \begin{equation*}
         \frac{\partial \mathbf{U}_{i}}{\partial t} = -\frac{1}{|V_{i}|} \left( \mathbf{F}_{i+\frac{1}{2}}
             - \mathbf{F}_{i-\frac{1}{2}} \right) + \mathbf{S}_{i}
@@ -46,7 +46,7 @@
 \end{frame}
 
 \begin{frame}{Solution Approaches}
-    These equations are typically solved on a cartesian grid with non-uniform sized cells:
+    These equations are typically solved on a cartesian grid with non-uniform mesh spacing:
     \begin{itemize}
         \item<2-> the refinement needs to follow localized features
         \item<3-> some type of estimator of the local error is needed
@@ -60,37 +60,15 @@
 \begin{frame}{Block-Structured AMR}
     \begin{figure}
         \center
-        \includegraphics[scale=0.4]{amr1.png}
-    \end{figure}
-\end{frame}
-
-\begin{frame}{Block-Structured AMR}
-    \begin{figure}
-        \center
-        \includegraphics[scale=0.4]{amr2.png}
-    \end{figure}
-\end{frame}
-
-\begin{frame}{Block-Structured AMR}
-    \begin{figure}
-        \center
-        \includegraphics[scale=0.4]{amr3.png}
-    \end{figure}
-\end{frame}
-
-\begin{frame}{Block-Structured AMR}
-    \begin{figure}
-        \center
         \includegraphics[scale=0.4]{amr4.png}
     \end{figure}
 \end{frame}
 
 \begin{frame}{Filling Factor}
     The filling factor is the number of cells in a block which were flagged, divided by the total.
-    As one reduces the block sizes...
     \begin{itemize}
-        \item blocks with multiple parents becomes complicated
-        \item communication between neighboring blocks becomes costly
+        \item<2-> blocks with multiple parents becomes complicated
+        \item<3-> parallel communication between neighboring blocks becomes costly
     \end{itemize}
     \begin{figure}
         \center
@@ -102,11 +80,11 @@
 
 \begin{frame}{a la Harten}
     \begin{itemize}
-        \item<2-> Besides the AMR concepts, a multiresolution approach was also introduced by
+        \item<1-> Besides the AMR concepts, a multiresolution approach was also introduced by
             Harten. Grid is \textit{not} refined in space. Instead, a wavelet
             transform is performed on the uniform grid, and the fluxes are
             interpolated in smooth regions. \\
-        \item<3->``The goal of a multi-scale decomposition of a discrete set of
+        \item<2->``The goal of a multi-scale decomposition of a discrete set of
             data is a "rearrangement" of its information content in such a way
             that the new discrete representation, exactly equivalent to the old
             one, is more "manageable" in some respects." - Arandiga, Donat
@@ -116,8 +94,8 @@
 \begin{frame}{Multiresolution}
     Define multiple, nested grids
     \begin{equation*}
-        \mathbf{G}^{l} = \left\{ x^{l}_{i+\frac{1}{2}} \right\}_{i=0}^{N_{l}} =
-            \left\{ x^{l+1}_{i+\frac{1}{2}} \right\}_{i=0,\text{i even}}^{N_{l+1}}.
+        \mathcal{G}^{l} = \left\{ x^{l}_{i+\frac{1}{2}} \right\}_{i=0}^{N_{l}} =
+            \left\{ x^{l+1}_{i+\frac{1}{2}} \right\}_{i=1,\text{i even}}^{N_{l+1}}.
     \end{equation*}
     Coarsening of avarage data in cell done via
     \begin{equation*}
@@ -137,7 +115,8 @@
     A mask $\left\{ \mathbf{m} \right\}_{i}^{N^{l}}$ is created for significant cells.
 \end{frame}
 
-\begin{frame}{Decomposition}
+\begin{frame}[shrink=25]{Decomposition}
+    \vspace{1.5cm}
     \begin{figure}
         \center
         \input{predict_coarsen.tex}
@@ -176,10 +155,31 @@
     Once the forward wavelet transform has been computed on cell-averaged solution data...
     \begin{itemize}
         \item<2-> utilize this regularity information to identify sufficiently smooth regions
-            in which to interpolate the flux.
+            in which to interpolate the flux
         \item<3-> introduce sufficiently large buffer region (why?) around flagged cells
-        \item<4-> perform inverse transform and compute or interpolate fluxes
+        \item<4-> perform inverse transform and either compute or interpolate each $F_{i\pm \frac{1}{2}}$
     \end{itemize}
+\end{frame}
+
+\begin{frame}{Two Interacting Blast Waves}
+  \begin{figure}
+    \center
+    \includegraphics[scale=0.4]{blast2_early.png}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{Two Interacting Blast Waves}
+  \begin{figure}
+    \center
+    \includegraphics[scale=0.4]{blast2_late.png}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{Two Interacting Blast Waves}
+  \begin{figure}
+    \center
+    \includegraphics[scale=0.4]{blast2_vlate.png}
+  \end{figure}
 \end{frame}
 
 \begin{frame}{Convergence}
@@ -187,23 +187,6 @@
   \begin{figure}
     \center
     \includegraphics[scale=0.5]{convergence.png}
-  \end{figure}
-\end{frame}
-
-\begin{frame}{Outlook}
-  \begin{itemize}
-    \item develop performance study for effect of filling factor on time to
-          solution, overheads... with and without wavelet scheme
-    \item weakly compressible turbulence (uniform mesh)
-    \item compressible turbulence (potentially adaptive)
-    \item turbulent combustion (adaptive)
-  \end{itemize}
-\end{frame}
-  
-\begin{frame}{Turbulence}
-  \begin{figure}
-    \center
-    \includegraphics[scale=0.15]{tburn1.png}
   \end{figure}
 \end{frame}
 
