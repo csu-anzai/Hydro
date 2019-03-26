@@ -25,8 +25,8 @@ for i = 0:bs
     plot( i/bs * ones(1,16), linspace(0,1,16) , 'k', 'linewidth', 0.5 );
 end
 set(0,'defaulttextinterpreter','latex');
-xlabel('$x$','fontsize',15);
-ylabel('$y$','fontsize',15);
+xlabel('$x$','fontsize',16);
+ylabel('$y$','fontsize',16);
 print(figure(1),'amr1','-dpng','-r400');
 
 % overlay AMR level 2 blocks
