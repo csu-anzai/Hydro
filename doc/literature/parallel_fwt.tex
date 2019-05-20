@@ -1,0 +1,86 @@
+\begin{tikzpicture}[thick,scale=0.275, every node/.style={scale=0.6}]
+
+    % variables
+    \def\xl{-8.0}
+    \def\xr{8.0}
+    \def\y{0.0}
+    \def\yy{-3.0}
+    \def\yyy{-6.0}
+    \def\ts{0.75}
+    \def\op{0.35}
+    \def\fx{0.15}
+    
+    % draw ghost cells
+    \draw [mygray] (\xl-4,\y+\ts/2) --(\xr+4,\y+\ts/2);
+    \draw [mygray] (\xl-4,\yy+\ts/2) --(\xr+4,\yy+\ts/2);
+    \draw [mygray] (\xl-4,\yyy+\ts/2) --(\xr+4,\yyy+\ts/2);
+    \draw [mygray] (\xl-1.0,\y) --(\xl-1.0,\y+\ts);
+    \draw [mygray] (\xr+1.0,\y) --(\xr+1.0,\y+\ts);
+    \draw [mygray] (\xl-2.0,\y) --(\xl-2.0,\y+\ts);
+    \draw [mygray] (\xr+2.0,\y) --(\xr+2.0,\y+\ts);
+    \draw [mygray] (\xl-3.0,\y) --(\xl-3.0,\y+\ts);
+    \draw [mygray] (\xr+3.0,\y) --(\xr+3.0,\y+\ts);
+    \draw [mygray] (\xl-4.0,\y) --(\xl-4.0,\y+\ts);
+    \draw [mygray] (\xr+4.0,\y) --(\xr+4.0,\y+\ts);
+
+    % ghost cells at level l=1
+    \draw [mygray] (\xl-2.0,\yy) --(\xl-2.0,\yy+\ts);
+    \draw [mygray] (\xr+2.0,\yy) --(\xr+2.0,\yy+\ts);
+    \draw [mygray] (\xl-4.0,\yy) --(\xl-4.0,\yy+\ts);
+    \draw [mygray] (\xr+4.0,\yy) --(\xr+4.0,\yy+\ts);
+
+    % level l=2
+    \draw [mygray] (\xl-4.0,\yyy) --(\xl-4.0,\yyy+\ts);
+    \draw [mygray] (\xr+4.0,\yyy) --(\xr+4.0,\yyy+\ts);
+
+    % draw grids
+    \draw (\xl,\y+\ts/2) --(\xr,\y+\ts/2);
+    \draw (\xl,\yy+\ts/2) --(\xr,\yy+\ts/2);
+    \draw (\xl,\yyy+\ts/2) --(\xr,\yyy+\ts/2);
+    
+    % draw cells for max level
+    \draw (\xl,\y) --(\xl,\y+\ts);
+    \draw (\xl+1.0,\y) --(\xl+1.0,\y+\ts);
+    \draw (\xl+2.0,\y) --(\xl+2.0,\y+\ts);
+    \draw (\xl+3.0,\y) --(\xl+3.0,\y+\ts);
+    \draw (\xl+4.0,\y) --(\xl+4.0,\y+\ts);
+    \draw (\xl+5.0,\y) --(\xl+5.0,\y+\ts);
+    \draw (\xl+6.0,\y) --(\xl+6.0,\y+\ts);
+    \draw (\xl+7.0,\y) --(\xl+7.0,\y+\ts);
+    \draw (\xl+8.0,\y) --(\xl+8.0,\y+\ts);
+    \draw (\xl+9.0,\y) --(\xl+9.0,\y+\ts);
+    \draw (\xl+10.0,\y) --(\xl+10.0,\y+\ts);
+    \draw (\xl+11.0,\y) --(\xl+11.0,\y+\ts);
+    \draw (\xl+12.0,\y) --(\xl+12.0,\y+\ts);
+    \draw (\xl+13.0,\y) --(\xl+13.0,\y+\ts);
+    \draw (\xl+14.0,\y) --(\xl+14.0,\y+\ts);
+    \draw (\xl+15.0,\y) --(\xl+15.0,\y+\ts);
+    \draw (\xl+16.0,\y) --(\xl+16.0,\y+\ts);
+    
+    % lower level cells
+    \draw (\xl,\yy) --(\xl,\yy+\ts);
+    \draw (\xl+2.0,\yy) --(\xl+2.0,\yy+\ts);
+    \draw (\xl+4.0,\yy) --(\xl+4.0,\yy+\ts);
+    \draw (\xl+6.0,\yy) --(\xl+6.0,\yy+\ts);
+    \draw (\xl+8.0,\yy) --(\xl+8.0,\yy+\ts);
+    \draw (\xl+10.0,\yy) --(\xl+10.0,\yy+\ts);
+    \draw (\xl+12.0,\yy) --(\xl+12.0,\yy+\ts);
+    \draw (\xl+14.0,\yy) --(\xl+14.0,\yy+\ts);
+    \draw (\xl+16.0,\yy) --(\xl+16.0,\yy+\ts);
+    
+    % even lower level cells
+    \draw (\xl,\yyy) --(\xl,\yyy+\ts);
+    \draw (\xl+4.0,\yyy) --(\xl+4.0,\yyy+\ts);
+    \draw (\xl+8.0,\yyy) --(\xl+8.0,\yyy+\ts);
+    \draw (\xl+12.0,\yyy) --(\xl+12.0,\yyy+\ts);
+    \draw (\xl+16.0,\yyy) --(\xl+16.0,\yyy+\ts);
+ 
+    % arrows indicating flux interpolation dependency
+    \draw[myblue,->,line width=0.25mm,>=stealth] (\xr-4,\yy+\ts) -- (\xr-1,\y);
+
+    % nodes
+    \node at (\xl-7.0,\y+0.25) {\Large $l=0$};
+    \node at (\xl-7.0,\yy+0.25) {\Large $l=1$};
+    \node at (\xl-7.0,\yyy+0.25) {\Large $l=2$};
+
+\end{tikzpicture}
