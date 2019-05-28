@@ -34,8 +34,8 @@
 % international journal for numerical methods in fluids
 % aiaa
 % journal of fluid mechanics
-\title{Wavelet-Enhanced Block-Structured Adaptive Mesh Refinement for Simulating
-Reactive Flows}
+\title{An Asynchronous Multiresolution Scheme on Fully Adaptive Blocks for
+Simulating Reactive Flows}
 
 \author{
   Brandon Gusto\\
@@ -56,24 +56,27 @@ Reactive Flows}
 \maketitle
 
 \begin{abstract}
-    We present a generalization of Harten's multiresolution scheme for
-    simulating reactive flows on Cartesian, logically rectangular
-    block-structured adaptive mesh refinement (AMR) grids in one and two
-    dimensions. The scheme addresses a shortcoming of tree-based AMR codes,
-    which is the creation of blocks with a low filling factor; that is, many
-    cells in such a block are resolved beyond the desired error tolerance,
-    necessitating excess computational resources.  To overcome this issue, a
-    multiresolution (MR) representation is introduced not only to adapt grid but
-    also to adaptively compute fluxes. In smooth regions, some fluxes may be
-    interpolated from the multiresolution basis.  The error introduced by this
-    approximation is shown to be of the same order as the local truncation error
-    of the reconstruction scheme. Thus the rate of convergence of the underlying
-    spatial reconstruction scheme is preserved. Additionally, the
-    multiresolution transform is asynchronous, requiring only one
-    synchronization step which is equivalent to the filling of ghost cells for
-    each AMR block. applied per AMR block, obviating any need for communication
-    of MR information between blocks. The efficiency of the scheme is
-    demonstrated using several one and two-dimensional problems.
+    We present a generalization of Harten's original multiresolution scheme for
+    simulating reactive flows on logically rectangular block-structured adaptive
+    mesh refinement (AMR) grids in one and two dimensions. The scheme addresses
+    a major shortcoming of tree-based AMR codes, which is the creation of blocks
+    with a low filling factor; that is, many cells in such a block are resolved
+    beyond the desired error tolerance, necessitating excessive computational
+    resources.  To overcome this issue, we introduce a multiresolution
+    representation of the solution, not only to adapt the grid but also to
+    adaptively compute fluxes and sources on each block. The scheme recycles
+    regularity information obtained by the multiresolution grid adaptation in
+    order to select flux and source calculations which may be accurately
+    replaced by interpolation from the multiresolution basis. A block which
+    employs this scheme is denoted as a fully adaptive block (FAB).  The error
+    introduced by this approximation is shown to be of the same order as the
+    local truncation error of the reconstruction scheme. Thus the rate of
+    convergence of the underlying spatial reconstruction scheme is preserved.
+    Additionally with respect to parallel applications, the multiresolution
+    transform and computation of fluxes and sources on FABs is asynchronous,
+    requiring only one synchronization step which is equivalent to the filling
+    of ghost cells for each block. The efficiency of the scheme is demonstrated
+    using several one and two-dimensional problems.
 \end{abstract}
 
 % keywords can be removed
@@ -87,7 +90,7 @@ Reactive Flows}
     significantly higher resolution in computer simulations than smooth regions
     of the flow.  Naturally, intense effort has gone into the development of
     methods which employ a multi-scale or adaptive strategy to accurately
-    simulate such flows without over-resolving large areas of the domain.
+    simulate such flows without over-resolving smooth areas of the domain.
 
     % paragraph introducing adaptive mesh refinement as a concept
     The most popular strategy to accurately capture regions of interest in fluid
@@ -102,35 +105,38 @@ Reactive Flows}
     %feature-based refinement, and evaluation of gradient information (references
     %here).
 
-    % paragraph reviews the work of harten and multiresolution methods
-    An alternate approach to dynamic grid adaptation based on wavelets has became
-    popular in recent years. The first such effort was introduced in a seminal
-    paper by Harten \cite{harten1994}, where a multiresolution representation of
-    the discrete solution on a uniform grid was used for adaptively computing the
-    divergence of the flux within a finite volume formulation. The original
-    scheme was applied soley to hyperbolic conservation laws, but was then
-    expanded by Bihari to include viscous terms in (\hl{citation}), and then source
-    terms in the context of reactive flows in (\hl{citation}). Harten's scheme
-    represents the discrete solution on a uniform grid, but uses a
-    multiresolution representation of the solution to identify regions where
-    flux computations may be avoided. The multiresolution transform is obtained
-    by using average-interpolating wavelets as basis functions. The scheme was
-    extended to multiple dimensions in (cite), and the to problems with source
-    terms in (cite).
 
-    % review the multiresolution-adaptive papers
-    Although Harten's original scheme was intended to be an alternative to
-    spatially non-uniform grid adaptation, a series of papers have
-    since reintroduced this concept within the MR framework. Thus the AMR
-    approach has been redeveloped but with the refinement criterion defined by
-    the MR representation rather than with the traditional metrics mentioned
-    previously.
+    \subsection*{Harten's Multiresolution Scheme}
 
-\section{Finite Volume Discretization}
+        % paragraph reviews the work of harten and multiresolution methods
+        An alternate approach to dynamic grid adaptation based on wavelets has became
+        popular in recent years. The first such effort was introduced in a seminal
+        paper by Harten \cite{harten1994}, where a multiresolution representation of
+        the discrete solution on a uniform grid was used for adaptively computing the
+        divergence of the flux within a finite volume formulation. The original
+        scheme was applied soley to hyperbolic conservation laws, but was then
+        expanded by Bihari to include viscous terms in (\hl{citation}), and then source
+        terms in the context of reactive flows in (\hl{citation}). Harten's scheme
+        represents the discrete solution on a uniform grid, but uses a
+        multiresolution representation of the solution to identify regions where
+        flux computations may be avoided. The multiresolution transform is obtained
+        by using average-interpolating wavelets as basis functions. The scheme was
+        extended to multiple dimensions in (cite), and the to problems with source
+        terms in (cite).
+
+        % review the multiresolution-adaptive papers
+        Although Harten's original scheme was intended to be an alternative to
+        spatially non-uniform grid adaptation, a series of papers have
+        since reintroduced this concept within the MR framework. Thus the AMR
+        approach has been redeveloped but with the refinement criterion defined by
+        the MR representation rather than with the traditional metrics mentioned
+        previously.
+
+\section{Governing Equations and Finite Volume Formulation}
 
     % describe merging block-structured AMR with Harten's scheme
     In the present work we are interested in numerically solving conservation
-    laws, on a domain $\Omega$, of the form
+    laws of the form
     \begin{equation}
     \begin{cases}
       u_{t} + f(u)_{x} = s(u) \\    
@@ -139,14 +145,23 @@ Reactive Flows}
     \end{equation}
     where $u$ represents a conserved quantity, $f(u)$ is the flux function, and
     $s(u)$ is a source term. In the finite volume formulation, the solution
-    $u(x,t)$ is approximated by a volume average defined over each cell $I_{i} =
-    \left[ x_{i}-\frac{h}{2}, x_{i}+\frac{h}{2} \right]$ as
+    $u(x,t)$ is approximated by a volume average defined within each cell $I_{i}
+    = \left[ x_{i}-\frac{h}{2}, x_{i}+\frac{h}{2} \right]$. Here $h$ is the cell
+    width determined by the number of cells, $N$, and the size of the
+    computational domain
+    $\Omega \in \left[a,b\right]$,
     \begin{equation}
-        u_{i}(t) = \frac{1}{h} \int_{x_{i}-\frac{h}{2}}^{x_{i}+\frac{h}{2}} u(\xi,t) d \xi,
+        h = \frac{b-a}{N}.
     \end{equation}
-    where $h$ is the cell width. For convenience we use $i \pm \frac{1}{2}$ in
-    the subscripts to indicate the left and right interfaces of the target cell.
-    The governing equations are cast into the semi-discrete conservative form,
+    The discrete solution is represented in terms of cell averages
+    \begin{equation}
+        u_{i}(t) = \frac{1}{h} \int_{x_{i-1/2}}^{x_{i+1/2}} u(\xi,t) d \xi,
+    \end{equation}
+    where for convenience we use $i \pm \frac{1}{2}$ in the subscripts to
+    indicate the left and right interfaces of the target cell (i.e.
+    $x_{i+\frac{1}{2}} =
+    x_{i} + \frac{h}{2}$).  The governing equations are cast into the
+    semi-discrete conservative form,
     \begin{equation}
         \frac{du_{i}(t)}{dt} = -\frac{1}{h} \left( f(u(x_{i+\frac{1}{2}})) -
         f(u(x_{i-\frac{1}{2}})) \right).
@@ -157,10 +172,20 @@ Reactive Flows}
         f(u(x_{i+\frac{1}{2}})).
     \end{equation}
 
-    % subsection on piecewise parabolic method, riemann solvers
-    \subsection{Reference Scheme}
+    % subsection* on piecewise parabolic method, riemann solvers
+    \subsection*{Reference Scheme}
 
-        % detail the piecewise parabolic method
+    % detail the piecewise parabolic method
+
+    % two main issues: no jump greater than one refinement level, and no
+    % incomplete trees
+
+    % illustration amr block tree structure
+    \begin{figure}[H]
+        \center
+        \input{amr_tree.tex}
+        \caption{}
+    \end{figure}
 
 \section{Multiresolution Analysis}
 
@@ -231,7 +256,7 @@ Reactive Flows}
     their prediced values. The scheme is detailed by first examining the grid
     hierarchy needed for the multiresolution representation of the data.
 
-    \subsection{Grid Hierarchy}
+    \subsection*{Grid Hierarchy}
 
         % describe the nested grids
         In Harten's original scheme, the domain is discretized into a
@@ -247,7 +272,7 @@ Reactive Flows}
 
         % illustration of grids here?
 
-    \subsection{Forward Transform}
+    \subsection*{Forward Transform}
 
         % describe the prediction operator, and detail coefficients
         The forward transform provides regularity information about the function
@@ -285,14 +310,18 @@ Reactive Flows}
         \begin{figure}[H]
             \center
             \input{parallel_fwt.tex}
-           \caption{A
+            \caption{A block of consisting of $N^{0} = 16$ cells is shown. Four
+            ghost cells are included on each end of the block, allowing the
+            multiresolution decomposition to descend two levels (to grid level
+            $l=2$). Interpolation stencils for the computation of detail
+            coefficients at levels $l=1, l=2$ are shown, indicating the need for ghost cells.}
         \end{figure}
 
-    \subsection{Inverse Transform}
+    \subsection*{Inverse Transform}
 
         % 
         
-    \subsection{Calculation of Fluxes and Sources}
+    \subsection*{Calculation of Fluxes and Sources}
         Once the detail coefficients have been obtained, the MR scheme
         proceeds by setting a threshold $\epsilon$ and truncating coefficients
         which have an absolute value below the threshold. Lastly, the inverse
@@ -318,34 +347,30 @@ Reactive Flows}
         The process repeats until all fluxes are either computed or
         interpolated on the fine grid $l=0$.
 
-        \subsection{Error Analysis}
+        \subsection*{Error Analysis}
 
             % describe choice of epsilon
 
-        \subsection{Buffer Region}
-
-\section{Block-Structured Adaptive Mesh Refinement Algorithm}
+\section{Asynchronous Fully Adaptive Block Scheme}
 
     % pseudocode of algorithm
 
-        % illustration of parallel issue
-        \begin{figure}[H]
-            \center
-            \input{parallel_flux.tex}
-           \caption{Two examples of flux interpolation on a hierarchy of grids
-            on Process 1: one procedure requires flux data from the adjacent
-            process, the other does not.}
-        \end{figure}
+    % illustration of parallel issue
+    \begin{figure}[H]
+        \center
+        \input{parallel_flux.tex}
+       \caption{Two examples of flux interpolation on a hierarchy of grids
+        on Process 1: one procedure requires flux data from the adjacent
+        process, the other does not.}
+    \end{figure}
+
+    \subsection*{Buffer Region}
+
+    \subsection*{Load Balancing}
 
 \section{Numerical Results}
 
-    \subsection{Convergence Analysis}
-
-        \begin{figure}
-            \centering
-            \includegraphics[width=0.7\textwidth]{convergence.png}
-            \caption{}
-        \end{figure}
+    \subsection*{Convergence Analysis}
 
         \begin{center}\vspace{1cm}
         \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
@@ -367,7 +392,7 @@ Reactive Flows}
         \end{tabular}
         \end{center}\vspace{1cm}
 
-    \subsection{Example}
+    \subsection*{Example}
     Using the inviscid flow assumption, the dynamics of compressible fluids are
     modeled using the reactive Euler equations \hl{add domain notation}
     \begin{equation}

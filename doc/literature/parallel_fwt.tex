@@ -1,4 +1,4 @@
-\begin{tikzpicture}[thick,scale=0.275, every node/.style={scale=0.6}]
+\begin{tikzpicture}[thick,scale=0.3, every node/.style={scale=0.6}]
 
     % variables
     \def\xl{-8.0}
@@ -76,7 +76,27 @@
     \draw (\xl+16.0,\yyy) --(\xl+16.0,\yyy+\ts);
  
     % arrows indicating flux interpolation dependency
-    \draw[myblue,->,line width=0.25mm,>=stealth] (\xr-4,\yy+\ts) -- (\xr-1,\y);
+    \draw[->,line width=0.2mm,>=stealth] (\xr-3,\yy+\ts) -- (\xr-0.8,\y-0.1);
+    \draw[->,line width=0.2mm,>=stealth] (\xr-1,\yy+\ts) -- (\xr-0.5,\y-0.1);
+    \draw[mygray,->,line width=0.2mm,>=stealth] (\xr+1,\yy+\ts) -- (\xr-0.3,\y-0.1);
+
+    \draw[->,line width=0.2mm,>=stealth] (\xr-6,\yyy+\ts) -- (\xr-1.3,\yy-0.1);
+    \draw[->,line width=0.2mm,>=stealth] (\xr-2,\yyy+\ts) -- (\xr-1,\yy-0.1);
+    \draw[mygray,->,line width=0.2mm,>=stealth] (\xr+2,\yyy+\ts) -- (\xr-0.7,\yy-0.1);
+
+    \draw[mygray,->,line width=0.2mm,>=stealth] (\xl-1,\yy+\ts) -- (\xl+1.2,\y-0.1);
+    \draw[->,line width=0.2mm,>=stealth] (\xl+1,\yy+\ts) -- (\xl+1.5,\y-0.1);
+    \draw[->,line width=0.2mm,>=stealth] (\xl+3,\yy+\ts) -- (\xl+1.8,\y-0.1);
+
+    \draw[mygray,->,line width=0.2mm,>=stealth] (\xl-2,\yyy+\ts) -- (\xl+2.7,\yy-0.1);
+    \draw[->,line width=0.2mm,>=stealth] (\xl+2,\yyy+\ts) -- (\xl+3,\yy-0.1);
+    \draw[->,line width=0.2mm,>=stealth] (\xl+6,\yyy+\ts) -- (\xl+3.3,\yy-0.1);
+
+    % curly brace
+    \draw[decoration={brace,raise=5pt},decorate]
+        (\xr,\y+1.0) -- node[above=10pt] {\Large Ghost region}(\xr+4.0,\y+1.0);
+    \draw[decoration={brace,raise=5pt},decorate]
+        (\xl-4.0,\y+1.0) -- node[above=10pt] {\Large Ghost region}(\xl,\y+1.0);
 
     % nodes
     \node at (\xl-7.0,\y+0.25) {\Large $l=0$};
