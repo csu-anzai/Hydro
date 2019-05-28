@@ -1,0 +1,17 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Finite Volume Discretization}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Reference Scheme}{section.2}% 3
+\BOOKMARK [1][-]{section.3}{Multiresolution Analysis}{}% 4
+\BOOKMARK [1][-]{section.4}{Harten's Multiresolution Scheme on Uniform Grids}{}% 5
+\BOOKMARK [2][-]{subsection.4.1}{Grid Hierarchy}{section.4}% 6
+\BOOKMARK [2][-]{subsection.4.2}{Forward Transform}{section.4}% 7
+\BOOKMARK [2][-]{subsection.4.3}{Inverse Transform}{section.4}% 8
+\BOOKMARK [2][-]{subsection.4.4}{Interpolation of Fluxes}{section.4}% 9
+\BOOKMARK [2][-]{subsection.4.5}{Error Analysis}{section.4}% 10
+\BOOKMARK [2][-]{subsection.4.6}{Buffer Region}{section.4}% 11
+\BOOKMARK [1][-]{section.5}{Block-Structured Adaptive Mesh Refinement Algorithm}{}% 12
+\BOOKMARK [1][-]{section.6}{Numerical Results}{}% 13
+\BOOKMARK [2][-]{subsection.6.1}{Convergence Analysis}{section.6}% 14
+\BOOKMARK [2][-]{subsection.6.2}{Example}{section.6}% 15
+\BOOKMARK [1][-]{section.7}{Acknowledgements}{}% 16
+\BOOKMARK [1][-]{appendix.A}{Derivation of Prediction Operator in One-Dimension}{}% 17
