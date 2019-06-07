@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[12pt,letterpaper]{article}
 
 \usepackage{arxiv}
 
@@ -34,8 +34,7 @@
 % international journal for numerical methods in fluids
 % aiaa
 % journal of fluid mechanics
-\title{An Asynchronous Multiresolution Scheme on Fully Adaptive Blocks for
-Simulating Reactive Flows}
+\title{A Multiresolution Scheme Featuring Fully Adaptive Blocks for Simulating Reactive Flows}
 
 \author{
   Brandon Gusto\\
@@ -105,32 +104,31 @@ Simulating Reactive Flows}
     %feature-based refinement, and evaluation of gradient information (references
     %here).
 
+    % paragraph reviews the work of harten and multiresolution methods
+    An alternate approach to dynamic grid adaptation based on wavelets has became
+    popular in recent years. The first such effort was introduced in a seminal
+    paper by Harten \cite{harten1994}, where a multiresolution representation of
+    the discrete solution on a uniform grid was used for adaptively computing the
+    divergence of the flux within a finite volume formulation. The original
+    scheme was applied soley to hyperbolic conservation laws, but was then
+    expanded by Bihari to include viscous terms in (\hl{citation}), and then source
+    terms in the context of reactive flows in (\hl{citation}). Harten's scheme
+    represents the discrete solution on a uniform grid, but uses a
+    multiresolution representation of the solution to identify regions where
+    flux computations may be avoided. The multiresolution transform is obtained
+    by using average-interpolating wavelets as basis functions. The scheme was
+    extended to multiple dimensions in (cite), and the to problems with source
+    terms in (cite).
 
-    \subsection*{Harten's Multiresolution Scheme}
+    % review the multiresolution-adaptive papers
+    Although Harten's original scheme was intended to be an alternative to
+    spatially non-uniform grid adaptation, a series of papers have
+    since reintroduced this concept within the MR framework. Thus the AMR
+    approach has been redeveloped but with the refinement criterion defined by
+    the MR representation rather than with the traditional metrics mentioned
+    previously.
 
-        % paragraph reviews the work of harten and multiresolution methods
-        An alternate approach to dynamic grid adaptation based on wavelets has became
-        popular in recent years. The first such effort was introduced in a seminal
-        paper by Harten \cite{harten1994}, where a multiresolution representation of
-        the discrete solution on a uniform grid was used for adaptively computing the
-        divergence of the flux within a finite volume formulation. The original
-        scheme was applied soley to hyperbolic conservation laws, but was then
-        expanded by Bihari to include viscous terms in (\hl{citation}), and then source
-        terms in the context of reactive flows in (\hl{citation}). Harten's scheme
-        represents the discrete solution on a uniform grid, but uses a
-        multiresolution representation of the solution to identify regions where
-        flux computations may be avoided. The multiresolution transform is obtained
-        by using average-interpolating wavelets as basis functions. The scheme was
-        extended to multiple dimensions in (cite), and the to problems with source
-        terms in (cite).
-
-        % review the multiresolution-adaptive papers
-        Although Harten's original scheme was intended to be an alternative to
-        spatially non-uniform grid adaptation, a series of papers have
-        since reintroduced this concept within the MR framework. Thus the AMR
-        approach has been redeveloped but with the refinement criterion defined by
-        the MR representation rather than with the traditional metrics mentioned
-        previously.
+    % discuss pros cons of block-amr
 
 \section{Governing Equations and Finite Volume Formulation}
 
@@ -142,50 +140,36 @@ Simulating Reactive Flows}
       u_{t} + f(u)_{x} = s(u) \\    
       u(x,0) = u_{0}(x),
     \end{cases}
+    \label{claw}
     \end{equation}
     where $u$ represents a conserved quantity, $f(u)$ is the flux function, and
-    $s(u)$ is a source term. In the finite volume formulation, the solution
-    $u(x,t)$ is approximated by a volume average defined within each cell $I_{i}
-    = \left[ x_{i}-\frac{h}{2}, x_{i}+\frac{h}{2} \right]$. Here $h$ is the cell
-    width determined by the number of cells, $N$, and the size of the
-    computational domain
-    $\Omega \in \left[a,b\right]$,
-    \begin{equation}
-        h = \frac{b-a}{N}.
-    \end{equation}
-    The discrete solution is represented in terms of cell averages
+    $s(u)$ is a source term. For the sake of presentation, we let the scalar
+    equation (\ref{claw}) stand in for the more complicated systems of
+    conversation laws which will be the focus of applications.  In the finite
+    volume formulation, the solution $u(x,t)$ is approximated by volume
+    averages defined within each cell $I_{i} = \left[ x_{i}-\frac{h}{2},
+    x_{i}+\frac{h}{2} \right]$ in the computational domain.  The cell width $h$
+    is determined by the number of cells, $N$, and the size of the domain
+    $\Omega \in \left[a,b\right]$.
+    The cell averages are given by
     \begin{equation}
         u_{i}(t) = \frac{1}{h} \int_{x_{i-1/2}}^{x_{i+1/2}} u(\xi,t) d \xi,
     \end{equation}
-    where for convenience we use $i \pm \frac{1}{2}$ in the subscripts to
+    where for convenience we use $i \pm 1/2$ in the subscripts to
     indicate the left and right interfaces of the target cell (i.e.
-    $x_{i+\frac{1}{2}} =
-    x_{i} + \frac{h}{2}$).  The governing equations are cast into the
+    $x_{i+1/2} =
+    x_{i} + \frac{h}{2}$). The governing equations are cast into the
     semi-discrete conservative form,
     \begin{equation}
-        \frac{du_{i}(t)}{dt} = -\frac{1}{h} \left( f(u(x_{i+\frac{1}{2}})) -
-        f(u(x_{i-\frac{1}{2}})) \right).
+        \frac{du_{i}(t)}{dt} = -\frac{1}{h} \left( \hat{f}_{i+1/2} -
+        \hat{f}_{i-1/2} \right),
     \end{equation}
-    The fluxes are evaluated numerically as
+    where the numerical flux is evaluated as
     \begin{equation}
-       \hat{f}_{i + \frac{1}{2}}(u_{i-p}, \dots, u_{i+p}) \approx
-        f(u(x_{i+\frac{1}{2}})).
+        \hat{f}_{i + 1/2} = \hat{f}(u^{-}_{i+1/2}, u^{+}_{i+1/2}).
     \end{equation}
-
-    % subsection* on piecewise parabolic method, riemann solvers
-    \subsection*{Reference Scheme}
-
-    % detail the piecewise parabolic method
-
-    % two main issues: no jump greater than one refinement level, and no
-    % incomplete trees
-
-    % illustration amr block tree structure
-    \begin{figure}[H]
-        \center
-        \input{amr_tree.tex}
-        \caption{}
-    \end{figure}
+    In the present work, the reconstruction method of choice is a fifth-order
+    weighted essentially non-oscillatory (WENO) scheme.
 
 \section{Multiresolution Analysis}
 
@@ -199,28 +183,29 @@ Simulating Reactive Flows}
     A multiresolution analysis (MRA) of the Lebesgue space
     $L_{2}(\mathbb{R})$ defines a sequence of nested approximation spaces.
     These spaces satisfy certain self-similarity properties in both space
-    and scale. We define the following sequence
+    and scale. An MRA defines the following sequence
     \begin{equation*}
         \dots \subset V_{j-1} \subset V_{j} \subset V_{j+1} \subset \dots \text{ }
         \text{ } \text{ } \text{ } j\in \mathbb{Z},
     \end{equation*}
-    where for each subspace $V_{j}$, the points $y_{j}$ are defined. The
-    following properties hold:
-    \begin{enumerate}
-        \item $f(x) \in V_{j} \Leftrightarrow f(x+k) \in V_{j} : \forall k
-            \in y_{j}$
-        \item $f(x) \in V_{j} \Leftrightarrow f(2x) \in V_{j+1}$ 
-    \end{enumerate}
-    The first point addresses the self-similarity in space, implying that
-    each subspace $V_{j}$ is invariant under shifts. A scaling function
-    $\phi_{j}(x) \in V_{j}$ is defined which forms a basis,
+    where for each subspace $V_{j}$,
+    %, the points $y_{j}$ are defined. The
+    %following properties hold:
+    %\begin{enumerate}
+    %    \item $f(x) \in V_{j} \Leftrightarrow f(x+k) \in V_{j} : \forall k
+    %        \in y_{j}$
+    %    \item $f(x) \in V_{j} \Leftrightarrow f(2x) \in V_{j+1}$ 
+    %\end{enumerate}
+    %The first point addresses the self-similarity in space, implying that
+    %each subspace $V_{j}$ is invariant under shifts.
+    a scaling function $\phi_{j}(x) \in V_{j}$ is defined which forms a basis,
     \begin{equation*}
         V_{j} = \text{span} \left\{ \phi_{j}(x+k) : \forall k \in y_{j}
         \right\}.
     \end{equation*}
-    Additionally the complement of $V_{j} \in V_{j+1}$ is $W_{j}$, which is
+    Additionally, the complement of $V_{j} \in V_{j+1}$ is $W_{j}$, which is
     known as the wavelet or detail space. This relation is defined
-    mathematically as
+    by a direct summation as
     \begin{equation*}
         V_{j+1} = W_{j} \oplus V_{j}.
     \end{equation*}
@@ -228,8 +213,8 @@ Simulating Reactive Flows}
     \begin{equation*}
         V_j = V_0 \oplus W_0 \oplus W_1 \oplus \dots \oplus W_{j-1},
     \end{equation*}
-    thus the fine-scale information is represented by the coarsest scale
-    plus a series of differences at higher levels.
+    thus fine-scale information on any arbitrary level $j$ is represented by
+    the coarsest scale plus a series of differences at higher levels.
 
 \section{Harten's Multiresolution Scheme on Uniform Grids}
 
@@ -352,6 +337,16 @@ Simulating Reactive Flows}
             % describe choice of epsilon
 
 \section{Asynchronous Fully Adaptive Block Scheme}
+
+    % two main issues: no jump greater than one refinement level, and no
+    % incomplete trees
+
+    % illustration amr block tree structure
+    \begin{figure}[H]
+        \center
+        \input{amr_tree.tex}
+        \caption{}
+    \end{figure}
 
     % pseudocode of algorithm
 
