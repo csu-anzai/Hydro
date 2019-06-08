@@ -28,12 +28,13 @@
 \definecolor{myblue}{RGB}{60,60,255}
 \renewcommand{\arraystretch}{1.2}
 
-% potential journals
-% journal of computational physics
-% computers and fluids
-% international journal for numerical methods in fluids
-% aiaa
-% journal of fluid mechanics
+% potential journals:
+    % journal of computational physics
+    % computers and fluids
+    % international journal for numerical methods in fluids
+    % aiaa
+    % journal of fluid mechanics
+
 \title{A Multiresolution Scheme Featuring Fully Adaptive Blocks for Simulating Reactive Flows}
 
 \author{
@@ -86,51 +87,75 @@
     % paragraph introduces the need for spatially adaptive grids
     Fluid flows are often characterized by disparate spatial and temporal length
     scales. Certain features such as turbulence or shocks necessitate
-    significantly higher resolution in computer simulations than smooth regions
-    of the flow.  Naturally, intense effort has gone into the development of
-    methods which employ a multi-scale or adaptive strategy to accurately
-    simulate such flows without over-resolving smooth areas of the domain.
+    significantly higher resolution than smooth regions of the flow.  In
+    reacting flows, combustion fronts often act in highly localized regions, and
+    on very small time scales. Naturally, intense effort has gone into the
+    development of methods which employ a multi-scale or adaptive strategy to
+    accurately simulate such flows without over-resolving smooth areas of the
+    domain.
 
     % paragraph introducing adaptive mesh refinement as a concept
     The most popular strategy to accurately capture regions of interest in fluid
-    simulations is to introduce a non-uniform spatial grid.  Methods which
-    introduce a hierarchy of nested grid levels are generally described as
-    adaptive mesh refinement (AMR) methods. Obtaining an estimate of the local
-    truncation error (LTE) of the numerical scheme on a particular grid
-    level allows for the identification of regions where refinement is necessary
-    for solution accuracy. AMR methods may employ several strategies to
-    approximate the LTE. 
+    simulations is to introduce a non-uniform spatial grid, with higher
+    resolution in regions of interest.  Methods which introduce a hierarchy of
+    nested grid resolutions are generally described as adaptive mesh refinement
+    (AMR) methods. AMR methods rely on estimates of the local truncation error (LTE)
+    of the numerical scheme to determine regions where refinement is necessary for solution
+    accuracy. Several strategies to approximate the LTE are used (\hl{list
+    methods}).
     %\cite{Berger1984}.  Alternative methods include
     %feature-based refinement, and evaluation of gradient information (references
     %here).
 
+    % talk about block-structured AMR
+    Regarding the implementation of AMR methods on large parallel computers,
+    certain engineering realities have neccessitated the reduction in
+    granularity of the adaptive refinement. To use a single computational cell
+    as the unit for refinement (i.e. cell-based refinement) introduces a number
+    of costly compromises. Firstly, such an adapted grid requires the
+    reconstruction method of choice to utilize nonuniform stencils, requiring
+    increased computational resources. More significantly, the cell-based
+    refinement requires extremely costly data traversal. Traversing tree space
+    requires an average $\mathcal{O}(n^d)$ (\hl{confirm this?}) operations. Thus
+    most AMR codes make use of some type of block-based approach. Tree-based
+    block-structured codes, where each block consists of a fixed number of
+    cells, are a very popular choice. These types of approaches are implemented
+    in a number of AMR libraries including Paramesh (\hl{cite}), p4est
+    (\hl{cite}, and others. This approach allows for simple mesh management
+    procedures, and scales well for very large number of processors in parallel.
+
     % paragraph reviews the work of harten and multiresolution methods
-    An alternate approach to dynamic grid adaptation based on wavelets has became
-    popular in recent years. The first such effort was introduced in a seminal
-    paper by Harten \cite{harten1994}, where a multiresolution representation of
-    the discrete solution on a uniform grid was used for adaptively computing the
-    divergence of the flux within a finite volume formulation. The original
-    scheme was applied soley to hyperbolic conservation laws, but was then
-    expanded by Bihari to include viscous terms in (\hl{citation}), and then source
-    terms in the context of reactive flows in (\hl{citation}). Harten's scheme
-    represents the discrete solution on a uniform grid, but uses a
-    multiresolution representation of the solution to identify regions where
-    flux computations may be avoided. The multiresolution transform is obtained
-    by using average-interpolating wavelets as basis functions. The scheme was
-    extended to multiple dimensions in (cite), and the to problems with source
-    terms in (cite).
+    Alternate approaches to dynamic grid adaptation based on wavelet theory have
+    become popular in recent years. The first such effort was introduced in a
+    seminal paper by Harten \cite{harten1994}, where a multiresolution
+    representation of the discrete solution on a uniform grid was used for
+    adaptively computing the divergence of the flux within a finite volume
+    framework. Rather than adapt the grid by truncating the wavelet basis, the
+    idea was to accelerate the computation of high-order essentially
+    non-oscillatory (ENO) schemes using the multiresolution information. Fluxes
+    in smooth regions were interpolated from fluxes obtained at interfaces
+    corresponding to coarser grid levels. The original scheme was applied solely
+    to hyperbolic conservation laws, but was then expanded by Bihari et. al. to
+    two-dimensional simulations in (\hl{citation}), followed by the inclusion of
+    viscous terms in (\hl{citation}), and then tp source terms in the context of
+    reactive flows in (\hl{citation}). These works retained the original flavor
+    of Harten's scheme, which was to represent the discrete solution on a
+    uniform grid, but uses a multiresolution representation of the solution to
+    identify regions where flux (and source term) computations may be avoided.
+    The multiresolution transform is obtained by using average-interpolating
+    wavelets as basis functions.
 
     % review the multiresolution-adaptive papers
     Although Harten's original scheme was intended to be an alternative to
-    spatially non-uniform grid adaptation, a series of papers have
-    since reintroduced this concept within the MR framework. Thus the AMR
-    approach has been redeveloped but with the refinement criterion defined by
-    the MR representation rather than with the traditional metrics mentioned
-    previously.
+    spatially non-uniform grid adaptation, a series of papers have since
+    reintroduced this concept of non-uniform grids within the MR framework. Thus
+    the AMR approach has been redeveloped but with the refinement criterion
+    defined by the MR representation rather than with the traditional metrics
+    mentioned previously. The first fully adaptive scheme was presented by Cohen
+    et. al. to study hyperbolic conservation laws in two dimensions in
+    (\hl{cite}).
 
-    % discuss pros cons of block-amr
-
-\section{Governing Equations and Finite Volume Formulation}
+\section{Governing Equations and Finite Volume Discretization}
 
     % describe merging block-structured AMR with Harten's scheme
     In the present work we are interested in numerically solving conservation
@@ -141,19 +166,17 @@
       u(x,0) = u_{0}(x),
     \end{cases}
     \label{claw}
-    \end{equation}
-    where $u$ represents a conserved quantity, $f(u)$ is the flux function, and
-    $s(u)$ is a source term. For the sake of presentation, we let the scalar
-    equation (\ref{claw}) stand in for the more complicated systems of
-    conversation laws which will be the focus of applications.  In the finite
-    volume formulation, the solution $u(x,t)$ is approximated by volume
+    \end{equation} where $u$ represents a conserved quantity, $f(u)$ is the flux
+    function, and $s(u)$ is a source term. For the sake of presentation, we let
+    the scalar equation (\ref{claw}) stand in for the more complicated systems
+    of conversation laws which will be the focus of our applications.  In the
+    finite volume formulation, the solution $u(x,t)$ is approximated by volume
     averages defined within each cell $I_{i} = \left[ x_{i}-\frac{h}{2},
     x_{i}+\frac{h}{2} \right]$ in the computational domain.  The cell width $h$
     is determined by the number of cells, $N$, and the size of the domain
-    $\Omega \in \left[a,b\right]$.
-    The cell averages are given by
+    $\Omega \in \left[a,b\right]$.  The cell averages are given by
     \begin{equation}
-        u_{i}(t) = \frac{1}{h} \int_{x_{i-1/2}}^{x_{i+1/2}} u(\xi,t) d \xi,
+        \overline{u}_{i}(t) = \frac{1}{h} \int_{x_{i-1/2}}^{x_{i+1/2}} u(\xi,t) d \xi,
     \end{equation}
     where for convenience we use $i \pm 1/2$ in the subscripts to
     indicate the left and right interfaces of the target cell (i.e.
@@ -161,8 +184,9 @@
     x_{i} + \frac{h}{2}$). The governing equations are cast into the
     semi-discrete conservative form,
     \begin{equation}
-        \frac{du_{i}(t)}{dt} = -\frac{1}{h} \left( \hat{f}_{i+1/2} -
+        \frac{d\overline{u}_{i}(t)}{dt} = -\frac{1}{h} \left( \hat{f}_{i+1/2} -
         \hat{f}_{i-1/2} \right),
+        \label{ode}
     \end{equation}
     where the numerical flux is evaluated as
     \begin{equation}
@@ -171,91 +195,64 @@
     In the present work, the reconstruction method of choice is a fifth-order
     weighted essentially non-oscillatory (WENO) scheme.
 
-\section{Multiresolution Analysis}
+    \subsection{WENO Reconstruction Scheme}
 
-    % overview of multiresolution
-    In this section we first provide a brief review of the essential ideas
-    regarding multiresolution analysis and wavelets as they pertain to the
-    present work, and then we explain in-depth the muliresolution scheme used
-    for both grid adaptation and the calculation of fluxes and sources.
+    \subsection{Time Integration}
+     
+        % define evolution operator as in domingues2008
+        Once the system of ordinary differential equations (\ref{ode}) is
+        established, the objective is to integrate them forward in time. In our
+        implementation we use a second-order explicit Runge-Kutta scheme to
+        advance. This is summarized by
+        \begin{equation}
+            \bm{u}^{n+1} = \bm{E} \bm{u}^{n},
+        \end{equation}
+        where $\bm{E}$ represents the nonlinear evolution operator, and codifies the
+        temporal and spatial discretizations.
 
-    % describe multiresolution analysis (sourced from tymczak2000)
-    A multiresolution analysis (MRA) of the Lebesgue space
-    $L_{2}(\mathbb{R})$ defines a sequence of nested approximation spaces.
-    These spaces satisfy certain self-similarity properties in both space
-    and scale. An MRA defines the following sequence
-    \begin{equation*}
-        \dots \subset V_{j-1} \subset V_{j} \subset V_{j+1} \subset \dots \text{ }
-        \text{ } \text{ } \text{ } j\in \mathbb{Z},
-    \end{equation*}
-    where for each subspace $V_{j}$,
-    %, the points $y_{j}$ are defined. The
-    %following properties hold:
-    %\begin{enumerate}
-    %    \item $f(x) \in V_{j} \Leftrightarrow f(x+k) \in V_{j} : \forall k
-    %        \in y_{j}$
-    %    \item $f(x) \in V_{j} \Leftrightarrow f(2x) \in V_{j+1}$ 
-    %\end{enumerate}
-    %The first point addresses the self-similarity in space, implying that
-    %each subspace $V_{j}$ is invariant under shifts.
-    a scaling function $\phi_{j}(x) \in V_{j}$ is defined which forms a basis,
-    \begin{equation*}
-        V_{j} = \text{span} \left\{ \phi_{j}(x+k) : \forall k \in y_{j}
-        \right\}.
-    \end{equation*}
-    Additionally, the complement of $V_{j} \in V_{j+1}$ is $W_{j}$, which is
-    known as the wavelet or detail space. This relation is defined
-    by a direct summation as
-    \begin{equation*}
-        V_{j+1} = W_{j} \oplus V_{j}.
-    \end{equation*}
-    Considering successively finer approximation spaces yields
-    \begin{equation*}
-        V_j = V_0 \oplus W_0 \oplus W_1 \oplus \dots \oplus W_{j-1},
-    \end{equation*}
-    thus fine-scale information on any arbitrary level $j$ is represented by
-    the coarsest scale plus a series of differences at higher levels.
-
-\section{Harten's Multiresolution Scheme on Uniform Grids}
+\section{Harten's Multiresolution Scheme}
 
     % describe overview of transform, and average-interpolating wavelets
-    The multiresolution scheme presented here is based on the work of Harten, as
-    mentioned previously. The multiresolution analysis generated by this scheme
-    consists of generalized bi-orthogonal wavelets (\hl{cite}). Although the
-    wavelets are never constructed explicitly, the same mechanics used to build
-    them are used to construct the multiresolution representation of the
-    discrete solution.  This is done using average-interpolating polynomials to
+    The average-interpolating multiresolution approach is based on a hierarchy
+    of nested discretizations on the domain of interest $\Omega$. In the case of
+    a one-dimensional, uniformly spaced grid, the hierarchy is defined by
+    \begin{equation}
+        \mathcal{G}^{l} = \left\{ x_{i}^{l} \right\}_{i=0}^{N^{l}}, \text{ }
+        \text{ } \text{ } \text{ } x_{i}^{l} = i \cdot h^{l}, \text{ }
+        \text{ } h^{l} = 2^{L-l} \cdot h^{L}, \text{ } \text{ } N^{l} = N^{L}
+        / 2^{L-l},
+    \end{equation}
+    where the finest grid is denoted by $\mathcal{G}^{L}$, and on any arbitrary
+    level $l$, the cell width is $h^{l}$, and the number of cells is $N^{l}$.
+    Given a vector of discrete cell averages $\bm{u}^{L}$ at the finest
+    resolution, the multiresolution representation is obtained by the following
+    operations:
+    \begin{enumerate}
+        \item[] \textit{Split:} The cells at grid level $l$ are split into two
+            sets, even and odd.
+        \item[] \textit{Project:} The cells at level $l$ are projected, or
+            coarsened by means of volume averaging onto the coarser grid level
+            $l-1$.
+        \item[] \textit{Predict}: A stencil of odd cell averages at level $l$ are predicted
+                by an average-interpolating polynomial based on cells at level
+                $l-1$.
+    \end{enumerate}
+    The splitting of cells is done simply according to the cell index. The
+    projection is defined by a linear operator $P_{l}^{l-1}$, which performs the
+    mapping $P_{l}^{l-1} : \bm{u}_{l} \rightarrow \bm{u_{l-1}}$. The projection
+    preserves averages at the finer level.  maps the vector $\bm{u}^{l}$ to
+    $\bm{u}^{l-1}$. This is done using average-interpolating polynomials to
     predict, based on a stencil of cell-averages at one grid level, the cell
     averages at one finer level of resolution. This process is done in a
     principled way, and defines the forward wavelet transform (also known as
-    encoding). The transform consists of two steps:
-    \begin{enumerate}
-        \item[] \textbf{Split}: The cells at grid level $l$ are split into even and odd
-                components.
-        \item[] \textbf{Predict}: The odd cell averages at level $l$ are predicted
-                by an average-interpolating polynomial based on cells at
-                level $l-1$.
-    \end{enumerate}
-    Once the prediction step is complete, the difference information is
-    easily obtained by comparing the odd-indexed cell-averages at level $l$ with
-    their prediced values. The scheme is detailed by first examining the grid
-    hierarchy needed for the multiresolution representation of the data.
+    \textit{encoding}). The transform consists of two steps: Once the prediction
+    step is complete, the regularity information about the underlying function
+    sampled at level $l$ has been obtained. The scheme is explored in more
+    detail by first examining the grid hierarchy needed for the multiresolution
+    representation of the data.
 
     \subsection*{Grid Hierarchy}
 
-        % describe the nested grids
-        In Harten's original scheme, the domain is discretized into a
-        hierarchy of uniformly-spaced, nested grids. In Cartesian
-        coordinates, the grid is defined by
-        \begin{equation}
-            \mathcal{G}^{l} = \left\{ x_{i}^{l} \right\}_{i=0}^{N^{l}}, \text{ }
-            \text{ } \text{ } \text{ } x_{i}^{l} = i \cdot h^{l}, \text{ }
-            \text{ } h^{l} = 2^{l} \cdot h^{0}, \text{ } \text{ } N^{l} = N_{0}
-            / 2^{l},
-        \end{equation}
-        where on level $l$, $h^{l}$ is the cell width and $N^{l}$ is the number of cells.
-
-        % illustration of grids here?
 
     \subsection*{Forward Transform}
 
@@ -291,50 +288,54 @@
         \end{equation}
         These steps are illustrated in Figure (2).
 
-        % illustration of parallel fwt 
-        \begin{figure}[H]
-            \center
-            \input{parallel_fwt.tex}
-            \caption{A block of consisting of $N^{0} = 16$ cells is shown. Four
-            ghost cells are included on each end of the block, allowing the
-            multiresolution decomposition to descend two levels (to grid level
-            $l=2$). Interpolation stencils for the computation of detail
-            coefficients at levels $l=1, l=2$ are shown, indicating the need for ghost cells.}
-        \end{figure}
+    the difference information is
+    easily obtained by comparing the odd-indexed cell-averages at level $l$ with
+    their predicted values.
 
-    \subsection*{Inverse Transform}
+    % illustration of parallel fwt 
+    \begin{figure}[H]
+        \center
+        \input{parallel_fwt.tex}
+        \caption{A block of consisting of $N^{0} = 16$ cells is shown. Four
+        ghost cells are included on each end of the block, allowing the
+        multiresolution decomposition to descend two levels (to grid level
+        $l=2$). Interpolation stencils for the computation of detail
+        coefficients at levels $l=1, l=2$ are shown, indicating the need for ghost cells.}
+    \end{figure}
 
-        % 
-        
-    \subsection*{Calculation of Fluxes and Sources}
-        Once the detail coefficients have been obtained, the MR scheme
-        proceeds by setting a threshold $\epsilon$ and truncating coefficients
-        which have an absolute value below the threshold. Lastly, the inverse
-        transform then starts from grid $l=L$ and at each interface either
-        computes fluxes using the fine-grid scheme, or interpolates them using
-        the MR basis. The fluxes are interpolated by
-        \begin{align}
-            & \tilde{f}_{2i+1}^{l-1} \approx \sum_{p=1}^{s+1} \alpha_{p} \left(
-            \hat{f}^{l}_{i-p+1} + \hat{f}^{l}_{i+p} \right),
-        \end{align}
-        where the interpolants are of degree $2s+1$. The coefficients for
-        various degrees of polynomial interpolants are shown in Table (ref).
-        \begin{table}
-            \centering
-            \begin{tabular}{|l|l|l|l|}
-            \hline
-                & $\alpha_{1}$ & $\alpha_{2}$ & $\alpha_{3}$ \\ \hline
-                $s=0$ & 1/2 & 0 & 0 \\ \hline
-                $s=1$ & 9/16 & -1/16 & 0 \\ \hline
-            \end{tabular}
-            \caption{Coefficients for cell-average interpolation in the prediction step.}
-        \end{table}
-        The process repeats until all fluxes are either computed or
-        interpolated on the fine grid $l=0$.
+\subsection*{Inverse Transform}
 
-        \subsection*{Error Analysis}
+    % 
+    
+\subsection*{Calculation of Fluxes and Sources}
+    Once the detail coefficients have been obtained, the MR scheme
+    proceeds by setting a threshold $\epsilon$ and truncating coefficients
+    which have an absolute value below the threshold. Lastly, the inverse
+    transform then starts from grid $l=L$ and at each interface either
+    computes fluxes using the fine-grid scheme, or interpolates them using
+    the MR basis. The fluxes are interpolated by
+    \begin{align}
+        & \tilde{f}_{2i+1}^{l-1} \approx \sum_{p=1}^{s+1} \alpha_{p} \left(
+        \hat{f}^{l}_{i-p+1} + \hat{f}^{l}_{i+p} \right),
+    \end{align}
+    where the interpolants are of degree $2s+1$. The coefficients for
+    various degrees of polynomial interpolants are shown in Table (ref).
+    \begin{table}
+        \centering
+        \begin{tabular}{|l|l|l|l|}
+        \hline
+            & $\alpha_{1}$ & $\alpha_{2}$ & $\alpha_{3}$ \\ \hline
+            $s=0$ & 1/2 & 0 & 0 \\ \hline
+            $s=1$ & 9/16 & -1/16 & 0 \\ \hline
+        \end{tabular}
+        \caption{Coefficients for cell-average interpolation in the prediction step.}
+    \end{table}
+    The process repeats until all fluxes are either computed or
+    interpolated on the fine grid $l=0$.
 
-            % describe choice of epsilon
+    \subsection*{Error Analysis}
+
+        % describe choice of epsilon
 
 \section{Asynchronous Fully Adaptive Block Scheme}
 
@@ -428,84 +429,120 @@
 
 \appendix
 
+\section{Multiresolution Analysis}
+
+    % describe multiresolution analysis (sourced from tymczak2000)
+    A multiresolution analysis (MRA) of the Lebesgue space
+    $L^{2}(\mathbb{R})$ defines a sequence of nested approximation spaces.
+    These spaces satisfy certain self-similarity properties in both space
+    and scale. An MRA defines a sequence of closed subspaces $\{ \mathcal{V}_{j} : j \in
+    \mathbb{Z} \}$ such that
+    \begin{equation*}
+        \mathcal{V}_{0} \subset \mathcal{V}_{1} \subset \mathcal{V}_{2} \subset \cdots
+        \subset L^{2}.
+    \end{equation*}
+    The complement of $\mathcal{V}_{j} \in \mathcal{V}_{j+1}$ is defined by
+    $\mathcal{W}_{j}$, known as the detail space. This relation is defined
+    by a direct summation as
+    \begin{equation*}
+        \mathcal{V}_{j+1} = \mathcal{W}_{j} \oplus \mathcal{V}_{j}.
+    \end{equation*}
+    Considering successively finer approximation spaces yields for any
+    arbitrary level $J$,
+    \begin{equation*}
+        \mathcal{V}_{J} = \mathcal{V}_0 \oplus \mathcal{W}_0 \oplus \mathcal{W}_1 \oplus \dots \oplus \mathcal{W}_{J-1}.
+    \end{equation*}
+    Thus fine-scale information on any arbitrary level $J$ is represented by
+    the coarsest scale plus a series of differences at higher levels.
+    Interested readers can refer to (\hl{cite}) for more details on the
+    construction of the bi-orthogonal multiresolution analysis used.
+
+    %, a real-valued scaling function
+    %$\phi_{j}(x) \in V_{j}$ is defined which forms a basis,
+    %\begin{equation*}
+    %    V_{j} = \text{span} \left\{ \phi_{j}(x+k) : \forall k \right\}.
+    %\end{equation*}
+
 \section{Derivation of Prediction Operator in One-Dimension}
-We are interested in obtaining the difference between approximation spaces at varying levels of resolution. We 
-are given cell-averaged values as input data to our wavelet transform. This data is fed to the scheme at some arbitrary maximum
-resolution level $J$, and the wavelet transform produces details coefficients at each lower level until the coarsest level,
-$j=0$, is reached. The coefficients in this case are interchangeable with the cell-averages and are denoted by $c^{j}_{k}$,
-where the level of resolution is denoted by $j$, and the spatial index is denoted by $k$. We consider an interpolating
-polynomial $p(x)$ such that 
-\begin{align}
-    c^{j}_{k-1} &= \int_{x^{j}_{k-1}}^{x^{j}_{k}} p(x) dx \\
-    c^{j}_{k} &= \int_{x^{j}_{k}}^{x^{j}_{k+1}} p(x) dx \\
-    c^{j}_{k+1} &= \int_{x^{j}_{k+1}}^{x^{j}_{k+2}} p(x) dx.
-\end{align}
-The polynomial $p(x)$ should then predict the finer cell-averages of cell $c^{j}_{k}$ as
-\begin{align}
-    \hat{c}^{j+1}_{2k} &= 2 \int_{x^{j}_{k}}^{x^{j}_{k+1/2}} p(x) dx \\
-    \hat{c}^{j+1}_{2k+1} &= 2 \int_{x^{j}_{k+1/2}}^{x^{j}_{k+1}} p(x) dx
-\end{align}
-At present, it may not be clear how to implement such a scheme on a computer. However this interpolation procedure
-can be cast in a more suitable form by introducing another polynomial, the integral of $p(x)$:
-\begin{equation}
-	P(x) = \int_{0}^{x} p(y) dy.
-\end{equation}
-Now the problem is to interpolate the following data
-\begin{align}
-    0 &= P(x^{j}_{k-1}) \\
-    c^{j}_{k-1} &= P(x^{j}_{k}) \\
-    c^{j}_{k-1} + c^{j}_{k} &= P(x^{j}_{k+1}) \\
-    c^{j}_{k-1} + c^{j}_{k} + c^{j}_{k+1} &= P(x^{j}_{k+2}).
-\end{align}
-This can easily be done using Lagrange polynomials. Then the predictions are given in terms of $P(x)$ by
-\begin{align}
-	\hat{c}^{j+1}_{2k} &= 2 \left( P(x^{j}_{k+1/2}) - P(x^{j}_{k}) \right) \\
-	\hat{c}^{j+1}_{2k+1} &= 2 \left( P(x^{j}_{k+1}) - P(x^{j}_{k+1/2}) \right).
-\end{align}
-This interpolating polynomial is cast in the Lagrange form,
-\begin{equation}
-P(x) = \sum_{i=0}^{n} y_{i} l_{i}(x),
-\end{equation}
-where $y_{i}$ are the functional data, and $l_{i}(x)$ are the Lagrange polynomials. For $n=3$ these
-are given by
-\begin{align}
-    l_{0}(x) &= \frac{x-x_1}{x_0-x_1} \frac{x-x_2}{x_0-x_2} \frac{x-x_3}{x_0-x_3} \\
-    l_{1}(x) &= \frac{x-x_0}{x_1-x_0} \frac{x-x_2}{x_1-x_2} \frac{x-x_3}{x_1-x_3} \\
-    l_{2}(x) &= \frac{x-x_0}{x_2-x_0} \frac{x-x_1}{x_2-x_1} \frac{x-x_3}{x_2-x_3} \\
-    l_{3}(x) &= \frac{x-x_0}{x_3-x_0} \frac{x-x_1}{x_3-x_1} \frac{x-x_2}{x_3-x_2},
-\end{align}
-and the final interpolating polynomial is
-\begin{equation}
-	P(x) = (0) l_{0}(x) + ( c^{j}_{k-1} ) l_{1}(x) + ( c^{j}_{k-1} + c^{j}_{k} ) l_{2}(x)
-		+ ( c^{j}_{k-1} + c^{j}_{k} + c^{j}_{k+1} ) l_{3}(x).
-\end{equation}
-Several evaluations are necessary in order to obtain the predictions. Using intervals of equal length, these values are
-\begin{align}
-	P(x^{j}_{k}) &= c^{j}_{k-1} \\
-	P(x^{j}_{k+1/2}) &= \frac{17}{16} c^{j}_{k-1} + \frac{1}{2} c^{j}_{k} - \frac{1}{16} c^{j}_{k+1} \\
-	P(x^{j}_{k+1}) &= c^{j}_{k-1} + c^{j}_{k}.
-\end{align}
-Then the predictions of the cell-averages at the higher level of resolution are finally given by
-\begin{align}
-	\hat{c}^{j+1}_{2k} & = c^{j}_{k} + \frac{1}{8} \left( c^{j}_{k-1} - c^{j}_{k+1} \right) \\
-	\hat{c}^{j+1}_{2k+1} & = c^{j}_{k} - \frac{1}{8} \left( c^{j}_{k-1} - c^{j}_{k+1} \right).
-\end{align}
-This procedure could easily be extended to non-uniformly
-spaced intervals, giving different weights. Note that only the
-odd indices are counted because in the multiresolution scheme the
-data is initially split into even
-and odd signals. All data at level $j$ are just considered to
-be a copy of the even-index data at level $j+1$, whereas
-the odd-indexed data at level $j+1$ is what is predicted
-by even-indexed data at level $j+1$. Also important are the
-interpolants at the ends of the domain. Given below are the
-left and right predictions, respectively:
-\begin{align}
-	\hat{c}^{j+1}_{2k+1} & = \frac{5}{8} c^{j}_{k}
-	+ \frac{1}{2} c^{j}_{k+1} - \frac{1}{8} c^{j}_{k+2} \\
-	\hat{c}^{j+1}_{2k+1} & = \frac{1}{8} c^{j}_{k-2}
-	- \frac{1}{2} c^{j}_{k-1} + \frac{11}{8} c^{j}_{k}.
-\end{align}
+
+    % derivation of prediction operator
+    We are interested in obtaining the difference between approximation spaces at varying levels of resolution. We 
+    are given cell-averaged values as input data to our wavelet transform. This data is fed to the scheme at some arbitrary maximum
+    resolution level $J$, and the wavelet transform produces details coefficients at each lower level until the coarsest level,
+    $j=0$, is reached. The coefficients in this case are interchangeable with the cell-averages and are denoted by $c^{j}_{k}$,
+    where the level of resolution is denoted by $j$, and the spatial index is denoted by $k$. We consider an interpolating
+    polynomial $p(x)$ such that 
+    \begin{align}
+        c^{j}_{k-1} &= \int_{x^{j}_{k-1}}^{x^{j}_{k}} p(x) dx \\
+        c^{j}_{k} &= \int_{x^{j}_{k}}^{x^{j}_{k+1}} p(x) dx \\
+        c^{j}_{k+1} &= \int_{x^{j}_{k+1}}^{x^{j}_{k+2}} p(x) dx.
+    \end{align}
+    The polynomial $p(x)$ should then predict the finer cell-averages of cell $c^{j}_{k}$ as
+    \begin{align}
+        \hat{c}^{j+1}_{2k} &= 2 \int_{x^{j}_{k}}^{x^{j}_{k+1/2}} p(x) dx \\
+        \hat{c}^{j+1}_{2k+1} &= 2 \int_{x^{j}_{k+1/2}}^{x^{j}_{k+1}} p(x) dx
+    \end{align}
+    At present, it may not be clear how to implement such a scheme on a computer. However this interpolation procedure
+    can be cast in a more suitable form by introducing another polynomial, the integral of $p(x)$:
+    \begin{equation}
+        P(x) = \int_{0}^{x} p(y) dy.
+    \end{equation}
+    Now the problem is to interpolate the following data
+    \begin{align}
+        0 &= P(x^{j}_{k-1}) \\
+        c^{j}_{k-1} &= P(x^{j}_{k}) \\
+        c^{j}_{k-1} + c^{j}_{k} &= P(x^{j}_{k+1}) \\
+        c^{j}_{k-1} + c^{j}_{k} + c^{j}_{k+1} &= P(x^{j}_{k+2}).
+    \end{align}
+    This can easily be done using Lagrange polynomials. Then the predictions are given in terms of $P(x)$ by
+    \begin{align}
+        \hat{c}^{j+1}_{2k} &= 2 \left( P(x^{j}_{k+1/2}) - P(x^{j}_{k}) \right) \\
+        \hat{c}^{j+1}_{2k+1} &= 2 \left( P(x^{j}_{k+1}) - P(x^{j}_{k+1/2}) \right).
+    \end{align}
+    This interpolating polynomial is cast in the Lagrange form,
+    \begin{equation}
+    P(x) = \sum_{i=0}^{n} y_{i} l_{i}(x),
+    \end{equation}
+    where $y_{i}$ are the functional data, and $l_{i}(x)$ are the Lagrange polynomials. For $n=3$ these
+    are given by
+    \begin{align}
+        l_{0}(x) &= \frac{x-x_1}{x_0-x_1} \frac{x-x_2}{x_0-x_2} \frac{x-x_3}{x_0-x_3} \\
+        l_{1}(x) &= \frac{x-x_0}{x_1-x_0} \frac{x-x_2}{x_1-x_2} \frac{x-x_3}{x_1-x_3} \\
+        l_{2}(x) &= \frac{x-x_0}{x_2-x_0} \frac{x-x_1}{x_2-x_1} \frac{x-x_3}{x_2-x_3} \\
+        l_{3}(x) &= \frac{x-x_0}{x_3-x_0} \frac{x-x_1}{x_3-x_1} \frac{x-x_2}{x_3-x_2},
+    \end{align}
+    and the final interpolating polynomial is
+    \begin{equation}
+        P(x) = (0) l_{0}(x) + ( c^{j}_{k-1} ) l_{1}(x) + ( c^{j}_{k-1} + c^{j}_{k} ) l_{2}(x)
+            + ( c^{j}_{k-1} + c^{j}_{k} + c^{j}_{k+1} ) l_{3}(x).
+    \end{equation}
+    Several evaluations are necessary in order to obtain the predictions. Using intervals of equal length, these values are
+    \begin{align}
+        P(x^{j}_{k}) &= c^{j}_{k-1} \\
+        P(x^{j}_{k+1/2}) &= \frac{17}{16} c^{j}_{k-1} + \frac{1}{2} c^{j}_{k} - \frac{1}{16} c^{j}_{k+1} \\
+        P(x^{j}_{k+1}) &= c^{j}_{k-1} + c^{j}_{k}.
+    \end{align}
+    Then the predictions of the cell-averages at the higher level of resolution are finally given by
+    \begin{align}
+        \hat{c}^{j+1}_{2k} & = c^{j}_{k} + \frac{1}{8} \left( c^{j}_{k-1} - c^{j}_{k+1} \right) \\
+        \hat{c}^{j+1}_{2k+1} & = c^{j}_{k} - \frac{1}{8} \left( c^{j}_{k-1} - c^{j}_{k+1} \right).
+    \end{align}
+    This procedure could easily be extended to non-uniformly
+    spaced intervals, giving different weights. Note that only the
+    odd indices are counted because in the multiresolution scheme the
+    data is initially split into even
+    and odd signals. All data at level $j$ are just considered to
+    be a copy of the even-index data at level $j+1$, whereas
+    the odd-indexed data at level $j+1$ is what is predicted
+    by even-indexed data at level $j+1$. Also important are the
+    interpolants at the ends of the domain. Given below are the
+    left and right predictions, respectively:
+    \begin{align}
+        \hat{c}^{j+1}_{2k+1} & = \frac{5}{8} c^{j}_{k}
+        + \frac{1}{2} c^{j}_{k+1} - \frac{1}{8} c^{j}_{k+2} \\
+        \hat{c}^{j+1}_{2k+1} & = \frac{1}{8} c^{j}_{k-2}
+        - \frac{1}{2} c^{j}_{k-1} + \frac{11}{8} c^{j}_{k}.
+    \end{align}
 
 \bibliographystyle{unsrt}  
 \bibliography{references}
