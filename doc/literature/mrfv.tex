@@ -176,7 +176,7 @@
     is determined by the number of cells, $N$, and the size of the domain
     $\Omega \in \left[a,b\right]$.  The cell averages are given by
     \begin{equation}
-        \overline{u}_{i}(t) = \frac{1}{h} \int_{x_{i-1/2}}^{x_{i+1/2}} u(\xi,t) d \xi,
+        u_{i}(t) = \frac{1}{h} \int_{x_{i-1/2}}^{x_{i+1/2}} u(\xi,t) d \xi,
     \end{equation}
     where for convenience we use $i \pm 1/2$ in the subscripts to
     indicate the left and right interfaces of the target cell (i.e.
@@ -184,7 +184,7 @@
     x_{i} + \frac{h}{2}$). The governing equations are cast into the
     semi-discrete conservative form,
     \begin{equation}
-        \frac{d\overline{u}_{i}(t)}{dt} = -\frac{1}{h} \left( \hat{f}_{i+1/2} -
+        \frac{du_{i}(t)}{dt} = -\frac{1}{h} \left( \hat{f}_{i+1/2} -
         \hat{f}_{i-1/2} \right),
         \label{ode}
     \end{equation}
@@ -195,10 +195,10 @@
     In the present work, the reconstruction method of choice is a fifth-order
     weighted essentially non-oscillatory (WENO) scheme.
 
-    \subsection{WENO Reconstruction Scheme}
+    \subsection{WENO}
 
     \subsection{Time Integration}
-     
+
         % define evolution operator as in domingues2008
         Once the system of ordinary differential equations (\ref{ode}) is
         established, the objective is to integrate them forward in time. In our
@@ -210,89 +210,174 @@
         where $\bm{E}$ represents the nonlinear evolution operator, and codifies the
         temporal and spatial discretizations.
 
-\section{Harten's Multiresolution Scheme}
+\section{Harten's Multiresolution Scheme on a Uniform Grid}
 
     % describe overview of transform, and average-interpolating wavelets
-    The average-interpolating multiresolution approach is based on a hierarchy
-    of nested discretizations on the domain of interest $\Omega$. In the case of
-    a one-dimensional, uniformly spaced grid, the hierarchy is defined by
+    We present here a review of Harten's multiresolution method for adaptive
+    flux computations within the original context of uniform, one-dimensional
+    grids. This is necessary to illustrate the extension of the scheme to
+    block-structured AMR grids. The multiresolution approach is based on a
+    hierarchy of nested discretizations on the domain of interest, $\Omega$.
+    The hierarchy of grids consists level $l=1$ and is
+    refined repeatedly by a factor of two until some
+    predetermined maximum level $l=L$.  The grids are defined by
     \begin{equation}
-        \mathcal{G}^{l} = \left\{ x_{i}^{l} \right\}_{i=0}^{N^{l}}, \text{ }
-        \text{ } \text{ } \text{ } x_{i}^{l} = i \cdot h^{l}, \text{ }
-        \text{ } h^{l} = 2^{L-l} \cdot h^{L}, \text{ } \text{ } N^{l} = N^{L}
+        \bm{\mathcal{G}}_{l} = \left\{ x_{i}^{l} \right\}_{i=0}^{N_{l}}, \text{ }
+        \text{ } \text{ } \text{ } x_{i}^{l} = i \cdot h_{l}, \text{ }
+        \text{ } h_{l} = 2^{L-l} \cdot h_{L}, \text{ } \text{ } N_{l} = N_{L}
         / 2^{L-l},
     \end{equation}
-    where the finest grid is denoted by $\mathcal{G}^{L}$, and on any arbitrary
-    level $l$, the cell width is $h^{l}$, and the number of cells is $N^{l}$.
-    Given a vector of discrete cell averages $\bm{u}^{L}$ at the finest
-    resolution, the multiresolution representation is obtained by the following
-    operations:
-    \begin{enumerate}
-        \item[] \textit{Split:} The cells at grid level $l$ are split into two
-            sets, even and odd.
-        \item[] \textit{Project:} The cells at level $l$ are projected, or
-            coarsened by means of volume averaging onto the coarser grid level
-            $l-1$.
-        \item[] \textit{Predict}: A stencil of odd cell averages at level $l$ are predicted
-                by an average-interpolating polynomial based on cells at level
-                $l-1$.
-    \end{enumerate}
-    The splitting of cells is done simply according to the cell index. The
-    projection is defined by a linear operator $P_{l}^{l-1}$, which performs the
-    mapping $P_{l}^{l-1} : \bm{u}_{l} \rightarrow \bm{u_{l-1}}$. The projection
-    preserves averages at the finer level.  maps the vector $\bm{u}^{l}$ to
-    $\bm{u}^{l-1}$. This is done using average-interpolating polynomials to
-    predict, based on a stencil of cell-averages at one grid level, the cell
-    averages at one finer level of resolution. This process is done in a
-    principled way, and defines the forward wavelet transform (also known as
-    \textit{encoding}). The transform consists of two steps: Once the prediction
-    step is complete, the regularity information about the underlying function
-    sampled at level $l$ has been obtained. The scheme is explored in more
-    detail by first examining the grid hierarchy needed for the multiresolution
-    representation of the data.
+    where $h_{l}$ and $N_{l}$ denote the cell width and number of cells,
+    respectively, on level $l$. We denote the finest grid by
+    $\bm{\mathcal{G}}_{L}$. denote the index space of cells on each level
+    of the hierarchy by $\bm{\mathcal{I}}^{l} = (1,\dots,N^{l})$.
 
-    \subsection*{Grid Hierarchy}
-
-
-    \subsection*{Forward Transform}
+    \subsection*{Encoding}
 
         % describe the prediction operator, and detail coefficients
-        The forward transform provides regularity information about the function
-        underlying the fine-grid data. The transform procedure can be succinctly
-        written in terms of a matrix-vector operation to yield the
-        multiresolution representation of the data, $u_{MR}^{0}$, as
+        Given a vector of discrete cell averages at the finest resolution,
+        $\bm{u}^{L}$, the multiresolution representation is obtained by the
+        following operations:
+        \begin{enumerate}
+            \item[] \textit{Split:} The cells at grid level $l$ are split into two
+                sets, even and odd.
+            \item[] \textit{Project:} The cells at level $l$ are projected, or
+                coarsened by means of volume averaging onto the coarser grid level
+                $l-1$.
+            \item[] \textit{Predict}: A stencil of odd cell averages at level $l$ are predicted
+                    by an average-interpolating polynomial based on cells at level
+                    $l-1$.
+        \end{enumerate}
+        The splitting of cells is done according to the cell index. The projection
+        is defined by a linear operator $\bm{P}_{l+1}^{l}$, which performs the
+        mapping $\bm{P}_{l+1}^{l} : \bm{u}^{l+1} \mapsto \bm{u}^{l}$. The
+        projection preserves averages at the finer level, by design, and in the
+        context of a uniform grid is the simple averaging of parent cells,
         \begin{equation}
-            \bm{u}_{M}^{l} = \bm{M}^{l} \bm{u}^{l} = \left( \bm{d}^{l+1}, \bm{d}^{l+2},
-            \dots, \bm{d}^{l+L}; \bm{u}^{L} \right)^{T}.
+            u^{l}_{i} = \frac{1}{2} ( u^{l+1}_{2i} + u^{l+1}_{2i+1} ), \text{ } \text{ } \text{ } \text{ } \forall i \in \mathcal{I}^{l}
+        \end{equation}
+        The prediction operator likewise performs the mapping
+        $\bm{P}_{l}^{l+1} : \bm{u}^{l} \mapsto \bm{u}^{l+1}$. This is done
+        using a unique average-interpolating polynomial of degree $2s$ to
+        predict, based on a stencil of cell-averages at grid level $l$, the odd
+        cell averages at the finer level level $l+1$. The prediction is given
+        by the centered interpolant,
+        \begin{equation}
+            \tilde{u}_{2i+1}^{l+1} = u_{i}^{l} - \sum_{p=1}^{s}
+            \gamma_{p} \left( u^{l}_{i-p} - u^{l}_{i+p} \right), \text{ } \text{ } \text{ } \text{ } \forall i \in \mathcal{I}^{l},
+        \end{equation}
+        where the coefficients $\gamma_{i}$ are supplied in Table
+        (\ref{coeff1}). The order of accuracy of each interpolant is $r=2s+1$.
+        \begin{table}[]
+            \center
+            \begin{tabular}{|l|l|l|l|l|}
+            \hline
+                order    & $\gamma_{1}$ & $\gamma_{2}$ & $\gamma_{3}$ & $\gamma_{4}$ \\ \hline
+                3 & 1/8          & 0            & 0            & 0            \\ \hline
+                5 & -22/128      & 3/128        & 0            & 0            \\ \hline
+                7 & 0            & 0            & 0            & 0            \\ \hline
+                9 & 0            & 0            & 0            & 0            \\ \hline
+            \end{tabular}
+            \label{coeff1}
+            \caption{For the derivation of these coefficients, the reader is referred to Appendix (\hl{ref}).}
+        \end{table}
+
+        \begin{table}[]
+            \center
+            \begin{tabular}{|l|l|l|l|l|}
+            \hline
+                order    & $\beta_{1}$ & $\beta_{2}$ & $\beta_{3}$ & $\beta_{4}$ \\ \hline
+                1 & 1/2          & 0            & 0            & 0            \\ \hline
+                3 & 9/16         & -1/16        & 0            & 0            \\ \hline
+                5 & 0            & 0            & 0            & 0            \\ \hline
+                7 & 0            & 0            & 0            & 0            \\ \hline
+            \end{tabular}
+            \label{coeff1}
+            \caption{}
+        \end{table}
+        Once the prediction is made, the difference information on level $l$ is
+        obtained by computing the detail coefficient as
+        \begin{equation}
+            d^{l}_{i} = u^{l+1}_{2i+1} - \tilde{u}^{l+1}_{2i+1}, \text{ } \text{ } \text{ } \text{ } \forall i \in \mathcal{I}^{l}.
+        \end{equation}
+        for each cell.  The encoding procedure is complete when the detail
+        coefficients have been computed on all levels $l=0,\dots,L-1$.  The
+        entire procedure can be succinctly written in terms of a matrix-vector
+        operation to yield the multiresolution representation of the data,
+        $u_{M}^{L}$, as
+        \begin{equation}
+            \bm{u}^{L}_{M} = \bm{M} \bm{u}^{L} = \left( \bm{d}^{L-1}, \bm{d}^{L-2},
+            \dots, \bm{d}^{0}, \bm{u}^{0} \right)^{T}.
         \end{equation}
         Here the multiresolution operator $\bm{M}$ contains the prediction
-        operator for each
-        \begin{equation}
-            \tilde{u}_{2i+1}^{l-1} \approx u_{i}^{l} - \sum_{p=1}^{s}
-            \gamma_{p} \left( u^{l}_{i-p} - u^{l}_{i+p} \right).
-        \end{equation}
-        In Table (1) the coefficients are shown for several average-interpolating stencils
-        \begin{table}
-            \centering
-            \begin{tabular}{|l|l|l|l|}
-            \hline
-                & $\gamma_{1}$ & $\gamma_{2}$ & $\gamma_{3}$ \\ \hline
-                $s=1$ & $1/8$ & 0 & 0 \\ \hline
-                $s=2$ & $-22/128$ & $3/128$ & 0 \\ \hline
-            \end{tabular}
-            \caption{Coefficients for cell-average interpolation in the prediction step.}
-        \end{table}
-        The detail coefficients are then computed as
-        \begin{equation}
-            d^{l}_{i} = u^{l-1}_{2i+1} - \tilde{u}^{l-1}_{2i+1}.
-        \end{equation}
-        These steps are illustrated in Figure (2).
+        operation and subsequent detail coefficient calculation for each cell
+        on each level of the hierarchy.
 
-    the difference information is
-    easily obtained by comparing the odd-indexed cell-averages at level $l$ with
-    their predicted values.
+    \subsection*{Truncation}
 
-    % illustration of parallel fwt 
+        % describe truncation proceudure
+        Once the difference information has been computed, compression of the
+        fine-grid cell averages $\bm{u}^{L}$ is obtained by truncating
+        coefficients whose magnitude is below a prescribed level-dependent
+        threshold, $\varepsilon_{l}$.  In \cite{harten1994} the following
+        threshold is proposed
+        \begin{equation}
+            \varepsilon_{l} = \varepsilon / 2^{L-l}.
+        \end{equation}
+        The detail coefficients are truncated according to
+        \begin{equation}
+            \tilde{d}^{l}_{i} =
+                \begin{cases}
+                    d^{l}_{i}, \text{ } \text{if} \text{ } |d^{l}_{i}| > \varepsilon_{l} \\
+                    0, \text{ } \text{if} \text{ } |d^{l}_{i}| \leq \varepsilon_{l}.
+                \end{cases}
+        \end{equation}
+
+    \subsection*{Decoding}
+
+        % describe decoding
+        The fine-grid solution is reconstructed by computing from levels
+        $l=0,\dots,L-1$ the following
+        \begin{align}
+            u_{2i+1}^{l+1} & = d_{i}^{l} + u_{i}^{l} - \sum_{p=1}^{s}
+            \gamma_{p} \left( u^{l}_{i-p} - u^{l}_{i+p} \right) \\
+            u_{2i}^{l+1} & = 2 u_{i}^{l} - u_{2i+1}^{l+1},
+        \end{align}
+        for each cell on the level.
+        \begin{equation}
+            \bm{u}^{L}_{M} = \bm{M} \bm{u}^{L} = \left( \bm{d}^{L-1}, \bm{d}^{L-2},
+            \dots, \bm{d}^{0}, \bm{u}^{0} \right)^{T}.
+        \end{equation}
+
+    \subsection*{Adaptive Calculation of Fluxes and Sources}
+
+        % dicuss computation of fluxes and sources
+        That is, we define a mask $\mathcal{M}(\varepsilon)$.
+        Once the detail coefficients have been obtained, the MR scheme
+        proceeds by setting a threshold $\varepsilon$ and truncating coefficients
+        which have an absolute value below the threshold. Lastly, the inverse
+        transform then starts from grid $l=L$ and at each interface either
+        computes fluxes using the fine-grid scheme, or interpolates them using
+        the MR basis. The fluxes are interpolated by
+        \begin{align}
+            & \tilde{f}_{2i+1}^{l-1} \approx \sum_{p=1}^{s+1} \beta_{p} \left(
+            \hat{f}^{l}_{i-p+1} + \hat{f}^{l}_{i+p} \right) \\
+            & s=0, \text{ } \beta_{1} = 1/2 \\
+            & s=1, \text{ } \beta_{1} = 9/16, \text{ } \beta_{2} = -1/16
+        \end{align}
+        where the interpolants are of degree $2s+1$. The coefficients for
+        various degrees of polynomial interpolants are shown in Table (ref).
+        The process repeats until all fluxes are either computed or
+        interpolated on the fine grid $l=0$.
+
+    \subsection*{Error Analysis}
+
+\section{Asynchronous Fully Adaptive Block Scheme}
+
+    % two main issues: no jump greater than one refinement level, and no
+    % incomplete trees
+
+    % illustration of parallel encoding
     \begin{figure}[H]
         \center
         \input{parallel_fwt.tex}
@@ -302,46 +387,6 @@
         $l=2$). Interpolation stencils for the computation of detail
         coefficients at levels $l=1, l=2$ are shown, indicating the need for ghost cells.}
     \end{figure}
-
-\subsection*{Inverse Transform}
-
-    % 
-    
-\subsection*{Calculation of Fluxes and Sources}
-    Once the detail coefficients have been obtained, the MR scheme
-    proceeds by setting a threshold $\epsilon$ and truncating coefficients
-    which have an absolute value below the threshold. Lastly, the inverse
-    transform then starts from grid $l=L$ and at each interface either
-    computes fluxes using the fine-grid scheme, or interpolates them using
-    the MR basis. The fluxes are interpolated by
-    \begin{align}
-        & \tilde{f}_{2i+1}^{l-1} \approx \sum_{p=1}^{s+1} \alpha_{p} \left(
-        \hat{f}^{l}_{i-p+1} + \hat{f}^{l}_{i+p} \right),
-    \end{align}
-    where the interpolants are of degree $2s+1$. The coefficients for
-    various degrees of polynomial interpolants are shown in Table (ref).
-    \begin{table}
-        \centering
-        \begin{tabular}{|l|l|l|l|}
-        \hline
-            & $\alpha_{1}$ & $\alpha_{2}$ & $\alpha_{3}$ \\ \hline
-            $s=0$ & 1/2 & 0 & 0 \\ \hline
-            $s=1$ & 9/16 & -1/16 & 0 \\ \hline
-        \end{tabular}
-        \caption{Coefficients for cell-average interpolation in the prediction step.}
-    \end{table}
-    The process repeats until all fluxes are either computed or
-    interpolated on the fine grid $l=0$.
-
-    \subsection*{Error Analysis}
-
-        % describe choice of epsilon
-
-\section{Asynchronous Fully Adaptive Block Scheme}
-
-    % two main issues: no jump greater than one refinement level, and no
-    % incomplete trees
-
     % illustration amr block tree structure
     \begin{figure}[H]
         \center
@@ -366,19 +411,19 @@
 
 \section{Numerical Results}
 
-    \subsection*{Convergence Analysis}
+    \subsection*{Convergence Analysis for Smooth Advection Problem}
 
         \begin{center}\vspace{1cm}
         \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
         \hline
-                   & \multicolumn{4}{l|}{$\epsilon = 0.0$}              & \multicolumn{4}{l|}{$\epsilon = 10^{-12}$}         \\ \hline
+                   & \multicolumn{4}{l|}{$\varepsilon = 0.0$}              & \multicolumn{4}{l|}{$\varepsilon = 10^{-12}$}         \\ \hline
         grid cells & $L_{1}$ error & order & $L_{\infty}$ error & order & $L_{1}$ error & order & $L_{\infty}$ error & order \\ \hline
         16         &               &       &                    &       &               &       &                    &       \\ \hline
         32         &               &       &                    &       &               &       &                    &       \\ \hline
         64         &               &       &                    &       &               &       &                    &       \\ \hline
         128        &               &       &                    &       &               &       &                    &       \\ \hline
         256        &               &       &                    &       &               &       &                    &       \\ \hline
-                   & \multicolumn{4}{l|}{$\epsilon = 10^{-6}$}          & \multicolumn{4}{l|}{$\epsilon = 10^{-4}$}          \\ \hline
+                   & \multicolumn{4}{l|}{$\varepsilon = 10^{-6}$}          & \multicolumn{4}{l|}{$\varepsilon = 10^{-4}$}          \\ \hline
         grid cells & $L_{1}$ error & order & $L_{\infty}$ error & order & $L_{1}$ error & order & $L_{\infty}$ error & order \\ \hline
         16         &               &       &                    &       &               &       &                    &       \\ \hline
         32         &               &       &                    &       &               &       &                    &       \\ \hline
@@ -388,7 +433,11 @@
         \end{tabular}
         \end{center}\vspace{1cm}
 
-    \subsection*{Example}
+    \subsection*{Two Blast Waves}
+
+    \subsection*{Nuclear Burning}
+
+    \subsection*{Mach Reflection}
     Using the inviscid flow assumption, the dynamics of compressible fluids are
     modeled using the reactive Euler equations \hl{add domain notation}
     \begin{equation}
@@ -401,15 +450,11 @@
     \begin{equation}
         f = 
     \begin{pmatrix}
-    \rho u \\ \rho u^2 + p \\ \rho u v \\ \rho u w \\ u( E + p )
+    \rho u \\ \rho u^2 + p \\ \rho u v \\ u( E + p )
     \end{pmatrix}, \text{ } \text{ } \text{ }
         g = 
     \begin{pmatrix}
-    \rho v \\ \rho u v \\ \rho v^2 + p \\ \rho v w \\ v( E + p )
-    \end{pmatrix}, \text{ } \text{ } \text{ }
-        h = 
-    \begin{pmatrix}
-    \rho w \\ \rho u w \\ \rho v w \\ \rho w^2 + p \\ w( E + p )
+    \rho v \\ \rho u v \\ \rho v^2 + p \\ v( E + p )
     \end{pmatrix},
     \end{equation}
     and $s(u)$ represents sources. The total energy per
@@ -420,7 +465,7 @@
     where $e$ is the internal energy and the kinetic energy contribution is
     \begin{equation*}
         \frac{1}{2} \mathbf{V}^{2} = \frac{1}{2} \mathbf{V}
-        \cdot \mathbf{V} = \frac{1}{2} \left( u^2 + v^2 + w^2 \right).
+        \cdot \mathbf{V} = \frac{1}{2} \left( u^2 + v^2 \right).
     \end{equation*}
     The system of nonlinear equations is closed by an
     equation of state which is in general not derived from that of an ideal gas.
