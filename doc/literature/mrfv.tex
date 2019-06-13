@@ -218,9 +218,9 @@
     grids. This is necessary to illustrate the extension of the scheme to
     block-structured AMR grids. The multiresolution approach is based on a
     hierarchy of nested discretizations on the domain of interest, $\Omega$.
-    The hierarchy of grids consists level $l=1$ and is
-    refined repeatedly by a factor of two until some
-    predetermined maximum level $l=L$.  The grids are defined by
+    The hierarchy consists of grids at a coarsest level $l=1$ to a finest grid
+    $l=L$, where any two adjacent levels differ by a refinement factor of two.
+    The grids are defined by
     \begin{equation}
         \bm{\mathcal{G}}_{l} = \left\{ x_{i}^{l} \right\}_{i=0}^{N_{l}}, \text{ }
         \text{ } \text{ } \text{ } x_{i}^{l} = i \cdot h_{l}, \text{ }
@@ -239,34 +239,44 @@
         $\bm{u}^{L}$, the multiresolution representation is obtained by the
         following operations:
         \begin{enumerate}
-            \item[] \textit{Split:} The cells at grid level $l$ are split into two
-                sets, even and odd.
-            \item[] \textit{Project:} The cells at level $l$ are projected, or
-                coarsened by means of volume averaging onto the coarser grid level
-                $l-1$.
-            \item[] \textit{Predict}: A stencil of odd cell averages at level $l$ are predicted
-                    by an average-interpolating polynomial based on cells at level
-                    $l-1$.
+            \item[] \textit{Split:} The cells at grid level $l$ are split into
+                even and odd sets, $\bm{\mathcal{I}}_{even}^{l}$ and
+                $\bm{\mathcal{I}}_{odd}^{l}$, based on their indices.
+            \item[] \textit{Project:} The cells at level $l+1$ are projected
+                by means of volume averaging, onto the coarser grid
+                level $l$. The projection is defined by a linear operator
+                which performs the mapping $\bm{P}_{l+1}^{l} : \bm{u}^{l+1}
+                \mapsto \bm{u}^{l}$. 
+            \item[] \textit{Predict}: A stencil of cell averages $i \in
+                \bm{\mathcal{I}}_{odd}^{l}$ are predicted by an
+                average-interpolating polynomial based on cells at level $l-1$.
+                Thus, the prediction operator performs the mapping
+                $\bm{P}_{l-1}^{l} : \bm{u}^{l-1} \mapsto \bm{u}^{l}$. 
         \end{enumerate}
-        The splitting of cells is done according to the cell index. The projection
-        is defined by a linear operator $\bm{P}_{l+1}^{l}$, which performs the
-        mapping $\bm{P}_{l+1}^{l} : \bm{u}^{l+1} \mapsto \bm{u}^{l}$. The
-        projection preserves averages at the finer level, by design, and in the
-        context of a uniform grid is the simple averaging of parent cells,
+        The projection preserves averages at the finer level, by design, and in
+        the context of uniform grids is the simple averaging of parent cells,
         \begin{equation}
-            u^{l}_{i} = \frac{1}{2} ( u^{l+1}_{2i} + u^{l+1}_{2i+1} ), \text{ } \text{ } \text{ } \text{ } \forall i \in \mathcal{I}^{l}
+            u^{l}_{i} = \left( \bm{P}_{l+1}^{l} \bm{u}^{l+1} \right)_{i} = \frac{1}{2} ( u^{l+1}_{2i-1} + u^{l+1}_{2i} ), \text{ }
+            \text{ } \text{ } \text{ } \forall i \in \bm{\mathcal{I}}^{l}.
         \end{equation}
-        The prediction operator likewise performs the mapping
-        $\bm{P}_{l}^{l+1} : \bm{u}^{l} \mapsto \bm{u}^{l+1}$. This is done
-        using a unique average-interpolating polynomial of degree $2s$ to
-        predict, based on a stencil of cell-averages at grid level $l$, the odd
-        cell averages at the finer level level $l+1$. The prediction is given
-        by the centered interpolant,
+        The prediction operator is defined by a unique average-interpolating
+        polynomial to predict, based on a stencil of cell-averages at grid level
+        $l$, the odd cell averages at the finer level level $l+1$. The
+        prediction mapping is performed using the following centered
+        interpolants,
         \begin{equation}
-            \tilde{u}_{2i+1}^{l+1} = u_{i}^{l} - \sum_{p=1}^{s}
-            \gamma_{p} \left( u^{l}_{i-p} - u^{l}_{i+p} \right), \text{ } \text{ } \text{ } \text{ } \forall i \in \mathcal{I}^{l},
+            \tilde{u}_{i}^{l} = \left( \bm{P}_{l-1}^{l} \bm{u}^{l-1}
+            \right)_{i} = 
+            \begin{cases}
+                u_{i/2}^{l-1} - \sum_{p=1}^{s} \gamma_{p} \left( u^{l-1}_{i/2-p} -
+                u^{l-1}_{i/2+p} \right), \text{ } \text{ } \text{ } \forall
+                i \in \bm{\mathcal{I}}_{even}^{l} \\
+                u_{(i+1)/2}^{l-1} + \sum_{p=1}^{s} \gamma_{p} \left(
+                u^{l-1}_{(i+1)/2-p} - u^{l-1}_{(i+1)/2+p} \right), \text{ }
+                \text{ } \text{ } \forall i \in \bm{\mathcal{I}}_{odd}^{l}
+            \end{cases}
         \end{equation}
-        where the coefficients $\gamma_{i}$ are supplied in Table
+        The coefficients $\gamma_{i}$ are supplied in Table
         (\ref{coeff1}). The order of accuracy of each interpolant is $r=2s+1$.
         \begin{table}[]
             \center
@@ -281,24 +291,11 @@
             \label{coeff1}
             \caption{For the derivation of these coefficients, the reader is referred to Appendix (\hl{ref}).}
         \end{table}
-
-        \begin{table}[]
-            \center
-            \begin{tabular}{|l|l|l|l|l|}
-            \hline
-                order    & $\beta_{1}$ & $\beta_{2}$ & $\beta_{3}$ & $\beta_{4}$ \\ \hline
-                1 & 1/2          & 0            & 0            & 0            \\ \hline
-                3 & 9/16         & -1/16        & 0            & 0            \\ \hline
-                5 & 0            & 0            & 0            & 0            \\ \hline
-                7 & 0            & 0            & 0            & 0            \\ \hline
-            \end{tabular}
-            \label{coeff1}
-            \caption{}
-        \end{table}
         Once the prediction is made, the difference information on level $l$ is
         obtained by computing the detail coefficient as
         \begin{equation}
-            d^{l}_{i} = u^{l+1}_{2i+1} - \tilde{u}^{l+1}_{2i+1}, \text{ } \text{ } \text{ } \text{ } \forall i \in \mathcal{I}^{l}.
+            d^{l}_{i} = u^{l+1}_{2i} - \tilde{u}^{l+1}_{2i}, \text{ } \text{ }
+            \text{ } \text{ } \forall i \in \bm{\mathcal{I}}^{l}.
         \end{equation}
         for each cell.  The encoding procedure is complete when the detail
         coefficients have been computed on all levels $l=0,\dots,L-1$.  The
@@ -329,42 +326,59 @@
             \tilde{d}^{l}_{i} =
                 \begin{cases}
                     d^{l}_{i}, \text{ } \text{if} \text{ } |d^{l}_{i}| > \varepsilon_{l} \\
-                    0, \text{ } \text{if} \text{ } |d^{l}_{i}| \leq \varepsilon_{l}.
+                    0, \text{ } \text{if} \text{ } |d^{l}_{i}| \leq
+                    \varepsilon_{l},
                 \end{cases}
         \end{equation}
-
+        producing the following approximate representation,
+        \begin{equation}
+            \tilde{\bm{u}}^{L}_{M} = T_{\varepsilon}(\bm{u}^{L}_{M}) = \left(
+            \tilde{\bm{d}}^{L-1}, \tilde{\bm{d}}^{L-2},
+            \dots, \tilde{\bm{d}}^{0}, \bm{u}^{0} \right)^{T}.
+        \end{equation}
+        
     \subsection*{Decoding}
 
         % describe decoding
         The fine-grid solution is reconstructed by computing from levels
-        $l=0,\dots,L-1$ the following
+        $l=1,\dots,L-1$ the following
         \begin{align}
-            u_{2i+1}^{l+1} & = d_{i}^{l} + u_{i}^{l} - \sum_{p=1}^{s}
-            \gamma_{p} \left( u^{l}_{i-p} - u^{l}_{i+p} \right) \\
-            u_{2i}^{l+1} & = 2 u_{i}^{l} - u_{2i+1}^{l+1},
+            u_{2i}^{l+1} & = d_{i}^{l} + \tilde{u}_{2i}^{l+1} \\
+            u_{2i-1}^{l+1} & = 2 u_{i}^{l} - u_{2i}^{l+1},
         \end{align}
-        for each cell on the level.
+        for each cell on the level.  If the detail coefficients are truncated
+        below a nonzero $\varepsilon$, the discrete representation becomes
         \begin{equation}
-            \bm{u}^{L}_{M} = \bm{M} \bm{u}^{L} = \left( \bm{d}^{L-1}, \bm{d}^{L-2},
-            \dots, \bm{d}^{0}, \bm{u}^{0} \right)^{T}.
+            \bm{u}^{L}_{\varepsilon} \approx \bm{M}^{-1} \tilde{\bm{u}}^{L}_{M}.
         \end{equation}
+
 
     \subsection*{Adaptive Calculation of Fluxes and Sources}
 
         % dicuss computation of fluxes and sources
-        That is, we define a mask $\mathcal{M}(\varepsilon)$.
         Once the detail coefficients have been obtained, the MR scheme
         proceeds by setting a threshold $\varepsilon$ and truncating coefficients
         which have an absolute value below the threshold. Lastly, the inverse
         transform then starts from grid $l=L$ and at each interface either
         computes fluxes using the fine-grid scheme, or interpolates them using
         the MR basis. The fluxes are interpolated by
-        \begin{align}
-            & \tilde{f}_{2i+1}^{l-1} \approx \sum_{p=1}^{s+1} \beta_{p} \left(
-            \hat{f}^{l}_{i-p+1} + \hat{f}^{l}_{i+p} \right) \\
-            & s=0, \text{ } \beta_{1} = 1/2 \\
-            & s=1, \text{ } \beta_{1} = 9/16, \text{ } \beta_{2} = -1/16
-        \end{align}
+        \begin{equation}
+            \tilde{f}_{2i+1}^{l-1} \approx \sum_{p=1}^{s+1} \beta_{p} \left(
+            \hat{f}^{l}_{i-p+1} + \hat{f}^{l}_{i+p} \right),
+        \end{equation}
+        \begin{table}[]
+            \center
+            \begin{tabular}{|l|l|l|l|l|}
+            \hline
+                order    & $\beta_{1}$ & $\beta_{2}$ & $\beta_{3}$ & $\beta_{4}$ \\ \hline
+                3 & 9/16         & -1/16        & 0            & 0            \\ \hline
+                5 & 0            & 0            & 0            & 0            \\ \hline
+                7 & 0            & 0            & 0            & 0            \\ \hline
+                9 & 0            & 0            & 0            & 0            \\ \hline
+            \end{tabular}
+            \label{coeff1}
+            \caption{}
+        \end{table}
         where the interpolants are of degree $2s+1$. The coefficients for
         various degrees of polynomial interpolants are shown in Table (ref).
         The process repeats until all fluxes are either computed or
@@ -374,8 +388,10 @@
 
 \section{Asynchronous Fully Adaptive Block Scheme}
 
+    \subsection*{Block-Structured Mesh Adaptation}
     % two main issues: no jump greater than one refinement level, and no
     % incomplete trees
+    We define a mask $\bm{\mathcal{M}}(\varepsilon)$.
 
     % illustration of parallel encoding
     \begin{figure}[H]
@@ -433,7 +449,7 @@
         \end{tabular}
         \end{center}\vspace{1cm}
 
-    \subsection*{Two Blast Waves}
+    \subsection*{Interacting Blast Waves}
 
     \subsection*{Nuclear Burning}
 
