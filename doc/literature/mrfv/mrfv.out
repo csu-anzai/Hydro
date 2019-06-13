@@ -1,6 +1,6 @@
 \BOOKMARK [1][-]{section.1}{Introduction}{}% 1
 \BOOKMARK [1][-]{section.2}{Governing Equations and Finite Volume Discretization}{}% 2
-\BOOKMARK [2][-]{subsection.2.1}{WENO}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.1}{Reconstruction with WENO Polynomials}{section.2}% 3
 \BOOKMARK [2][-]{subsection.2.2}{Time Integration}{section.2}% 4
 \BOOKMARK [1][-]{section.3}{Harten's Multiresolution Scheme on a Uniform Grid}{}% 5
 \BOOKMARK [1][-]{section.4}{Asynchronous Fully Adaptive Block Scheme}{}% 6
