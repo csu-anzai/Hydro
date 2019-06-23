@@ -1,0 +1,14 @@
+\begin{thebibliography}{1}
+
+\bibitem{harten1994}
+A.~Harten.
+\newblock Adaptive multiresolution schemes for shock computations.
+\newblock {\em Journal of Computational Physics}, 115(2):319--338, 1994.
+
+\bibitem{shu2009}
+Chi-Wang Shu.
+\newblock High order weighted essentially nonoscillatory schemes for convection
+  dominated problems.
+\newblock {\em SIAM Review}, 51:82--126, 2009.
+
+\end{thebibliography}

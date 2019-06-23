@@ -1,0 +1,38 @@
+\begin{tikzpicture}[sibling distance=2em,every node/.style = {shape=rectangle,align=center,top color=white}]
+
+    % variables
+    \def\y{0.0}
+    \def\yy{-1.0}
+    \def\yyy{-2.0}
+
+    % label levels
+    \node at (-2,\y) {$l=1$};
+    \node at (-2,\yy) {$l=2$};
+
+    % draw amr blocks
+    \draw [thick] (0,\y) rectangle (5,\y);
+    \draw [thick] (0,\y-0.1) rectangle (0,\y+0.1);
+    \draw [thick] (5,\y-0.1) rectangle (5,\y+0.1);
+
+    \draw [thick] (0,\yy) rectangle (5,\yy);
+    \draw [thick] (0,\yy-0.1) rectangle (0,\yy+0.1);
+    \draw [thick] (5,\yy-0.1) rectangle (5,\yy+0.1);
+    \draw [thick] (2.5,\yy-0.1) rectangle (2.5,\yy+0.1);
+
+    \draw [thick] (2.5,\yyy) rectangle (5,\yyy);
+    \draw [thick] (3.75,\yyy-0.1) rectangle (3.75,\yyy+0.1);
+    \draw [thick] (2.5,\yyy-0.1) rectangle (2.5,\yyy+0.1);
+    \draw [thick] (5,\yyy-0.1) rectangle (5,\yyy+0.1);
+
+    % block labels
+    \node [shape=rectangle,align=center] at (2.5,\y) {1};
+    \node [shape=rectangle,align=center] at (1.25,\yy) {2};
+
+    % draw tree
+    \node at (9,\y) {1}
+        child { node {2} }
+        child { node {3}[sibling distance=2em,every node/.style = {shape=rectangle,align=center,top color=white}]
+            child { node {4} }
+            child { node {5} } };
+
+\end{tikzpicture}

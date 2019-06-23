@@ -128,24 +128,24 @@
     procedures, and scales well for very large number of processors in parallel.
 
     % paragraph reviews the work of harten and multiresolution methods
-    Alternate approaches to dynamic grid adaptation based on wavelet theory
-    became popular after the seminal paper by Harten \cite{harten1994} was
-    introduced. In this work, a multiresolution representation of the discrete
-    solution on a uniform grid was used for adaptively computing the divergence
-    of the flux within a finite volume framework. Rather than adapt the grid by
-    truncating the wavelet basis, the idea was to accelerate the computation of
-    high-order essentially non-oscillatory (ENO) schemes using the
-    multiresolution information. Fluxes in smooth regions were interpolated from
-    fluxes obtained at interfaces corresponding to coarser grid levels. The
-    original scheme was applied solely to hyperbolic conservation laws, but was
-    then expanded by Bihari et. al. to two-dimensional simulations in
-    (\hl{citation}), followed by the inclusion of viscous terms in
-    (\hl{citation}), and then tp source terms in the context of reactive flows
-    in (\hl{citation}). These works retained the original flavor of Harten's
-    scheme, which was to represent the discrete solution on a uniform grid, but
-    uses a multiresolution representation of the solution to identify regions
-    where flux (and source term) computations may be avoided.  The
-    multiresolution transform is obtained by using average-interpolating
+    Alternate approaches to dynamic grid adaptation based on wavelet theory have
+    become popular in recent years. The first such effort was introduced in a
+    seminal paper by Harten \cite{harten1994}, where a multiresolution
+    representation of the discrete solution on a uniform grid was used for
+    adaptively computing the divergence of the flux within a finite volume
+    framework. Rather than adapt the grid by truncating the wavelet basis, the
+    idea was to accelerate the computation of high-order essentially
+    non-oscillatory (ENO) schemes using the multiresolution information. Fluxes
+    in smooth regions were interpolated from fluxes obtained at interfaces
+    corresponding to coarser grid levels. The original scheme was applied solely
+    to hyperbolic conservation laws, but was then expanded by Bihari et. al. to
+    two-dimensional simulations in (\hl{citation}), followed by the inclusion of
+    viscous terms in (\hl{citation}), and then tp source terms in the context of
+    reactive flows in (\hl{citation}). These works retained the original flavor
+    of Harten's scheme, which was to represent the discrete solution on a
+    uniform grid, but uses a multiresolution representation of the solution to
+    identify regions where flux (and source term) computations may be avoided.
+    The multiresolution transform is obtained by using average-interpolating
     wavelets as basis functions.
 
     % review the multiresolution-adaptive papers
@@ -205,42 +205,13 @@
 
         % describe the dang weno
         The class of WENO schemes are designed to provide the smoothest
-        polynomial for reconstructing the solution field. In the following work,
-        we utilize the recent hierarchical WENO schemes of Zhu et. al.,
-        \cite{zhu2018}. We briefly review the fundamentals of the approach in
-        this section.
+        polynomial for the reconstruction of the solution field. This polynomial
+        is generated from a summation of interpolations which each carry an
+        associated nonlinear weight. This weight is determined by some measure
+        of the smoothness within said stencil, and is not unique. In the present
+        work, we utilize the recent hierarchical WENO methods of Zhu et. al.
+        (\cite{shu2009}).
 
-        To provide left and right states as input to the Rieman solver, the
-        final WENO polynomial is evaluated at cell interfaces, $u(x_{i\pm1/2})$.
-        Given a target cell $I_{i}$, we first construct polynomials $q_{s}(x)$
-        of degree $2s$ based on the stencils $\mathcal{T}_{s} = \left\{ I_{i-s},
-        \dots, I_{i+s} \right\}$, which preserve respective cell averages.  The
-        polynomial $q(x)$ is evaluated at interfaces $x_{i-1/2}$ and $x_{i+1/2}$
-        to provide the states $u_{i-1/2}^{R}$ and $u_{i+1/2}^{L}$, respectively.
-        The result of the polynomials evaluated at the interface $x_{i+1/2}$ are
-        \begin{equation}
-            q_{s}(x_{i+1/2}) = \sum_{j \in \mathcal{T}_{s}} \alpha_{s,j} u_{j},
-        \end{equation}
-        where the weights $\alpha_{s,j}$ are provided in Table(\ref{coeff3}).
-        Evaluating the polynomial at the interface $x_{i-1/2}$ is
-        mirror-symmetric about the target cell. \\
-
-        The next step is to construct polynomials $p_{s}(x)$ using a convex
-        combination of the $q_{s}(x)$. We have
-        \begin{equation}
-            p_{s}(x) = \frac{1}{\gamma_{s,s}} q_{s}(x) - \sum_{l=1}^{s-1}
-            \frac{\gamma_{l,s}}{\gamma_{s,s}} p_{l}(x),
-        \end{equation}
-        where the linear weights $\gamma$ are supplied in Table (\hl{ref}). \\
-
-        Smoothness indicators are used to determine the near-optimal weight to
-        ascribe to each of the candidate polynomials, $p_{s}(x)$. We use the
-        same indicator and nonlinear weights as in (\cite{zhu2018},\hl{others}).
-        The final polynomial reconstruction is 
-        \begin{equation}
-            w_{s}(x) = \sum_{l=1}^{s} \omega_{l,s} p_{l}(x).
-        \end{equation}
- 
     \subsection{Time Integration}
 
         % define evolution operator as in domingues2008
@@ -412,13 +383,13 @@
         \end{equation}
         \begin{table}[]
             \center
-            \begin{tabular}{|l|l|l|l|l|l|}
+            \begin{tabular}{|l|l|l|l|l|}
             \hline
-                order    & $\beta_{1}$ & $\beta_{2}$ & $\beta_{3}$ & $\beta_{4}$ & $\beta_{5}$ \\ \hline
-                3 & 9/16         & -1/16        & 0            & 0 & 0 \\ \hline
-                5 & 75/128       & -25/256      & 3/256        & 0 & 0 \\ \hline
-                7 & 1225/2048    & -245/2048    & 49/2048      & -5/2048 & 0 \\ \hline
-                9 & 0            & 0            & 0            & 0 & 0 \\ \hline
+                order    & $\beta_{1}$ & $\beta_{2}$ & $\beta_{3}$ & $\beta_{4}$ \\ \hline
+                3 & 9/16         & -1/16        & 0            & 0            \\ \hline
+                5 & 0            & 0            & 0            & 0            \\ \hline
+                7 & 0            & 0            & 0            & 0            \\ \hline
+                9 & 0            & 0            & 0            & 0            \\ \hline
             \end{tabular}
             \label{coeff2}
             \caption{}
@@ -430,14 +401,7 @@
 
     \subsection*{Error Analysis}
 
-\section{Fully Adaptive Block Scheme}
-
-    % Key ideas: Perhaps we can utilize scale-selective WENO weights as in
-    % maulik 2018. If the error is below threshold, skip the rieman solve altogether
-    % and interpolate the flux based on harten's method. Also, explore
-    % possibility of using WENO interpolation for the Harten flux interpolation near
-    % boundaries? Actually probably not really necessary because the
-    % approximation still preserves the same order.
+\section{Asynchronous Fully Adaptive Block Scheme}
 
     \subsection*{Block-Structured Mesh Adaptation}
     % two main issues: no jump greater than one refinement level, and no
@@ -457,7 +421,7 @@
     % illustration amr block tree structure
     \begin{figure}[H]
         \center
-        \input{binarytree.tex}
+        \input{amr_tree.tex}
         \caption{}
     \end{figure}
 
@@ -561,42 +525,43 @@
         The system of nonlinear equations is closed by an
         equation of state which is in general not derived from that of an ideal gas.
 
+\section{Acknowledgements}
+
 \appendix
 
-%\section{Multiresolution Analysis}
-%
-%    % describe multiresolution analysis (sourced from tymczak2000)
-%    A multiresolution analysis (MRA) of the Lebesgue space
-%    $L^{2}(\mathbb{R})$ defines a sequence of nested approximation spaces.
-%    These spaces satisfy certain self-similarity properties in both space
-%    and scale. An MRA defines a sequence of closed subspaces $\{ \mathcal{V}_{j} : j \in
-%    \mathbb{Z} \}$ such that
-%    \begin{equation*}
-%        \mathcal{V}_{0} \subset \mathcal{V}_{1} \subset \mathcal{V}_{2} \subset \cdots
-%        \subset L^{2}.
-%    \end{equation*}
-%    The complement of $\mathcal{V}_{j} \in \mathcal{V}_{j+1}$ is defined by
-%    $\mathcal{W}_{j}$, known as the detail space. This relation is defined
-%    by a direct summation as
-%    \begin{equation*}
-%        \mathcal{V}_{j+1} = \mathcal{W}_{j} \oplus \mathcal{V}_{j}.
-%    \end{equation*}
-%    Considering successively finer approximation spaces yields for any
-%    arbitrary level $J$,
-%    \begin{equation*}
-%        \mathcal{V}_{J} = \mathcal{V}_0 \oplus \mathcal{W}_0 \oplus \mathcal{W}_1 \oplus \dots \oplus \mathcal{W}_{J-1}.
-%    \end{equation*}
-%    Thus fine-scale information on any arbitrary level $J$ is represented by
-%    the coarsest scale plus a series of differences at higher levels.
-%    Interested readers can refer to (\hl{cite}) for more details on the
-%    construction of the bi-orthogonal multiresolution analysis used.
-%
-%    %, a real-valued scaling function
-%    %$\phi_{j}(x) \in V_{j}$ is defined which forms a basis,
-%    %\begin{equation*}
-%    %    V_{j} = \text{span} \left\{ \phi_{j}(x+k) : \forall k \right\}.
-%    %\end{equation*}
-%
+\section{Multiresolution Analysis}
+
+    % describe multiresolution analysis (sourced from tymczak2000)
+    A multiresolution analysis (MRA) of the Lebesgue space
+    $L^{2}(\mathbb{R})$ defines a sequence of nested approximation spaces.
+    These spaces satisfy certain self-similarity properties in both space
+    and scale. An MRA defines a sequence of closed subspaces $\{ \mathcal{V}_{j} : j \in
+    \mathbb{Z} \}$ such that
+    \begin{equation*}
+        \mathcal{V}_{0} \subset \mathcal{V}_{1} \subset \mathcal{V}_{2} \subset \cdots
+        \subset L^{2}.
+    \end{equation*}
+    The complement of $\mathcal{V}_{j} \in \mathcal{V}_{j+1}$ is defined by
+    $\mathcal{W}_{j}$, known as the detail space. This relation is defined
+    by a direct summation as
+    \begin{equation*}
+        \mathcal{V}_{j+1} = \mathcal{W}_{j} \oplus \mathcal{V}_{j}.
+    \end{equation*}
+    Considering successively finer approximation spaces yields for any
+    arbitrary level $J$,
+    \begin{equation*}
+        \mathcal{V}_{J} = \mathcal{V}_0 \oplus \mathcal{W}_0 \oplus \mathcal{W}_1 \oplus \dots \oplus \mathcal{W}_{J-1}.
+    \end{equation*}
+    Thus fine-scale information on any arbitrary level $J$ is represented by
+    the coarsest scale plus a series of differences at higher levels.
+    Interested readers can refer to (\hl{cite}) for more details on the
+    construction of the bi-orthogonal multiresolution analysis used.
+
+    %, a real-valued scaling function
+    %$\phi_{j}(x) \in V_{j}$ is defined which forms a basis,
+    %\begin{equation*}
+    %    V_{j} = \text{span} \left\{ \phi_{j}(x+k) : \forall k \right\}.
+    %\end{equation*}
 
 \section{Derivation of Prediction Operator in One-Dimension}
 
@@ -677,8 +642,25 @@
         - \frac{1}{2} u^{j}_{k-1} + \frac{11}{8} u^{j}_{k}.
     \end{align}
 
-    \section{WENO Reconstruction}
+    \section{Weights for WENO Reconstruction}
 
+        % list the linear weno weights
+        In order to reconstruct the field and provide left and right input
+        states to the riemann solver at each cell interface, polynomial
+        approximations of the field must be calculated. Given a target cell
+        $I_{i}$, we build polynomials $p(x)$ based on a stencil of cells
+        $\mathcal{T}_{s} = \left\{ I_{i-s}, \dots, I_{i+s} \right\}$. The
+        reconstructed polynomials are in fact identical to the ones which are
+        used for prediction, except that in this case we must differentiate the
+        polynomial $P(x)$ after construction in order to evaluate $p(x)$
+        directly. The polynomial $p(x)$ is evaluated at interfaces $x_{i-1/2}$
+        and $x_{i+1/2}$ to provide the states $u_{i-1/2}^{R}$ and
+        $u_{i+1/2}^{L}$, respectively. The result of the polynomial of order
+        $2s+1$ evaluated at interface $x_{i+1/2}$ is
+        \begin{equation}
+            p_{s}(x) = \sum_{j \in \mathcal{T}_{s}} \alpha_{s,j} u_{j},
+        \end{equation}
+        where the weights $\alpha_{s,j}$ are given in Table(\hl{linear weights}).
         \begin{table}[H]
             \center
             \begin{tabular}{|l|l|l|l|l|l|l|l|l|l|}
@@ -697,43 +679,51 @@
 
     \begin{thebibliography}{9}
 
-        \bibitem{harten1994}
+        \bibitem{shu2009}
+          Leslie Lamport,
+          \textit{\LaTeX: a document preparation system},
+          Addison Wesley, Massachusetts,
+          2nd edition,
+          1994.
+
+      \bibitem{harten1994}
         Harten, A.,
         Adaptive Multiresolution Schemes for Shock Computations,
         Journal of Computational Physics,
         Volume 115, pg 319-338
         1994.
+        year = {1994},
+        volume = {115},
+        pages = {319-338},
+        number = {2},
+    }
 
-        \bibitem{woodward1984}
-        Woodward, P. and Colella, P.,
-        The Numerical Simulation of Two-Dimensional Fluid Flow with Strong Shocks,
-        Journal of Computational Physics,
-        Volume 54, pg 115-173
-        1984.
+    @article{woodward1984,
+        author = {Woodward, P. and Colella, P.},
+        title = {The Numerical Simulation of Two-Dimensional Fluid Flow with Strong Shocks},
+        journal = {Journal of Computational Physics},
+        year = {1984},
+        volume = {54},
+        pages = {115-173},
+    }
 
-        \bibitem{bihari1999}
-	    Bihari, B.L., and Schwendeman, D.,
-	    Multiresolution Schemes for the Reactive Euler Equations,
-	    Journal of Computational Physics,
-        Volume 154, pg 197-230
-        1999.
+    @article{bihari1999,
+        author = {Bihari, B.L., and Schwendeman, D.},
+        title = {Multiresolution Schemes for the Reactive Euler Equations},
+        journal = {Journal of Computational Physics},
+        year = {1999},
+        volume = {154},
+        pages = {197-230},
+    }
 
-        \bibitem{shu2009}
-        Shu, Chi-Wang,
-        High Order Weighted Essentially Nonoscillatory Schemes for Convection Dominated Problems,
-        SIAM Review,
-        Volume 51, pg 82-126.
-
-        \bibitem{zhu2018}
-        Zhu, and Shu, Chi-Wang,
-        A new type of multi-resolution WENO schemes with increasingly higher order of accuracy,
-        Unknown,
-        Unknown,
-        2018.
-
-
-
-
+    @article{shu2009,
+        author = {Shu, Chi-Wang},
+        title = {High Order Weighted Essentially Nonoscillatory Schemes for Convection Dominated Problems},
+        journal = {SIAM Review},
+        year = {2009},
+        volume = {51},
+        pages = {82-126}
+    }
 
     \end{thebibliography}
 
