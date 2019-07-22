@@ -1,0 +1,11 @@
+This is a 3D Cartesian dataset composed of a core, a surrounding shell, and an ambient medium.
+The grid is a 7-level AMR structure with increasing spatial resolution away from the core (centered at [0,0,0]).
+
+The available grid variables are:
+
+VARI    Distance from the core (r=sqrt(x^2 + y^2 + z^2))
+RAND    Random number in each cell in the range [-1,1]
+CORE    Tracer which is 1.e0 inside the core and 0.0 outside
+SHEL    Tracer which is 1.e0 inside the shell and 0.0 outside
+AMB     Tracer which is 1.e0 outside of the shell and 0.0 otherwise
+FLD     Field which is the composition of specified CORE, SHEL, and AMB values

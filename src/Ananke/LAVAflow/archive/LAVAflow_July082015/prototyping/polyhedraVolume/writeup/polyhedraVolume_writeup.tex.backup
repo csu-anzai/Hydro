@@ -1,0 +1,725 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath,amsbsy}
+
+%opening
+\title{Computing the volume of solids defined by polyhedral meshes in orthogonal coordinate systems}
+\author{Timothy Handy}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+\end{abstract}
+
+\section{Motivation}
+
+Consider an n-dimensional mesh with positions given by an orthogonal coordinate system (OSC). Any orthogonal coordinate system can be viewed as a uniform Cartesian coordinate system (or logically Cartesian coordinate system LCCS) with an appropriate scaling field, or metric, which decribes how geometric properties (length, area, volume) change in this Cartesian space.
+
+Returning to our mesh, every cell is an orthogonal, axis aligned brick in the LCCS. If we arbitrarily truncate or clip this cell, we will obviously have a change in the geometry when viewing the result in its native coordinate system.
+
+\subsection{Example}
+Consider the LCCS $r-\theta-z$ for cylindrical coordinates. Fixing $r$ and $z$ produces circles as $\theta$ varies. If we consider the domain $r_{in}\le r\le r_{out}$, $0\le\theta\le2\pi$, and $z=0$, we produce a filled ring. The area of this ring is given by 
+
+\begin{equation}
+	A_{ring} = \pi\left(r_{out}^2 - r_{in}^2\right)
+\end{equation}
+
+If we naively attempt to calculate the area of the ring as 
+
+\begin{equation}
+A_{ring}^{LCCS} = \left(r_{out}-r_{in}\right)\left(\theta_{max}-\theta_{min}\right)
+\end{equation}
+
+we see that
+
+\begin{equation}
+	\frac{A_{ring}}{A_{ring}^{LCCS}} = \pi\frac{r_{out} + r_{in}}{\theta_{max}-\theta_{min}} \neq 1.
+\end{equation}
+
+This result stresses the importance of including the metric when computing quantities on an LCCS.
+
+\section{Computing Area}
+
+The divergence theorem in a plane is given by 
+
+\begin{equation}
+\label{e:divplane}
+\int_{S}\nabla\cdot\mathbf{F} dA = \oint_{\partial S} \mathbf{F}\cdot\boldsymbol{\hat{n}} ds	
+\end{equation}
+
+where $\mathbf{F}$ is some vector field, $\boldsymbol{\hat{n}}$ is the normal to the curve, and $ds$ is the differential arc length.
+
+The goal is to choose some vector field $\mathbf{F}$ (\emph{defined on the surface $S$}) such that $\nabla\cdot\mathbf{F}=1$, which reduces Eq. (\ref{e:divplane}) to 
+
+\begin{equation}
+\label{e:area}
+  A_{S} = \int_{S}dA = \oint_{\partial S} \mathbf{F}\cdot\boldsymbol{\hat{n}} ds
+\end{equation}
+
+\subsection{Area of a surface in 3-space}
+
+In general, $\partial S$ may be a curve in 3-space, which complicates computation of the normal component. In the case where the curve lies in one of the coordinate planes, the normal is easy to directly calculate. Let $\alpha-\beta-\gamma$ define the axes of a LCCS. In the following we consider the cases where the curve is either in the $\alpha\beta$ plane, the $\alpha\gamma$ plane, the $\beta\gamma$ plane, or along an embedded surface in $\alpha-\beta-\gamma$. For all cases, $\mathbf{N}$ denotes the normal to the surface the curve lies on and may be written as
+\begin{equation}
+\label{e:N}
+	\mathbf{N} = N_{\alpha}(\alpha,\beta,\gamma)\boldsymbol{\hat{\alpha}} + N_{\beta}(\alpha,\beta,\gamma)\boldsymbol{\hat{\beta}} + N_{\gamma}(\alpha,\beta,\gamma)\boldsymbol{\hat{\gamma}}
+\end{equation}
+
+
+Additionally, the general line element can be written as 
+\begin{equation}
+	d\mathbf{s} = h_{\alpha}(\alpha,\beta,\gamma,d\alpha)\boldsymbol{\hat{\alpha}} + h_{\beta}(\alpha,\beta,\gamma,d\beta)\boldsymbol{\hat{\beta}} + h_{\gamma}(\alpha,\beta,\gamma,d\gamma)\boldsymbol{\hat{\gamma}} 
+\end{equation}
+
+From these two statements, the unit normal to the curve is, in general, given by 
+\begin{equation}
+\label{e:curvenormal}
+	\boldsymbol{\hat{n}} = \frac{d\mathbf{s}\times\mathbf{N}}{\left|d\mathbf{s}\times\mathbf{N}\right|}
+\end{equation}
+
+
+
+\subsubsection{$\alpha-\beta$ plane}
+
+For a curve in the $\alpha\beta$ plane, the surface normal is
+\begin{equation}
+	\mathbf{N} = 0\boldsymbol{\hat{\alpha}} + 0\boldsymbol{\hat{\beta}} + 1\boldsymbol{\hat{\gamma}}
+\end{equation}
+
+Application of Eq.(\ref{e:curvenormal}) gives
+\begin{equation}
+	\boldsymbol{\hat{n}} = \frac{h_{\beta}\boldsymbol{\hat{\alpha}} - h_{\alpha}\boldsymbol{\hat{\beta}} + 0\boldsymbol{\hat{\gamma}}}{\sqrt{h_{\alpha}^2 + h_{\beta}^2}}
+\end{equation}
+
+The differential arc length becomes (with $h_{\gamma}\equiv0$)
+\begin{equation}
+	ds = \sqrt{h_{\alpha}^2+h_{\beta}^2}
+\end{equation}
+
+and Eq.(\ref{e:area}) reduces to
+\begin{equation}
+	A_{S} = \oint_{\partial S} \mathbf{F}\cdot\left[h_{\beta}, -h_{\alpha}, 0\right]
+\end{equation}
+
+
+
+%%----------------------------------------------------------------------------------------------------
+
+\subsubsection{$\alpha-\gamma$ plane}
+
+For a curve in the $\alpha\gamma$ plane, the surface normal is
+\begin{equation}
+	\mathbf{N} = 0\boldsymbol{\hat{\alpha}} + 1\boldsymbol{\hat{\beta}} + 0\boldsymbol{\hat{\gamma}}
+\end{equation}
+
+Application of Eq.(\ref{e:curvenormal}) gives
+\begin{equation}
+	\boldsymbol{\hat{n}} = \frac{-h\boldsymbol{\hat{\alpha}} + 0\boldsymbol{\hat{\beta}} + h_{\alpha}\boldsymbol{\hat{\gamma}}}{\sqrt{h_{\alpha}^2 + h_{\gamma}^2}}
+\end{equation}
+
+The differential arc length becomes (with $h_{\beta}\equiv0$)
+\begin{equation}
+	ds = \sqrt{h_{\alpha}^2+h_{\gamma}^2}
+\end{equation}
+
+and Eq.(\ref{e:area}) reduces to
+\begin{equation}
+	A_{S} = \oint_{\partial S} \mathbf{F}\cdot\left[-h_{\gamma}, 0, h_{\alpha}\right]
+\end{equation}
+
+%%----------------------------------------------------------------------------------------------------
+
+\subsubsection{$\beta-\gamma$ plane}
+
+For a curve in the $\beta\gamma$ plane, the surface normal is
+\begin{equation}
+	\mathbf{N} = 1\boldsymbol{\hat{\alpha}} + 0\boldsymbol{\hat{\beta}} + 0\boldsymbol{\hat{\gamma}}
+\end{equation}
+
+Application of Eq.(\ref{e:curvenormal}) gives
+\begin{equation}
+	\boldsymbol{\hat{n}} = \frac{0\boldsymbol{\hat{\alpha}} + h_{\gamma}\boldsymbol{\hat{\beta}} - h_{\beta}\boldsymbol{\hat{\gamma}}}{\sqrt{h_{\beta}^2 + h_{\gamma}^2}}
+\end{equation}
+
+The differential arc length becomes (with $h_{\alpha}\equiv0$)
+\begin{equation}
+	ds = \sqrt{h_{\beta}^2+h_{\gamma}^2}
+\end{equation}
+
+and Eq.(\ref{e:area}) reduces to
+\begin{equation}
+	A_{S} = \oint_{\partial S} \mathbf{F}\cdot\left[0, h_{\gamma}, -h_{\beta}\right]
+\end{equation}
+
+\subsubsection{General surface}
+
+For a curve bounding a general surface embedded in 3-space, the surface normal is given by Eq.(\ref{e:N}).
+
+Application of Eq.(\ref{e:curvenormal}) gives
+\begin{equation}
+	\boldsymbol{\hat{n}} = \frac{\left( h_{\beta}N_{\gamma} - h_{\gamma}N_{\beta} \right)\boldsymbol{\hat{\alpha}} + \left( h_{\gamma}N_{\alpha} - h_{\alpha}N_{\gamma} \right)\boldsymbol{\hat{\beta}} + \left( h_{\alpha}N_{\beta} - h_{\beta}N_{\alpha} \right)\boldsymbol{\hat{\alpha}}}{\sqrt{\left( h_{\beta}N_{\gamma} - h_{\gamma}N_{\beta} \right)^2 + \left( h_{\gamma}N_{\alpha} - h_{\alpha}N_{\gamma} \right)^2 + \left( h_{\alpha}N_{\beta} - h_{\beta}N_{\alpha} \right)^2}}
+\end{equation}
+
+This quickly gets out of control as the denominator does not cancel with the differential arc length ($ds$) and one is left with a mess: 
+\begin{equation}
+	A_{S} = \oint_{\partial S} \frac{\left(\mathbf{F}\cdot\left[\left(h_{\beta}N_{\gamma} - h_{\gamma}N_{\beta} \right), \left( h_{\gamma}N_{\alpha} - h_{\alpha}N_{\gamma} \right), \left( h_{\alpha}N_{\beta} - h_{\beta}N_{\alpha} \right)\right]\right)\sqrt{h_{\alpha}^2 + h_{\beta}^2 + h_{\gamma}^2}}{\sqrt{\left( h_{\beta}N_{\gamma} - h_{\gamma}N_{\beta} \right)^2 + \left( h_{\gamma}N_{\alpha} - h_{\alpha}N_{\gamma} \right)^2 + \left( h_{\alpha}N_{\beta} - h_{\beta}N_{\alpha} \right)^2}}
+\end{equation}
+
+
+
+\subsubsection{Cartesian}
+
+
+The coordinate notation change for the LCCS is given by
+
+\begin{equation}
+	\left(\alpha,\beta,\gamma\right)\leftarrow\left(x,y,z\right)
+\end{equation}
+
+
+In Cartesian geometry, the metric is given by 
+\begin{align}
+& h_{\alpha} = d\alpha\nonumber\\
+& h_{\beta} = d\beta\\
+& h_{\gamma} = d\gamma\nonumber
+\end{align}
+
+
+and the differential line element is
+\begin{equation}
+	d\mathbf{s} = d\alpha\boldsymbol{\hat{\alpha}} + d\beta\boldsymbol{\hat{\beta}} + d\gamma\boldsymbol{\hat{\gamma}} 
+\end{equation}
+which implies a differential arc length of
+\begin{equation}
+	ds = \sqrt{d\mathbf{s}\cdot d\mathbf{s}} = \sqrt{d\alpha^2 + d\beta^2 + d\gamma^2}
+\end{equation}
+
+For planar curves, the area integrals are given as
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{|c|c|}
+		\hline
+		
+		plane & area integral \\ \hline 
+		$\alpha\beta$ & $A_{\alpha\beta} = \oint_{\partial S} F_{\alpha}d\beta - F_{\beta}d\alpha$ \\ \hline 
+		$\alpha\gamma$ & $A_{\alpha\gamma} = \oint_{\partial S} F_{\gamma}d\alpha - F_{\alpha}d\gamma$ \\ \hline 
+		$\beta\gamma$ & $A_{\beta\gamma} = \oint_{\partial S} F_{\beta}d\gamma - F_{\gamma}d\beta$ \\ \hline 
+		
+		\hline
+	\end{tabular}
+	\caption{Area integrals for planar curves in Cartesian geometry}
+	\label{t:cartesian}
+\end{table}
+
+
+\subsubsection{Cylindrical}
+
+
+The coordinate notation change for the LCCS is given by
+
+\begin{equation}
+	\left(\alpha,\beta,\gamma \right) \leftarrow \left(r,\theta,z\right)
+\end{equation}
+
+
+
+The metric is given by 
+\begin{align}
+& h_{\alpha} = d\alpha\nonumber\\
+& h_{\beta} = \alpha d\beta\\
+& h_{\gamma} = d\gamma\nonumber
+\end{align}
+
+
+and the differential line element is
+\begin{equation}
+	d\mathbf{s} = d\alpha\boldsymbol{\hat{\alpha}} + \alpha d\beta\boldsymbol{\hat{\beta}} + d\gamma\boldsymbol{\hat{\gamma}} 
+\end{equation}
+which implies a differential arc length of
+\begin{equation}
+	ds = \sqrt{d\mathbf{s}\cdot d\mathbf{s}} = \sqrt{d\alpha^2 + \alpha^2d\beta^2 + d\gamma^2}
+\end{equation}
+
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{|c|c|}
+		\hline
+		
+		plane & area integral \\ \hline 
+		$\alpha\beta$ & $A_{\alpha\beta} = \oint_{\partial S} \alpha F_{\alpha} d\beta - F_{\beta}d\alpha$ \\ \hline 
+		$\alpha\gamma$ & $A_{\alpha\gamma} = \oint_{\partial S} F_{\gamma}d\alpha - F_{\alpha}d\gamma$ \\ \hline 
+		$\beta\gamma$ & $A_{\beta\gamma} = \oint_{\partial S} F_{\beta}d\gamma - \alpha F_{\gamma} d\beta$ \\ \hline 
+		
+		\hline
+	\end{tabular}
+	\caption{Area integrals for planar curves in cylindrical geometry}
+	\label{t:cylindrical}
+\end{table}
+
+\subsubsection{Spherical}
+
+The coordinate notation change for the LCCS is given by
+
+\begin{equation}
+	\left(\alpha,\beta,\gamma\right)\leftarrow\left(r,\theta,\phi\right)
+\end{equation}
+
+
+
+
+The metric is given by 
+\begin{align}
+& h_{\alpha} = d\alpha\nonumber\\
+& h_{\beta} = \alpha\sin{\left(\gamma\right)}d\beta\\
+& h_{\gamma} = \alpha d\gamma\nonumber
+\end{align}
+
+
+and the differential line element is
+\begin{equation}
+	d\mathbf{s} = d\alpha\boldsymbol{\hat{\alpha}} + \alpha d\gamma\boldsymbol{\hat{\gamma}} + \alpha\sin{\left(\gamma\right)}d\beta\boldsymbol{\hat{\beta}} 
+\end{equation}
+which implies a differential arc length of
+\begin{equation}
+	ds = \sqrt{d\mathbf{s}\cdot d\mathbf{s}} = \sqrt{d\alpha^2 + \alpha^2d\gamma^2 + \alpha^2\sin^2{\left(\gamma\right)}d\beta^2}
+\end{equation}
+
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{|c|c|}
+		\hline
+		
+		plane & area integral \\ \hline 
+		$\alpha\beta$ & $A_{\alpha\beta} = \oint_{\partial S} \alpha\sin{\left(\gamma\right)} F_{\alpha}d\beta - F_{\beta}d\alpha$ \\ \hline 
+		$\alpha\gamma$ & $A_{\alpha\gamma} = \oint_{\partial S} F_{\gamma}d\alpha - \alpha F_{\alpha}d\gamma$ \\ \hline 
+		$\beta\gamma$ & $A_{\beta\gamma} = \oint_{\partial S} \alpha F_{\beta}d\gamma - \alpha\sin{\left(\gamma\right)}F_{\gamma}d\beta$ \\ \hline 
+		
+		\hline
+	\end{tabular}
+	\caption{Area integrals for planar curves in spherical geometry}
+	\label{t:spherical}
+\end{table}
+
+
+\subsubsection{Summary of General Area Integrals}
+
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{|c|l|l|l|}
+		\hline
+		
+		plane & Cartesian & Cylindrical & Spherical \\ \hline
+		
+		$\alpha\beta$ & $\oint F_{\alpha}d\beta - F_{\beta}d\alpha$ & $\oint \alpha F_{\alpha} d\beta - F_{\beta}d\alpha$ & $\oint \alpha\sin{\left(\gamma\right)} F_{\alpha}d\beta - F_{\beta}d\alpha$ \\ \hline
+		$\alpha\gamma$ & $\oint F_{\gamma}d\alpha - F_{\alpha}d\gamma$ & $\oint F_{\gamma}d\alpha - F_{\alpha}d\gamma$ & $\oint F_{\gamma}d\alpha - \alpha F_{\alpha}d\gamma$ \\ \hline
+		$\beta\gamma$ & $\oint F_{\beta}d\gamma - F_{\gamma}d\beta$ & $\oint F_{\beta}d\gamma - \alpha F_{\gamma} d\beta$ & $\oint \alpha F_{\beta}d\gamma - \alpha\sin{\left(\gamma\right)}F_{\gamma}d\beta$ \\ \hline
+		
+		\hline
+	\end{tabular}
+	\caption{Summary of area integrals for the different coordinate systems}
+	\label{t:areasummary}
+\end{table}
+
+\subsection{Choosing $\vec{\mathbf{F}}$ when $\nabla\cdot\vec{\mathbf{F}}=1$ }
+
+Given the general contour integrals as a function of $\mathbf{F}$ we must now choose the components of the vector field. 
+
+Recall that finding the area of a domain implies that
+
+\begin{equation}
+	\nabla\cdot\mathbf{F} = 1
+\end{equation}
+
+In order to reduce the number of integrals that need to be calculated, it is best to choose $\mathbf{F}$ such that there is only 1 non-zero component. As we have three coordinate planes, each geometry will need 3 $\mathbf{F}$ vectors. 
+
+\subsubsection{Cartesian}
+
+
+The divergence in Cartesian coordinates is given by
+\begin{equation}
+	\nabla\cdot\mathbf{F} = \frac{\partial F_{\alpha}}{\partial \alpha} + \frac{\partial F_{\beta}}{\partial \beta} + \frac{\partial F_{\gamma}}{\partial \gamma}
+\end{equation}
+
+This leads to choosing our three $\mathbf{F}$ vectors as:
+ 
+\begin{align}
+ \mathbf{F_1} &= \left[\alpha, 0, 0 \right]\\
+ \mathbf{F_2} &= \left[0, \beta, 0 \right]\\
+ \mathbf{F_3} &= \left[0, 0, \gamma \right]
+\end{align}
+
+
+The area integrals for Cartesian coordinates reduce to
+
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{|c|r|r|r|}
+		\hline
+		
+		plane & $F_{\alpha} = \alpha \left(\mathbf{F_1}\right)$ & $F_{\beta} = \beta \left(\mathbf{F_2}\right)$ & $F_{\gamma} = \gamma \left(\mathbf{F_3}\right)$ \\ \hline
+		
+		$\alpha\beta$ & $\oint \alpha d\beta$ & $-\oint \beta d\alpha$ & - \\ \hline
+		$\alpha\gamma$ & $-\oint \alpha d\gamma$ & - & $\oint \gamma d\alpha$ \\ \hline 
+		$\beta\gamma$ & - & $\oint \beta d\gamma$ & $-\oint \gamma d\beta$ \\ \hline
+		
+		\hline
+	\end{tabular}
+	\caption{Final area integrals for Cartesian coordinates}
+	\label{t:areacartesian}
+\end{table}
+
+
+\subsubsection{Cylindrical}
+
+
+The divergence in cylindrical coordinates is given by
+\begin{equation}
+	\nabla\cdot\mathbf{F} = \frac{1}{\alpha}\frac{\partial}{\partial \alpha}\left(\alpha F_{\alpha}\right) + \frac{1}{\alpha}\frac{\partial}{\partial \beta}F_{\beta} + \frac{\partial}{\partial \gamma} F_{\gamma}
+\end{equation}
+
+This leads to choosing our three $\mathbf{F}$ vectors as:
+ 
+\begin{align}
+ \mathbf{F_1} &= \left[\frac{1}{2}\alpha, 0, 0 \right]\\
+ \mathbf{F_2} &= \left[0, \alpha\beta, 0 \right]\\
+ \mathbf{F_3} &= \left[0, 0, \gamma \right]
+\end{align}
+
+
+The area integrals for Cylindrical coordinates reduce and are shown in Table~\ref{t:areacylindrical}. 
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{|c|r|r|r|}
+		\hline
+		
+		plane & $F_{\alpha} = \frac{1}{2}\alpha \left(\mathbf{F_1}\right)$ & $F_{\beta} = \alpha\beta \left(\mathbf{F_2}\right)$ & $F_{\gamma} = \gamma \left(\mathbf{F_3}\right)$ \\ \hline
+		
+		$\alpha\beta$ & $\oint \frac{1}{2}\alpha^2 d\beta$ & $-\oint \alpha\beta d\alpha$ & - \\ \hline
+		$\alpha\gamma$ & $-\oint \frac{1}{2}\alpha d\gamma$ & - & $\oint \gamma d\alpha$ \\ \hline 
+		$\beta\gamma$ & - & $\oint \alpha\beta d\gamma$ & $-\oint \alpha\gamma d\beta$ \\ \hline
+		
+		\hline
+	\end{tabular}
+	\caption{Final area integrals for Cylindrical coordinates}
+	\label{t:areacylindrical}
+\end{table}
+
+At first glance, the integrals in the $\beta\gamma$ plane may seem confusing. If we're in the $\beta\gamma$ plane, how can there be any area if there's no $\alpha$ component? The answer is that we're in \emph{a} $\beta\gamma$ plane ($\alpha=$const), not strictly the $\beta\gamma$ plane corresponding to $\alpha=0$. In physical thinking, the $\beta\gamma$ plane is a tube and we know that the radius ($\alpha$) scales the area of a tube ($A_{tube}=2\pi r\Delta z$). 
+
+\subsubsection{Note on Divergence}
+Until now, we've been using the standard 3d divergence in the various coordinate systems to evaluate $\mathbf{F}$, despite evaluating in \emph{planes} in the systems. This has worked so far because the metrics do not change when viewing only a plane in the systems. One must be careful, however, as this is not always true and violation of this will give incorrect results. 
+
+The general divergence equations for an orthogonal coordinate system, given the scale factors, is
+
+\begin{equation}
+	\nabla\cdot\mathbf{F} = \frac{1}{h_{\alpha}h_{\beta}h_{\gamma}}\left[\frac{\partial}{\partial \alpha}\left(h_{\beta}h_{\gamma}F_{\alpha}\right)+ \frac{\partial}{\partial \beta}\left(h_{\alpha}h_{\gamma}F_{\beta}\right) + \frac{\partial}{\partial \gamma}\left(h_{\alpha}h_{\beta}F_{\gamma}\right)\right]
+\end{equation}
+
+We'll see in the next section on spherical coordinates that this will come into play and we'll have to be more careful about choosing $\mathbf{F}$. 
+
+\subsubsection{Spherical}
+
+The divergence in spherical coordinates is given by
+\begin{equation}
+	\nabla\cdot\mathbf{F} = \frac{1}{\alpha^2}\frac{\partial}{\partial \alpha}\left(\alpha^2F_{\alpha}\right) + \frac{1}{\alpha\sin{\left(\gamma\right)}}\frac{\partial}{\partial \beta} F_{\beta} + \frac{1}{\alpha\sin{\left(\gamma\right)}}\frac{\partial}{\partial \gamma}\left(\sin{\left(\gamma\right)}F_{\gamma}\right)
+\end{equation}
+
+This is, in general, not compatible with our work so far when on planes in $\alpha\beta\gamma$. 
+
+For the $\alpha\beta$ plane:
+\begin{equation}
+	\nabla_{\alpha\beta}\cdot\mathbf{F} = \frac{1}{\alpha}\frac{\partial}{\partial \alpha}\left(\alpha F_{\alpha}\right) + \frac{1}{\alpha\sin{\left(\gamma\right)}}\frac{\partial}{\partial \beta} F_{\beta} + \frac{1}{\sin{\left(\gamma\right)}}\frac{\partial}{\partial \gamma}\left(\sin{\left(\gamma\right)}F_{\gamma}\right)
+\end{equation}
+
+For the $\alpha\gamma$ plane:
+\begin{equation}
+	\nabla_{\alpha\gamma}\cdot\mathbf{F} = \frac{1}{\alpha}\frac{\partial}{\partial \alpha}\left(\alpha F_{\alpha}\right) + \frac{\partial}{\partial \beta} F_{\beta} + \frac{1}{\alpha}\frac{\partial}{\partial \gamma}F_{\gamma}
+\end{equation}
+
+
+For the $\beta\gamma$ plane:
+\begin{equation}
+	\nabla_{\beta\gamma}\cdot\mathbf{F} = \frac{1}{\alpha^2}\frac{\partial}{\partial \alpha}\left(\alpha^2 F_{\alpha}\right) + \frac{1}{\alpha\sin{\left(\gamma\right)}}\frac{\partial}{\partial \beta} F_{\beta} + \frac{1}{\alpha\sin{\left(\gamma\right)}}\frac{\partial}{\partial \gamma}\left(\sin{\left(\gamma\right)}F_{\gamma}\right)
+\end{equation}
+
+
+For each plane, we have two possible vectors for a total of 6 vectors to choose. xxx
+
+This leads to choosing our three $\mathbf{F}$ vectors as:
+ 
+\begin{align}
+ \mathbf{F_1} &= \left[\frac{1}{2}\alpha, 0, 0 \right]\\
+ \mathbf{F_2} &= \left[0, \alpha\beta\sin{(\gamma)}, 0 \right]\\
+ \mathbf{F_3} &= \left[0, 0, -\alpha\cot{(\gamma)} \right]
+\end{align}
+
+The choice of $F_{\alpha}$ is initially unintuitive if one just attempts to plug into the divergence. In the $r\theta$ and $r\phi$ planes, the first term in the divergence reduces to
+\begin{equation}
+	\frac{1}{\alpha^2}\frac{\partial}{\partial \alpha}\left(\alpha^2F_{\alpha}\right) \rightarrow \frac{1}{\alpha}\frac{\partial}{\partial \alpha}\left(\alpha F_{\alpha}\right)
+\end{equation}
+as though we were in cylindrical coordinates, and we lose the multidimensional aspect of radial divergence.
+
+NOTE: There's something weird about the $\beta\gamma$ plane. $F_\beta$ actually needs to be $\beta\sin(\gamma)$, dropping the $\alpha$. If the area factor has its $\Delta r$ taken as zero, do we drop an order of $\alpha$ from all terms?
+
+The area integrals for Spherical coordinates reduce to
+
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{|c|r|r|r|}
+		\hline
+		
+		plane & $F_{\alpha} = \frac{1}{2}\alpha \left(\mathbf{F_1}\right)$ & $F_{\beta} = \alpha\beta\sin{(\gamma)} \left(\mathbf{F_2}\right)$ & $F_{\gamma} = -\alpha\cot{(\gamma)} \left(\mathbf{F_3}\right)$ \\ \hline
+		
+		$\alpha\beta$ & $\oint \frac{1}{2}\alpha^2\sin{(\gamma)}d\beta$ & $-\oint \alpha\beta\sin{(\gamma)}d\alpha$ & - \\ \hline
+		$\alpha\gamma$ & $-\oint \frac{1}{2}\alpha^2d\gamma$ & - & $-\oint \alpha\cot{(\gamma)} d\alpha$ \\ \hline 
+		$\beta\gamma$ & - & $\oint \alpha^2\beta\sin{(\gamma)} d\gamma$ & $\oint \alpha^2\cos{(\gamma)} d\beta$ \\ \hline
+		
+		\hline
+	\end{tabular}
+	\caption{Final area integrals for Spherical coordinates}
+	\label{t:areaspherical}
+\end{table}
+
+The same rationale for the presence and interpretation of ``in-plane'' coordinates applies here (see cylindrical coordinates). 
+
+
+
+\section{When $\nabla\cdot\vec{\mathbf{F}}$ is a monomial}
+\label{s:monomialarea}
+
+Consider now the case when the divergence of $\mathbf{F}$ is a monomial, $\nabla\cdot\mathbf{F} = K\alpha^a\beta^b\gamma^c$. This arises when calculating the volume of a set of faces, or when interpolating quantities between grids. 
+
+\subsection{Cartesian}
+
+For the Cartesian case, our three vectors become
+
+\begin{align}
+ \mathbf{F_1} &= \left[\frac{K}{a+1}\alpha^{a+1}\beta^{b}\gamma^{c}, 0, 0 \right]\\
+ \mathbf{F_2} &= \left[0, \frac{K}{b+1}\alpha^{a}\beta^{b+1}\gamma^{c}, 0 \right]\\
+ \mathbf{F_3} &= \left[0, 0, \frac{K}{c+1}\alpha^{a}\beta^{b}\gamma^{c+1} \right]
+\end{align}
+
+The final contour integrals for Cartesian coordinates become
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{|c|r|r|r|}
+		\hline
+		
+		plane & $F_{\alpha} = \frac{K}{a+1}\alpha^{a+1}\beta^{b}\gamma^{c} \left(\mathbf{F_1}\right)$ & $F_{\beta} = \frac{K}{b+1}\alpha^{a}\beta^{b+1}\gamma^{c} \left(\mathbf{F_2}\right)$ & $F_{\gamma} = \frac{K}{c+1}\alpha^{a}\beta^{b}\gamma^{c+1} \left(\mathbf{F_3}\right)$ \\ \hline
+		
+		$\alpha\beta$ & $\oint \frac{K}{a+1}\alpha^{a+1}\beta^{b}\gamma^{c} d\beta$ & $-\oint \frac{K}{b+1}\alpha^{a}\beta^{b+1}\gamma^{c} d\alpha$ & - \\ \hline
+		
+		$\alpha\gamma$ & $-\oint \frac{K}{a+1}\alpha^{a+1}\beta^{b}\gamma^{c} d\gamma$ & - & $\oint \frac{K}{c+1}\alpha^{a}\beta^{b}\gamma^{c+1} d\alpha$ \\ \hline 
+		
+		$\beta\gamma$ & - & $\oint \frac{K}{b+1}\alpha^{a}\beta^{b+1}\gamma^{c} d\gamma$ & $-\oint \frac{K}{c+1}\alpha^{a}\beta^{b}\gamma^{c+1} d\beta$ \\ \hline
+		
+		\hline
+	\end{tabular}
+	\caption{Final area integrals for Cartesian coordinates}
+	\label{t:areacartesianmono}
+\end{table}
+
+
+\subsection{Cylindrical}
+
+
+For the Cylindrical case, our three vectors become
+
+\begin{align}
+ \mathbf{F_1} &= \left[\frac{K}{a+2}\alpha^{a+1}\beta^{b}\gamma^{c}, 0, 0 \right]\\
+ \mathbf{F_2} &= \left[0, \frac{K}{b+1}\alpha^{a+1}\beta^{b+1}\gamma^{c}, 0 \right]\\
+ \mathbf{F_3} &= \left[0, 0, \frac{K}{c+1}\alpha^{a}\beta^{b}\gamma^{c+1} \right]
+\end{align}
+
+The final contour integrals for Cylindrical coordinates become
+
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{|c|r|r|r|}
+		\hline
+		
+		plane & $F_{\alpha} = \frac{K}{a+2}\alpha^{a+1}\beta^{b}\gamma^{c} \left(\mathbf{F_1}\right)$ & $F_{\beta} = \frac{K}{b+1}\alpha^{a+1}\beta^{b+1}\gamma^{c} \left(\mathbf{F_2}\right)$ & $F_{\gamma} = \frac{K}{c+1}\alpha^{a}\beta^{b}\gamma^{c+1} \left(\mathbf{F_3}\right)$ \\ \hline
+		
+		$\alpha\beta$ & $\oint \frac{K}{a+2}\alpha^{a+2}\beta^{b}\gamma^{c} d\beta$ & $-\oint \frac{K}{b+1}\alpha^{a+1}\beta^{b+1}\gamma^{c} d\alpha$ & - \\ \hline
+		
+		$\alpha\gamma$ & $-\oint \frac{K}{a+2}\alpha^{a+1}\beta^{b}\gamma^{c} d\gamma$ & - & $\oint \frac{K}{c+1}\alpha^{a}\beta^{b}\gamma^{c+1} d\alpha$ \\ \hline 
+		
+		$\beta\gamma$ & - & $\oint \frac{K}{b+1}\alpha^{a+1}\beta^{b+1}\gamma^{c} d\gamma$ & $-\oint \frac{K}{c+1}\alpha^{a+1}\beta^{b}\gamma^{c+1} d\beta$ \\ \hline
+		
+		\hline
+	\end{tabular}
+	\caption{Final area integrals for Cylindrical coordinates}
+	\label{t:areacylindricalmono}
+\end{table}
+
+
+\subsection{Spherical}
+
+For the Spherical case, our 6 vectors become
+
+\begin{align}
+ \mathbf{F_{\alpha}^{\alpha\beta}} &= \left[\frac{K}{a+2}\alpha^{a+1}\beta^{b}\gamma^{c}, 0, 0 \right] \\
+ \mathbf{F_{\beta}^{\alpha\beta}} &= \left[0, \frac{K}{b+1}\alpha^{a+1}\beta^{b+1}\gamma^{c}, 0 \right] \\
+ \mathbf{F_{\alpha}^{\alpha\gamma}} &= \left[\frac{K}{a+2}\alpha^{a+1}\beta^{b}\gamma^{c}, 0, 0 \right] \\
+ \mathbf{F_{\gamma}^{\alpha\gamma}} &=  \left[0, 0, \frac{K}{c+1}\alpha^{a+1}\beta^{b}\gamma^{c+1} \right] \\
+ \mathbf{F_{\beta}^{\beta\gamma}} &=  \left[0,  \frac{K}{b+1}\alpha^{a+1}\beta^{b+1}\gamma^{c}\sin(\gamma), 0 \right] \\
+ \mathbf{F_{\gamma}^{\beta\gamma}} &=  \text{not worth the trouble}
+\end{align}
+
+
+The final contour integrals for Spherical coordinates become
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{|c|r|r|r|}
+		\hline
+		
+		plane & $F_{\alpha}^{\text{plane}}$ & $F_{\beta}^{\text{plane}}$ & $F_{\gamma}^{\text{plane}}$ \\ \hline
+		
+		$\alpha\beta$ & $\oint \frac{K}{a+2}\alpha^{a+2}\beta^{b}\gamma^{c}\sin(\gamma) d\beta$ & $-\oint \frac{K}{b+1}\alpha^{a+1}\beta^{b+1}\gamma^{c}\sin(\gamma) d\alpha$ & - \\ \hline
+		
+		$\alpha\gamma$ & $-\oint \frac{K}{a+2}\alpha^{a+2}\beta^{b}\gamma^{c} d\gamma$ & - & $\oint \frac{K}{c+1}\alpha^{a+1}\beta^{b}\gamma^{c+1} d\alpha$ \\ \hline 
+		
+		$\beta\gamma$ & - & $\oint \frac{K}{b+1}\alpha^{a+2}\beta^{b+1}\gamma^{c}\sin(\gamma) d\gamma$ & $-\oint \text{not worth it} d\beta$ \\ \hline
+		
+		\hline
+	\end{tabular}
+	\caption{Final area integrals for Spherical coordinates}
+	\label{t:areasphericalmono}
+\end{table}
+
+
+\section{Application to Volumetric Quantities}
+
+We will now attempt to build upon the area computations in order to calculate volumetric quantities. Consider a function $g(\alpha,\beta,\gamma)$ defined over some volume $V$. It is possible to write the integral of the quantity as 
+
+\begin{equation}
+\label{e:volint}
+	\iiint_{V}g(\alpha,\beta,\gamma)dV = \iiint_{V}\nabla\cdot\mathbf{G}dV
+\end{equation}
+
+Furthermore, Eq.(\ref{e:volint}) can be rewritten as an area integral via Green's theorem:
+
+\begin{equation}
+	\iiint_{V}\nabla\cdot\mathbf{G}dV = \iint_{S}\mathbf{G}\cdot\mathbf{\hat{N}}dA
+\end{equation}
+
+But we know that Green's theorem applied in a plane is
+
+\begin{equation}
+	\iint_{S}\nabla\cdot\mathbf{F}dA = \oint_{\partial S}\mathbf{F}\cdot\mathbf{\hat{n}}ds
+\end{equation}
+
+
+We then have that 
+\begin{equation}
+	\nabla\cdot\mathbf{F} = \mathbf{G}\cdot\mathbf{\hat{N}}
+\end{equation}
+
+If we consider that $\mathbf{G}$ has only one nonzero component such that $\mathbf{G} = [G_\alpha,0,0]$ and apply the general definition of the divergence (Eq.(\ref{e:divplane})), we arrive at 
+
+\begin{equation}
+	\nabla\cdot\mathbf{F}=N_{\alpha}G_{\alpha} = N_{\alpha}\frac{\int h_{\alpha}h_{\beta}h_{\gamma}g(\alpha,\beta,\gamma)d\alpha}{h_{\beta}h_{\gamma}}
+\end{equation}
+
+
+
+\subsection{If $g(\alpha,\beta,\gamma)$ is a monomial}
+
+Now let us consider the case when $g(\alpha,\beta,\gamma)=C\alpha^\mu\beta^\eta\gamma^\xi$. Then, for each coordinate system, we arrive at 
+
+\begin{equation}
+	\nabla\cdot\mathbf{F} = \frac{N_{\alpha}C}{d+1}\alpha^{\mu+1}\beta^\eta\gamma^\xi
+\end{equation}
+
+where
+
+\begin{equation}
+	d = \begin{cases} 1 &\mbox{if Cartesian}\\
+			  2 &\mbox{if Cylindrical}\\
+			  3 &\mbox{if Spherical}\end{cases}
+\end{equation}
+
+which is a fairly remarkable result given the hassle of the coordinate systems prior to this.
+
+
+\section{Computing these equations over polyhedra}
+
+\subsection{Integration of polyhedra}
+
+Given a closed surface in $\alpha\beta\gamma$ space composed of planar polygons, we can condense the results of the previous section as the sum of the area integrals over faces
+
+\begin{equation}
+	\iiint_V C\alpha^\mu\beta^\eta\gamma^\xi dV = \sum_{f=1}^{N_{faces}} \frac{N_{\alpha}^fC}{d+1} \iint_{S_f} \alpha^{\mu+1}\beta^\eta\gamma^\xi dS_f
+\end{equation}
+
+The discussion on the reduction of the surface integral to a line integral was presented in Sec.{\ref{s:monomialarea}.
+
+\subsection{Evaluation of non-planar polygon surface integrals}
+
+Our previous work is only applicable if the surface lies in a plane (not necessarily containing the origin) in $\alpha\beta\gamma$. We can evaluate the surface integral of non-planar polygons by projecting them onto a plane, applying the integrals we have previously derived, and then unprojecting (thereby scaling the resulting integral).
+
+Let $\mathbf{\hat{N}_f}$ be the constant normal to the polygon in $\alpha\beta\gamma$ space. In order to decide which plane to project to, we determine the maximum absolute component $\hat{N}_c$, where $c=\alpha,\beta,\text{ or }\gamma$. We then determine the minimum value of the $c^\text{th}$ component over all vertices (minComp). We can project onto the plane with normal only in the $c^\text{th}$ direction by setting the $c^\text{th}$ component equal to minComp. 
+
+Choosing the maximum absolute component of the normal gives us the largest projection, which helps with numerical errors. One can see this by projecting a planar polygon into one of its orthogonal planes, which gives a line (and results in incorrect answers). 
+
+From here, it is possible to evaluate the surface integral as described in this work.
+
+In order to rescale the resulting answer, we can take 
+
+
+\subsection{Integration Over Straight Lines in $\alpha\beta\gamma$}
+
+Let a line in the $\alpha\beta\gamma$ plane connect two points, with the starting vertex index by $v$ and the end vertex indexed by $v+1$. Each coordinate is then given by
+
+\begin{align}
+	\alpha(\lambda) &= (1-\lambda)\alpha_{e} + \lambda\alpha_{e+1}\\
+	\beta(\lambda) &= (1-\lambda)\beta_{e} + \lambda\beta_{e+1}\\
+	\gamma(\lambda) &= (1-\lambda)\gamma_{e} + \lambda\gamma_{e+1}
+\end{align}
+
+Consider the integral of two quantities $\mu(\lambda)$ and $\eta(\lambda)$ defined analogously to the above. Then the integral of the multiple of these quantities raised to the powers $p$ and $q$ is
+
+\begin{equation}
+	\int_0^1\alpha (\lambda)^p\beta (\lambda)^q\gamma(\lambda)^r d\lambda = \frac{1}{p+q+r+1}\sum_{i=0}^p\sum_{j=0}^q\sum_{k=0}^r \frac{ {p \choose i}  {q \choose j} {r \choose k} }{ {{p+q+r}\choose{i+j+k}}}\alpha ^{i}_{v+1}\alpha ^{p-i}_{v}\beta ^{j}_{v+1}\beta ^{q-j}_{v}\gamma ^{k}_{v+1}\gamma ^{r-k}_{v}
+\end{equation}
+
+For the spherical case, a sin/cos term is included in the kernel of the integral, resulting in $\alpha ^p\beta ^q\gamma^r\sin{\gamma}$ or $\alpha ^p\beta ^q\gamma^r\cos{\gamma}$
+
+\begin{align}
+\label{e:fullintegrals}
+	\int_0^1\alpha (\lambda)^p\beta (\lambda)^q\gamma(\lambda)^r\sin{\gamma}d\lambda &= \sum_{i=0}^p\sum_{j=0}^q\sum_{k=0}^r \frac{ {p \choose i}  {q \choose j} {r \choose k} }{ {{p+q+r}\choose{i+j+k}}}\alpha ^{i}_{v+1}\alpha ^{p-i}_{v}\beta ^{j}_{v+1}\beta ^{q-j}_{v}\gamma ^{k}_{v+1}\gamma ^{r-k}_{v} \int_0^1 B^{p+q+r}_{i+j+k}\left(\lambda\right)\sin{\gamma}d\lambda
+%	\int_0^1\alpha (\lambda)^p\beta (\lambda)^q \cos{\gamma}d\lambda &= \sum_{i=0}^p\sum_{j=0}^q \frac{ {p \choose i}  {q \choose j} }{ {{p+q}\choose{i+j}}}\alpha ^{i}_{v+1}\alpha ^{p-i}_{v}\beta ^{j}_{v+1}\beta ^{q-j}_{v} \int_0^1 B^{p+q}_{i+j}\left(\lambda\right)\cos{\gamma}d\lambda
+\end{align}
+where $B^{p+q+r}_{i+j+k}$ is the $i+j+k$ term of the $p+q+r$ order Bernstein basis. This also appears in the simpler integral above, but reduces to the factor $1/(1+p+q+r)$ that appears infront of the summations. 
+
+The integrals in Eq.(\ref{e:fullintegrals}) can be evaluated as
+\begin{align}
+%\begin{split}
+	\int_0^1 B^{n}_{m}\left(\lambda\right)\sin{\xi}d\lambda = & \pi 2^{-n-3}\Gamma(m+1){n\choose m}\Gamma(-m+n+1) \\ \nonumber
+	& \left(4\sin(\xi_{v}) _2\tilde{F}_3\left(\frac{m+1}{2},\frac{m+2}{2};\frac{1}{2},\frac{n+2}{2},\frac{n+3}{2};-\frac{1}{4}(\xi_{v}-\xi_{v+1})^2\right) \right. - \\ 
+	& \left. (m+1)(\xi_{v}-\xi_{v+1})\cos(\xi_{v}) _2\tilde{F}_3\left(\frac{m+2}{2},\frac{m+3}{2};\frac{3}{2},\frac{n+3}{2},\frac{n+4}{2};-\frac{1}{4}(\xi_{v}-\xi_{v+1})^2\right)\right) \nonumber
+%\end{split}
+\end{align}
+%\begin{align}
+%\begin{split}
+%	\int_0^1 B^{n}_{k}\left(\lambda\right)\cos{\gamma}d\lambda = & \pi 2^{-n-3}\Gamma(k+1){n\choose k}\Gamma(-k+n+1) \\ \nonumber
+%	& \left(4\cos(\gamma_{v}) _2\tilde{F}_3\left(\frac{k+1}{2},\frac{k+2}{2};\frac{1}{2},\frac{n+2}{2},\frac{n+3}{2};-\frac{1}{4}(\gamma_{v}-\gamma_{v+1})^2\right) \right. + \\ 
+%	& \left. (k+1)(\gamma_{v}-\gamma_{v+1})\sin(\gamma_{v}) _2\tilde{F}_3\left(\frac{k+2}{2},\frac{k+3}{2};\frac{3}{2},\frac{n+3}{2},\frac{n+4}{2};-\frac{1}{4}(\gamma_{v}-\gamma_{v+1})^2\right)\right) \nonumber
+%\end{split}
+%\end{align}
+
+where $_2\tilde{F}_3\left(\vec{a};\vec{b};z\right)$ is the regularized, generalized hypergeometric function.
+
+\end{document}

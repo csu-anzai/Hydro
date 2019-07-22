@@ -1,0 +1,83 @@
+\documentclass[10.5pt]{article}
+
+% Packages:
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{pgfplots}
+\usepackage{bm}
+\usepackage{mathtools}          %loads amsmath as well
+\usepackage{titling}
+\usepackage{biblatex}
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+
+% Move title up:
+\setlength{\droptitle}{-10em}
+
+\begin{document}
+
+% Title information:
+\title{YSP Introductory Material}
+\maketitle
+
+    % section introducing cell averaged data
+    \section{Data Averages}
+    Let's suppose we are looking at data on an interval $x \in [0,1]$, where
+    $x$ is the coordinate along this interval. Suppose there is a function
+    $u(x)$ defined on this interval. This function is discretized by cutting the
+    interval into a number of cells, $N$.
+    \begin{figure}[H]
+        \center
+        \input{interval.tex}
+        \caption{Interval with $N=8$.}
+    \end{figure}
+    We denote the centers of each cell as $x_{i}$, and the left and right
+    boundaries as $x_{i-1/2}$ and $x_{i+1/2}$, respectively.  We define the
+    width of each cell as $\triangle x = \frac{1}{N} = x_{i+1/2} - x_{i-1/2}$. For each cell we
+    calculate the average amount of $u$ in each interval, and we denote these
+    averages as $\overline{u}_{i}$. This is done by perfoming integration of
+    $u(x)$ within the cell as
+    \begin{equation}
+        \overline{u}_{i} = \frac{1}{\triangle x} \int_{x_{i-1/2}}^{x_{i+1/2}}
+        u(x) dx.
+    \end{equation}
+
+    % section introducing data compression
+    \section{Wavelet Transform}
+    Now let's imagine that we have a second grid measuring the same function,
+    but with half the number of intervals ($N=4$).
+    \begin{figure}[H]
+        \center
+        \input{dual_interval.tex}
+        \caption{Fine grid with $N=8$ and coarse grid with $N=4$.}
+    \end{figure}
+    Note that each cell on the coarse level has two child cells which live on
+    the fine grid. We can \textit{predict} the child values on the finer grid by
+    creating an interpolating polynomial based on coarse grid values. Denote the
+    coarse cells by $u_{i}^{c}$ and the fine cells by $u_{i}^{f}$. The
+    prediction is made with the following interpolation
+    \begin{equation}
+        \tilde{u}^{f}_{2i} = u^{c}_{i} - \frac{1}{8} \left( u^{c}_{i-1} -
+        u^{c}_{i+1} \right) 
+    \end{equation}
+    Then we want to compute the difference between this polynomial
+    approximation, and the true value that we know. We compute the difference
+    for each coarse cell,
+    \begin{equation}
+        d^{c}_{i} = u^{f}_{2i} - \tilde{u}^{f}_{2i}.
+    \end{equation}
+    Note that near the boundaries we need to use biased interpolation. On the
+    left boundary compute
+    \begin{equation}
+        \tilde{u}^{f}_{2i} = \frac{5}{8} u^{c}_{i} + \frac{1}{2} u^{c}_{i+1}
+        -\frac{1}{8} u^{c}_{i+2}.
+    \end{equation}
+    Near the right boundary compute
+    \begin{equation}
+        \tilde{u}^{f}_{2i} = \frac{11}{8} u^{c}_{i} - \frac{1}{2} u^{c}_{i-1}
+        + \frac{1}{8} u^{c}_{i-2}.
+    \end{equation}
+
+\end{document}

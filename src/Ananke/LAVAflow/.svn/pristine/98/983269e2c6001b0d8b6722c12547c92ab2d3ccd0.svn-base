@@ -1,0 +1,2 @@
+/usr/bin/ar cr libLAVASTAT.a  CMakeFiles/LAVASTAT.dir/Histogram/Histogram.cxx.o
+/usr/bin/ranlib libLAVASTAT.a

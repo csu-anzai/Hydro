@@ -1,0 +1,17 @@
+set(MODULENAME LAVADRIVER)
+
+INCLUDE_DIRECTORIES("../MPI")
+
+set(${MODULENAME}_SOURCES
+Driver_Driver.cxx
+Driver_execute.cxx
+Driver_finalize.cxx
+Driver_initialize.cxx
+Driver_setExecuteFunction.cxx
+)
+
+
+ADD_LIBRARY(${MODULENAME} STATIC ${${MODULENAME}_SOURCES})
+TARGET_LINK_LIBRARIES(${MODULENAME} LAVAMPI)
+list(APPEND LAVAflow_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR})
+set(LAVAflow_INCLUDES ${LAVAflow_INCLUDES} PARENT_SCOPE)
