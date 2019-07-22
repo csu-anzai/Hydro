@@ -1,6 +1,6 @@
-function a = P(i,j)
+function q = P(i,j)
 
-    % cases
+    % global vars
     global u_0_0
     global u_0_1
     global u_0_2
@@ -11,7 +11,14 @@ function a = P(i,j)
     global u_2_1
     global u_2_2
 
-    % return
+    % return value
+    q = 0;
+    for ii = -1:i-1
+        for jj = -1:j-1
+            q = q + u(ii,jj);
+        end
+    end
+
     if (i==-1 & j==-1)
         a = 0;
     elseif (i==0 & j==-1)
@@ -46,5 +53,7 @@ function a = P(i,j)
         a = u(-1,-1) + u(-1,0) + u(-1,1) + u(0,-1) + u(0,0) + u(0,1) ...
             + u(1,-1) + u(1,0) + u(1,1);
     end
+
+    disp(q-a)
 
 end

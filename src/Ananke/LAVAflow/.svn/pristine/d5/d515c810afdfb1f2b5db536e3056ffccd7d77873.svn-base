@@ -1,2 +1,0 @@
-/usr/bin/ar cr libLAVAGRAPH.a  CMakeFiles/LAVAGRAPH.dir/Graph.cxx.o CMakeFiles/LAVAGRAPH.dir/Node.cxx.o CMakeFiles/LAVAGRAPH.dir/Edge.cxx.o
-/usr/bin/ranlib libLAVAGRAPH.a

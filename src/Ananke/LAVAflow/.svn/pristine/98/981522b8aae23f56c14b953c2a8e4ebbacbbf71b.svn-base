@@ -1,2 +1,0 @@
-/usr/bin/ar cr libLAVAMATH.a  CMakeFiles/LAVAMATH.dir/dot.cxx.o CMakeFiles/LAVAMATH.dir/cross.cxx.o CMakeFiles/LAVAMATH.dir/legendre.cxx.o CMakeFiles/LAVAMATH.dir/sphericalHarmonic.cxx.o CMakeFiles/LAVAMATH.dir/factorial.cxx.o
-/usr/bin/ranlib libLAVAMATH.a

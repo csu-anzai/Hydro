@@ -1,2 +1,0 @@
-/usr/bin/ar cr libLAVAflow.a  CMakeFiles/LAVAflow.dir/Operators/shellAveraging/ShellAverageOperator.cxx.o CMakeFiles/LAVAflow.dir/Operators/shellAveraging/planeShells/ShellAveragePlaneOperator.cxx.o CMakeFiles/LAVAflow.dir/Operators/surfaceAveraging/SurfaceAverageOperator.cxx.o CMakeFiles/LAVAflow.dir/Operators/surfaceAveraging/planarSurface/SurfaceAveragePlaneOperator.cxx.o CMakeFiles/LAVAflow.dir/Readers/VTKReader.cxx.o CMakeFiles/LAVAflow.dir/Mesh/Mesh.cxx.o
-/usr/bin/ranlib libLAVAflow.a
