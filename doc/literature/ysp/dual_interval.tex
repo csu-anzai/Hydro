@@ -1,0 +1,43 @@
+\begin{tikzpicture}[sibling distance=2em,every node/.style = {shape=rectangle,align=center,top color=white}]
+
+    % variables
+    \def\y{0.0}
+    \def\yy{-1.25}
+
+    % draw amr blocks
+    \draw [thick] (0,\y) rectangle (8,\y);
+    \draw [thick] (0,\yy) rectangle (8,\yy);
+
+    % tick marks
+    \draw [thick] (0,\y-0.1) rectangle (0,\y+0.1);
+    \draw [thick] (8,\y-0.1) rectangle (8,\y+0.1);
+    \draw [thick] (1,\y-0.1) rectangle (1,\y+0.1);
+    \draw [thick] (2,\y-0.1) rectangle (2,\y+0.1);
+    \draw [thick] (3,\y-0.1) rectangle (3,\y+0.1);
+    \draw [thick] (4,\y-0.1) rectangle (4,\y+0.1);
+    \draw [thick] (5,\y-0.1) rectangle (5,\y+0.1);
+    \draw [thick] (6,\y-0.1) rectangle (6,\y+0.1);
+    \draw [thick] (7,\y-0.1) rectangle (7,\y+0.1);
+
+    \draw [thick] (0,\yy-0.1) rectangle (0,\yy+0.1);
+    \draw [thick] (8,\yy-0.1) rectangle (8,\yy+0.1);
+    \draw [thick] (2,\yy-0.1) rectangle (2,\yy+0.1);
+    \draw [thick] (4,\yy-0.1) rectangle (4,\yy+0.1);
+    \draw [thick] (6,\yy-0.1) rectangle (6,\yy+0.1);
+
+    % labels
+    \node [shape=rectangle,align=center] at (0.5,\y-0.5) {$x_{1}$};
+    \node [shape=rectangle,align=center] at (1.5,\y-0.5) {$x_{2}$};
+    \node [shape=rectangle,align=center] at (2.5,\y-0.5) {$x_{3}$};
+    \node [shape=rectangle,align=center] at (3.5,\y-0.5) {$x_{4}$};
+    \node [shape=rectangle,align=center] at (4.5,\y-0.5) {$x_{5}$};
+    \node [shape=rectangle,align=center] at (5.5,\y-0.5) {$x_{6}$};
+    \node [shape=rectangle,align=center] at (6.5,\y-0.5) {$x_{7}$};
+    \node [shape=rectangle,align=center] at (7.5,\y-0.5) {$x_{8}$};
+
+    \node [shape=rectangle,align=center] at (1,\yy-0.5) {$x_{1}$};
+    \node [shape=rectangle,align=center] at (3,\yy-0.5) {$x_{2}$};
+    \node [shape=rectangle,align=center] at (5,\yy-0.5) {$x_{3}$};
+    \node [shape=rectangle,align=center] at (7,\yy-0.5) {$x_{4}$};
+
+\end{tikzpicture}
