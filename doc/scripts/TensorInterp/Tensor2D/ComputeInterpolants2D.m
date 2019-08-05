@@ -48,7 +48,15 @@ for i = 0:length(x)-1
 
     end
 end
+
+% compute u^{l+1}_{2i,2j}
 u4 = 4*(Q6 - Q4 - Q5 + Q1)
+
+% compute u^{l+1}_{2i-1,2j}
 u3 = 4*(Q5 - Q1 - P(0,1) + Q2)
+
+% compute u^{l+1}_{2i-1,2j-1}
 u2 = 4*(Q1 - Q2 - Q3 + P(0,0))
+
+% compute u^{l+1}_{2i,2j-1}
 u1 = 4*(Q4 - Q1 - P(1,0) + Q3)
