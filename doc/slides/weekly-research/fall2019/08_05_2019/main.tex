@@ -1,7 +1,7 @@
 \documentclass{beamer}
 
 % packages
-\usepackage{graphicx,amsmath,amsfonts,amssymb,listings,tikz}
+\usepackage{graphicx,amsmath,amsfonts,amssymb,listings,tikz,multimedia}
 
 % themes & colors
 \usetheme{Copenhagen}
@@ -22,25 +22,26 @@
   \frame{\titlepage}
 
   \begin{frame}{Highlights}
-    \begin{block}{Tasks}
+    \begin{block}{Highlights }
       \begin{itemize}
         \setlength\itemsep{1em}
-        \item Resolved Wavelet/AMR issue: wavelet-based prolongation routine
-            caused artifacts (will fix in future)
-        \item For periodic conditions, does function automatically give me block on other side of domain if at an edge?
+        \item Identified Multiresolution/AMR issue: multiresolution-based prolongation routine
+            caused artifacts
+        \item Multiresolution scheme works well in parallel, as long as buffer region is not added
       \end{itemize}
     \end{block}
   \end{frame}
 
-  \begin{frame}{\texttt{gr\_findAllNeghID}}
-    \begin{block}{Function usage}
-      \texttt{neighBlkID = surrBlksSummary \% regionInfo(LEFT\_EDGE,LEFT\_EDGE,1) \& \% details(BLKNO,1)}
-    \end{block}
+  \begin{frame}
+    \begin{figure}
+      \center
+      \movie[width=0.5\textwidth,height=0.4\textwidth, poster]{}{movie.avi}
+    \end{figure}
   \end{frame}
 
-  \begin{frame}{Implementation of Multiresolution Scheme in Proteus}
+  \begin{frame}{Buffer Region Filling}
     \begin{figure}
-      \input{tree.tex}
+      \input{buffer.tex}
     \end{figure}
   \end{frame}
 
@@ -48,10 +49,8 @@
     \begin{block}{Tasks}
       \begin{itemize}
         \setlength\itemsep{1em}
+        \item Complete mask filling cases for 2D
         \item Parallel communication of mask information to blocks across processors (in 1D and 2D)
-        \item Last thing in 2D is to implement interpolation in \texttt{prolong\_gen\_unk1\_fun}
-        \item Prolongation gets called both for whole block refinement and for coarse-to-fine ghost cell operations
-        \item Restriction is left as-is in all dimensions
       \end{itemize}
     \end{block}
   \end{frame}
