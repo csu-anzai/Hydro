@@ -1,0 +1,58 @@
+\documentclass{beamer}
+
+% packages
+\usepackage{graphicx,amsmath,amsfonts,amssymb,listings,tikz,multimedia}
+
+% themes & colors
+\usetheme{Copenhagen}
+\usecolortheme{beaver}
+\beamerdefaultoverlayspecification{<+->}
+
+% user commands
+\newcommand{\weeknum}{0}
+
+\begin{document}
+
+  \section{Group Meeting}
+  \title{Group Meeting}
+  \author{Brandon Gusto}
+
+  \institute{Dept. of Scientific Computing \\ Florida State University}
+  \date{\today}
+  \frame{\titlepage}
+
+  \begin{frame}{Highlights}
+    \begin{block}{Highlights }
+      \begin{itemize}
+        \setlength\itemsep{1em}
+        \item Identified Multiresolution/AMR issue: multiresolution-based prolongation routine
+            caused artifacts
+        \item Multiresolution scheme works well in parallel, as long as buffer region is not added
+      \end{itemize}
+    \end{block}
+  \end{frame}
+
+  \begin{frame}
+    \begin{figure}
+      \center
+      \movie[width=0.5\textwidth,height=0.4\textwidth, poster]{}{movie.avi}
+    \end{figure}
+  \end{frame}
+
+  \begin{frame}{Buffer Region Filling}
+    \begin{figure}
+      \input{buffer.tex}
+    \end{figure}
+  \end{frame}
+
+  \begin{frame}{Task List (TO-BE-COMPLETED)}
+    \begin{block}{Tasks}
+      \begin{itemize}
+        \setlength\itemsep{1em}
+        \item Complete mask filling cases for 2D
+        \item Parallel communication of mask information to blocks across processors (in 1D and 2D)
+      \end{itemize}
+    \end{block}
+  \end{frame}
+
+\end{document}

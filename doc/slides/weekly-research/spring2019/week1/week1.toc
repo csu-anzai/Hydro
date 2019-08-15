@@ -1,4 +1,0 @@
-\beamer@sectionintoc {1}{Finite Volume}{3}{0}{1}
-\beamer@sectionintoc {2}{Multiresolution}{5}{0}{2}
-\beamer@sectionintoc {3}{MR Code}{8}{0}{3}
-\beamer@sectionintoc {4}{Applications}{14}{0}{4}

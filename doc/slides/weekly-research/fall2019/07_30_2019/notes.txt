@@ -1,3 +1,0 @@
-1.) Create nightly tests for Proteus. One with Harten's method active and one
-    without.
-2.) Investigate GPU Hackathon funding
