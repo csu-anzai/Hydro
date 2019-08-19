@@ -1,7 +1,0 @@
-\frametitle{Multiresolution Scheme Implementation}
-To-do list:
-  \begin{itemize}
-    \item need to pass a non-uniform array to \texttt{hydro\_1d.F90}
-    \item inverse transform requires cell width info
-    \item write output file for detail coefficients
-  \end{itemize}

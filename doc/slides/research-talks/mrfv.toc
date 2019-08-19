@@ -1,5 +1,0 @@
-\beamer@endinputifotherversion {3.33pt}
-\beamer@sectionintoc {1}{Introduction}{1}{0}{1}
-\beamer@sectionintoc {2}{Introduction}{2}{0}{2}
-\beamer@sectionintoc {3}{Refinement}{9}{0}{3}
-\beamer@sectionintoc {4}{Multiresolution}{16}{0}{4}

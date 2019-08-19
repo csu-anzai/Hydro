@@ -1,0 +1,4 @@
+\beamer@sectionintoc {1}{Group Meeting}{1}{0}{1}
+\beamer@sectionintoc {2}{Multiresolution Scheme}{2}{0}{2}
+\beamer@sectionintoc {3}{Multiresolution Code}{7}{0}{3}
+\beamer@sectionintoc {4}{Multiresolution Finite Volume Scheme}{8}{0}{4}

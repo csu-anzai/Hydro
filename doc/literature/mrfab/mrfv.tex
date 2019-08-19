@@ -35,8 +35,7 @@
     % journal of fluid mechanics
 
 
-\title{Accelerating Multiresolution Schemes with Fully-Adaptive-Block
-Refinement: Applications to Reactive Flows}
+\title{Accelerating Block-Structured Adaptive Multiresolution Schemes: Applications to Reactive Flows}
 
 \author{
   Brandon Gusto\\
@@ -88,9 +87,9 @@ Refinement: Applications to Reactive Flows}
     % paragraph introduces the need for spatially adaptive grids
     Highly energetic and reacting flows are often characterized by disparate
     spatial and temporal length scales. Features such as shockwaves and contact
-    discontinuities, for instance, require vastly more resolution than do smooth
+    discontinuities, for instance, require significantly more resolution than smooth
     regions of the flow. Naturally, intense effort has gone into the development
-    of methods which employ some type of adaptive strategy. The purpose of an
+    of methods which employ adaptive strategies. The purpose of an
     adaptive strategy is to accurately simulate such flows without expending
     excess computational resources in relatively smooth regions of the flow.
 
@@ -134,7 +133,7 @@ Refinement: Applications to Reactive Flows}
 
     % paragraph reviews the work of harten and multiresolution methods
     Alternate approaches to dynamic grid adaptation based on wavelet theory
-    became popular after the seminal papers by Harten [\cite{harten1994},] were
+    became popular after the seminal papers by Harten \cite{harten1994}, were
     introduced. In this work, a multiresolution representation of the discrete
     solution on a uniform grid was used for adaptively computing the divergence
     of the flux within a finite volume framework. Rather than adapt the grid
@@ -171,7 +170,14 @@ Refinement: Applications to Reactive Flows}
     additional computation (the MR information is recycled after adaptation),
     while not impacting the accuracy of the solver.
 
-\section{Conservation Laws and Finite Volume Discretization}
+    In the section 2 of this manuscript, we describe the conservations laws that
+    we are interested in solving, as well as the underlying finite volume
+    method and discretization. In section 3, we introduce the multiresolution
+    decomposition of the numerical solution. In section 4, the block-based
+    adaptive scheme is introduced, which combines grid adaptation with the
+    interpolatory scheme of Harten \hl{cite}.
+    
+\section{Finite volume discretization of conservation laws}
 
     % describe merging block-structured AMR with Harten's scheme
     In the present work we are interested in numerically solving conservation
@@ -189,34 +195,36 @@ Refinement: Applications to Reactive Flows}
     the more complicated systems of conversation laws which will be the focus of
     our applications.  In the finite volume formulation, the solution $u(x,t)$
     is approximated by volume averages defined within each cell $I_{i} = \left[
-    x_{i}-\frac{h}{2}, x_{i}+\frac{h}{2} \right]$ in the computational
+    x_{i}-\frac{\Delta x}{2}, x_{i}+\frac{\Delta x}{2} \right]$ in the computational
     domain.  The cell width $h$ is determined by the number of cells, $N$, and
     the size of the domain $\Omega \in \left[a,b\right]$.  The cell averages are
     given by
     \begin{equation}
-        \overline{u}_{i}(t) = \frac{1}{h} \int_{x_{i-1/2}}^{x_{i+1/2}} u(\xi,t) d \xi,
+        \overline{u}_{i}(t) = \frac{1}{\Delta x} \int_{x_{i-1/2}}^{x_{i+1/2}} u(\xi,t) d \xi,
     \end{equation}
     where for convenience we use $i \pm 1/2$ as subscripts to indicate the left
     and right interfaces of the target cell (i.e.  $x_{i+1/2} = x_{i} +
-    \frac{h}{2}$). The governing equations are cast into the semi-discrete
+    \frac{\Delta x}{2}$). The governing equations are cast into the semi-discrete
     conservative form,
     \begin{equation}
-        \frac{d \overline{u}_{i}(t)}{dt} = L(\bm{u}) = -\frac{1}{h} \left( \hat{f}_{i+1/2} -
+        \frac{d \overline{u}_{i}(t)}{dt} = L(\bm{u}) = -\frac{1}{\Delta x} \left( \hat{f}_{i+1/2} -
         \hat{f}_{i-1/2} \right) + \overline{s}_{i},
         \label{ode}
     \end{equation}
-    where $\overline{s} = \frac{1}{h} \int_{x_{i-1/2}}^{x_{i+1/2}} s(\xi) d
+    where $\overline{s} = \frac{1}{\Delta x} \int_{x_{i-1/2}}^{x_{i+1/2}} s(\xi) d
     \xi$, and the numerical flux is evaluated as
     \begin{equation}
         \hat{f}_{i\pm1/2} = \hat{f}(u^{-}_{i\pm1/2}, u^{+}_{i\pm1/2}).
     \end{equation}
     The states $u^{-}_{i\pm1/2}$ and $u^{+}_{i\pm1/2}$ indicate the approximate
     value of the quantity $u$ immediately to the left and right of the cell
-    interface $x_{i\pm1/2}$. These values are reconstructed from a stencil of
-    cell averages using weighted essentially non-oscillatory schemes of
-    variable order.
+    interface $x_{i\pm1/2}$. 
+    
+    %These values are reconstructed from a stencil of
+    %cell averages using weighted essentially non-oscillatory schemes of
+    %variable order.
 
-    \subsection{Spatial Reconstruction and Calculation of Fluxes}
+    \subsection{Spatial reconstruction and calculation of fluxes}
 
         % overview of PPM
         In the vast majority of multiresolution finite volume schemes 
@@ -228,9 +236,9 @@ Refinement: Applications to Reactive Flows}
         can provide input here?}). In the present work, we use the piecewise
         parabolic method (PPM) of Woodward and Collela \hl{ref} to reconstruct
         the field and provide left and right inputs to the Riemann solver at
-        each cell interface.
+        each cell interface. \hl{More here from Tomek}.
 
-    \subsection{Time Integration}
+    \subsection{Time integration}
 
         % define evolution operator as in domingues2008
         Once the system of ordinary differential equations (\ref{ode}) is
@@ -238,105 +246,112 @@ Refinement: Applications to Reactive Flows}
         implementation we use a second-order explicit TVD Runge-Kutta scheme to
         advance. This is summarized by
         \begin{align}
-            & \tilde{\bm{u}}_{1} = \bm{u}^{n} + c_{1} \triangle t L(\bm{u}^{n}) \\
-            & \tilde{\bm{u}}_{2} = \tilde{\bm{u}}_{1} + c_{2} \triangle t L(\tilde{\bm{u}}_{1}) \\
+            & \tilde{\bm{u}}_{1} = \bm{u}^{n} + c_{1} \Delta t L(\bm{u}^{n}) \\
+            & \tilde{\bm{u}}_{2} = \tilde{\bm{u}}_{1} + c_{2} \Delta t L(\tilde{\bm{u}}_{1}) \\
             & \bm{u}^{n+1} = b_{1} \tilde{\bm{u}}_{1} + b_{2} \tilde{\bm{u}}_{2}
         \end{align}
         where $\bm{E}$ represents the nonlinear evolution operator, and codifies the
         temporal and spatial discretizations.
 
-\section{Harten's Multiresolution Scheme}
+\section{Multiresolution representation of data}
 
     % describe overview of transform, and average-interpolating wavelets
-    We present here a brief review of Harten's multiresolution method for
-    adaptive flux computations within the original context of uniform,
-    one-dimensional grids. This is necessary to illustrate the extension of the
-    scheme to block-structured AMR grids. The multiresolution approach is based
-    on a hierarchy of nested discretizations on the domain of interest,
-    $\Omega$.  The hierarchy consists of grids at a coarsest level $l=1$ to a
-    finest grid $l=L$, where any two adjacent levels differ by a refinement
-    factor of two.  The grids are defined by
+    We present here a review of the multiresolution concepts, as first
+    introduced by Harten \hl{cite} within the context of conservative finite volume
+    schemes. We illustrate the scheme for one- and two-dimensional uniform
+    grids for simplicity, but the approach can be generalized to non-uniform
+    Cartesian or Curvilinear grids. The multiresolution approach is based on a
+    hierarchy of nested discretizations on the domain of interest.  The
+    hierarchy consists of grids $l=1$ to $l=L$, labeled in order of increasing
+    resolution. Any two adjacent levels differ by a refinement factor of two.
+    The grids are defined by
     \begin{equation}
         \bm{\mathcal{G}}_{l} = \left\{ x_{i}^{l} \right\}_{i=0}^{N_{l}}, \text{ }
-        \text{ } \text{ } \text{ } x_{i}^{l} = i \cdot h_{l}, \text{ }
-        \text{ } h_{l} = 2^{L-l} \cdot h_{L}, \text{ } \text{ } N_{l} = N_{L}
+        \text{ } \text{ } \text{ } x_{i}^{l} = i \cdot \Delta x_{l}, \text{ }
+        \text{ } \Delta x_{l} = 2^{L-l} \cdot \Delta x_{L}, \text{ } \text{ } N_{l} = N_{L}
         / 2^{L-l},
     \end{equation}
-    where $h_{l}$ and $N_{l}$ denote the cell width and number of cells,
+    where $\Delta x_{l}$ and $N_{l}$ denote the cell width and number of cells,
     respectively, on level $l$. We denote the finest grid by
-    $\bm{\mathcal{G}}_{L}$. denote the index space of cells on each level
-    of the hierarchy by $\bm{\mathcal{I}}^{l} = \left\{ 1,\dots,N_{l} \right\}$.
+    $\bm{\mathcal{G}}_{L}$. The index space of cells on each level of the
+    hierarchy is denoted by $\bm{\mathcal{I}}^{l} = \left\{ 1,\dots,N_{l}
+    \right\}$. The objective of the multiresolution procedure is to transform
+    the data at the finest level, representing it instead as a sum of values at
+    the coarsest level plus a series of differences at finer levels. The result
+    is a decomposition which provides frequency and scale information of the
+    underlying data.
 
-    \subsection*{Encoding}
+    \subsection*{Forward transform}
 
         % describe the prediction operator, and detail coefficients
-        Given a vector of discrete cell averages at the finest resolution,
-        $\bm{u}^{L}$, the multiresolution representation is obtained by
-        performing a set of operations on levels $l = L-1,L-2,\dots,1$.  The
-        operations for an arbitrary level $l$ are as follows:
+        Given cell averages at the finest resolution, $\bm{\overline{u}}^{L}$, the forward
+        transform proceeds by performing the following set of mappings on levels $l =
+        L-1,L-2,\dots,1$:
         \begin{enumerate}
-            \item[] \textit{Split:} The cells at grid level $l+1$ are split into
-                even and odd sets, $\bm{\mathcal{I}}_{even}^{l+1}$ and
-                $\bm{\mathcal{I}}_{odd}^{l+1}$, based on their indices.
+%            \item[] \textit{Split:} The cells at grid level $l+1$ are split into
+%                even and odd sets, $\bm{\mathcal{I}}_{even}^{l+1}$ and
+%                $\bm{\mathcal{I}}_{odd}^{l+1}$, based on their indices.
             \item[] \textit{Project:} The cells at level $l+1$ are projected
                 by means of averaging, onto the coarser grid
                 level $l$. The projection is defined by a linear operator
-                which performs the mapping $\bm{P}_{l+1}^{l} : \bm{u}^{l+1}
-                \mapsto \bm{u}^{l}$. 
-            \item[] \textit{Predict}: Cell averages with indices $i \in
-                \bm{\mathcal{I}}_{odd}^{l+1}$ are predicted by an
-                average-interpolating polynomial constructed on level $l$.
-                Thus, the prediction operator performs the mapping
-                $\bm{P}_{l}^{l+1} : \bm{u}^{l} \mapsto \tilde{\bm{u}}^{l+1}$. 
+                which performs the mapping $\bm{P}_{l+1}^{l} : \overline{\bm{u}}^{l+1}
+                \mapsto \overline{\bm{u}}^{l}$. 
+            \item[] \textit{Predict}: Cell averages at level $l+1$
+                are predicted by an average-interpolating polynomial constructed
+                of cells on level $l$. The prediction operator performs
+                the mapping $\bm{P}_{l}^{l+1} : \overline{\bm{u}}^{l} \mapsto
+                \tilde{\bm{u}}^{l+1}$. 
         \end{enumerate}
-        The projection preserves averages at the finer level, by design, and in
-        the context of uniform grids is the simple averaging of parent cells,
+        The projection operation, which preserves averages at the finer level by design, 
+        is the simple weighted average of parent cells. In one dimension, this
+        average is given by
         \begin{equation}
-            u^{l}_{i} = \left( \bm{P}_{l+1}^{l} \bm{u}^{l+1} \right)_{i} = \frac{1}{2} ( u^{l+1}_{2i-1} + u^{l+1}_{2i} ), \text{ }
-            \text{ } \text{ } \text{ } \forall i \in \bm{\mathcal{I}}^{l}.
+            \overline{u}^{l}_{i} = \left( \bm{P}_{l+1}^{l}
+            \overline{\bm{u}}^{l+1} \right)_{i} = \frac{1}{2} (
+            \overline{u}^{l+1}_{2i-1} + \overline{u}^{l+1}_{2i} ), \quad \forall
+            i \in \bm{\mathcal{I}}^{l}.
         \end{equation}
         The prediction operator is defined by a unique average-interpolating
         polynomial to predict, based on a stencil of cell averages at grid level
-        $l$, the odd cell averages at the finer level $l+1$. The prediction
-        mapping is performed using the following centered interpolants,
-        \begin{equation}
-%            \tilde{u}_{i}^{l+1} = \left( \bm{P}_{l}^{l+1} \bm{u}^{l}
+        $l-1$, the odd cell averages at the finer level $l$. The prediction
+        mapping is performed using the following centered interpolants with
+        $m\in\{0,1\}$,
+        \begin{align}
+%            \tilde{u}_{i}^{l} = \left( \bm{P}_{l-1}^{l} \bm{u}^{l-1}
 %            \right)_{i} = 
 %            \begin{cases}
-%                u_{i/2}^{l} - \sum_{p=1}^{s} \gamma_{p} \left( u^{l}_{i/2-p} -
-%                u^{l}_{i/2+p} \right), \text{ } \text{ } \text{ } \forall
-%                i \in \bm{\mathcal{I}}_{even}^{l+1} \\
-%                u_{(i+1)/2}^{l} + \sum_{p=1}^{s} \gamma_{p} \left(
-%                u^{l}_{(i+1)/2-p} - u^{l}_{(i+1)/2+p} \right), \text{ }
-%                \text{ } \text{ } \forall i \in \bm{\mathcal{I}}_{odd}^{l+1}
+%                u_{i/2}^{l-1} - \sum_{p=1}^{s} \gamma_{p} \left( u^{l-1}_{i/2+p} -
+%                u^{l-1}_{i/2-p} \right), \text{ } \text{ } \text{ } \forall
+%                i \in \bm{\mathcal{I}}_{even}^{l} \\
+%                u_{(i+1)/2}^{l-1} + \sum_{p=1}^{s} \gamma_{p} \left(
+%                u^{l-1}_{(i+1)/2+p} - u^{l-1}_{(i+1)/2-p} \right), \text{ }
+%                \text{ } \text{ } \forall i \in \bm{\mathcal{I}}_{odd}^{l}
 %            \end{cases}
-            \tilde{u}_{2i}^{l+1} = \left( \bm{P}_{l}^{l+1} \bm{u}^{l}
-                \right)_{i} = u_{i}^{l} - \sum_{p=1}^{s} \gamma_{p} \left(
-                u^{l}_{i-p} - u^{l}_{i+p} \right) \text{ } \text{ } \text{ }
-                \forall i \in \bm{\mathcal{I}}^{l}
+            \tilde{u}_{2i-m}^{l+1} = u_{i}^{l} - (-1)^{m} \sum_{p=1}^{s} \gamma_{p} \left(
+                u^{l}_{i+p} - u^{l}_{i-p} \right), \quad \forall i \in \bm{\mathcal{I}}^{l}
             \label{prediction}
-        \end{equation}
+        \end{align}
         The coefficients $\gamma_{i}$ are supplied in Table (\ref{coeff1}). The
         order of accuracy of each interpolant is $r=2s+1$.
-        \begin{table}[H]
+        \begin{table}
             \center
             \begin{tabular}{|l|l|l|l|}
             \hline
                 order    & $\gamma_{1}$ & $\gamma_{2}$ & $\gamma_{3}$ \\ \hline
-                3 & 1/8          & 0            & 0            \\ \hline
+                3 & -1/8          & 0            & 0            \\ \hline
                 5 & -22/128      & 3/128        & 0            \\ \hline
                 7 & 0            & 0            & 0            \\ \hline
             \end{tabular}
             \label{coeff1}
-            \caption{For the derivation of these coefficients, the reader is referred to Appendix (\hl{ref}).}
+            \caption{Coefficients for centered, conservative interpolants of
+                orders 3-7. For the derivation of these coefficients, the reader is referred to Appendix (\hl{ref}).}
         \end{table}
         Once the prediction is made, the difference information is
-        obtained by computing the detail coefficient as
+        obtained by computing the detail coefficients as
         \begin{equation}
-            d^{l}_{i} = u^{l+1}_{2i} - \tilde{u}^{l+1}_{2i}, \text{ } \text{ }
-            \text{ } \text{ } \forall i \in \bm{\mathcal{I}}^{l}.
+            d^{l}_{i} = u^{l+1}_{2i} - \tilde{u}^{l+1}_{2i}, \quad \forall i \in \bm{\mathcal{I}}^{l}.
         \end{equation}
-        for each cell.  The encoding procedure is complete when the detail
+        The forward transform is complete when the detail
         coefficients have been computed on all levels $l=1,\dots,L-1$.  The
         entire procedure can be succinctly written in terms of a matrix-vector
         operation to yield the multiresolution representation of the data,
@@ -401,7 +416,7 @@ Refinement: Applications to Reactive Flows}
         computes fluxes using the fine-grid scheme, or interpolates them using
         the MR basis. The fluxes are interpolated by
         \begin{equation}
-            \hat{f}_{2i+1}^{l-1} \approx \sum_{p=1}^{s+1} \beta_{p} \left(
+            \hat{f}_{2i+1}^{l+1} \approx \sum_{p=1}^{s+1} \beta_{p} \left(
             \hat{f}^{l}_{i-p+1} + \hat{f}^{l}_{i+p} \right),
         \end{equation}
         \begin{table}[]
