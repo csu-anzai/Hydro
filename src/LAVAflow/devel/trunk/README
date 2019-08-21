@@ -1,0 +1,54 @@
+﻿#===============================================================
+# LAVAflow Brief Documentation
+# Last updated: 10-01-2015 by TAH
+#
+# Sections:
+# 1) Building
+# 2) Creating new driver
+#
+#===============================================================
+
+
+#===========================
+# 1) Building
+#===========================
+To setup the build process perform the following commands:
+    cd <lavaflow trunk>
+    mkdir build
+    cd build
+    cmake ..
+This will generate the required Makefiles.
+
+
+To perform a full build of ALL libraries and available drivers:
+    gmake -j <num procs> 
+
+
+To perform a build of only the LAVAflow library:
+    gmake -j <num procs> LAVAflow
+
+
+To perform a build of a specific driver:
+    gmake -j <num procs> <driver name>
+
+
+#===========================
+# 2) Creating a new driver
+#===========================
+To create a new driver, first decide if it will be a devel, test, or production driver. 
+Devel drivers are for developing parts of the library. 
+Test drivers are for automated unit tests. 
+Production drivers are final analysis ready.
+
+1. Copy the drivers/templateDriver directory to <driver type>/<driver name> 
+      where <driver name> is your desired name for the driver.
+2. Add the line ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/<driver name>)  to <driver type>/CMakeLists.txt
+3. In your new driver directory, rename “templateDriver.cxx” to <driver name>.cxx
+4. In your new driver directory, change the CMakeLists.txt file line SET(DRIVER_NAME "templateDriver") 
+      to SET(DRIVER_NAME "<driver name>")
+5. In your new driver directory, add additional sources to DRIVER_SOURCES as neccessary.
+
+Note that this templateDriver setup uses the new Driver class for setup of the surrounding environment. 
+This means that the actual main function lives in drivers/Driver_main.cxx, and the user-defined driver setup
+MUST include this file in its sources. The user driver must also include Driver_main.h and use 
+LAVAFLOW_DRIVER_BASENM as its function name.

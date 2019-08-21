@@ -1,11 +1,9 @@
 \BOOKMARK [1][-]{section.1}{Introduction}{}% 1
 \BOOKMARK [1][-]{section.2}{Conservation Laws and Finite Volume Discretization}{}% 2
-\BOOKMARK [2][-]{subsection.2.1}{WENO Reconstruction}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.1}{Spatial Reconstruction and Calculation of Fluxes}{section.2}% 3
 \BOOKMARK [2][-]{subsection.2.2}{Time Integration}{section.2}% 4
-\BOOKMARK [1][-]{section.3}{Harten's Multiresolution Scheme on a Uniform Grid}{}% 5
-\BOOKMARK [1][-]{section.4}{Asynchronous Fully Adaptive Block Scheme}{}% 6
+\BOOKMARK [1][-]{section.3}{Harten's Multiresolution Scheme}{}% 5
+\BOOKMARK [1][-]{section.4}{Fully Adaptive Block Scheme}{}% 6
 \BOOKMARK [1][-]{section.5}{Numerical Results}{}% 7
-\BOOKMARK [1][-]{section.6}{Acknowledgements}{}% 8
-\BOOKMARK [1][-]{appendix.A}{Multiresolution Analysis}{}% 9
-\BOOKMARK [1][-]{appendix.B}{Derivation of Prediction Operator in One-Dimension}{}% 10
-\BOOKMARK [1][-]{appendix.C}{Weights for WENO Reconstruction}{}% 11
+\BOOKMARK [1][-]{appendix.A}{Derivation of Prediction Operator in One-Dimension}{}% 8
+\BOOKMARK [1][-]{appendix.B}{WENO Reconstruction}{}% 9

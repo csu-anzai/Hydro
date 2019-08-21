@@ -1,0 +1,13 @@
+// config file for SaveClusterMesh
+
+
+inFilePath = "/data1/df11c/data/data/wdm/";
+inFilename = "wdm_hdf5_chk_0050";
+
+outFilePath = "/data1/df11c/Simulations/MergerEneryDecomp/";
+outFilename = "wdm_hdf5_chk_0050";
+
+subdomainBoundsX = [-1025e6,-880e6];
+subdomainBoundsY = [-6e6,139e6];
+subdomainBoundsZ = [0.,145e6];
+

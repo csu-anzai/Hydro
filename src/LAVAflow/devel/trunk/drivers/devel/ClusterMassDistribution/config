@@ -1,0 +1,14 @@
+// config file for SaveClusterMesh
+
+
+filePath            = "/data1/df11c/Simulations/WDStir/ClusterTest/";
+inFilename          = "tburn_hdf5_plt_cnt_0000";
+clusterFilename     = "markedClusters";
+
+// ignition time threshold for identifying clusters
+thresholdVarCutoff  = 10.;
+
+// minimum number of cells in a cluster (smaller clusters will be discarded)
+minClusterSize      = 10000;
+
+

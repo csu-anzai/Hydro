@@ -1,0 +1,167 @@
+#include <vtkType.h>
+#include <vtkIdList.h>
+#include <vtkTriangle.h>
+#include <vtkPolyData.h>
+#include <vtkCellData.h>
+#include <vtkPointData.h>
+#include <vtkDoubleArray.h>
+#include <vtkCurvatures.h>
+
+#include "BaseOperator.h"
+#include "CurvatureOperator.h"
+
+CurvatureOperator::CurvatureOperator()
+{
+	curvatures=vtkSmartPointer<vtkCurvatures>::New();
+	curvatures->SetCurvatureTypeToMean();
+}
+
+double distance2D(double* a, double* b)
+{
+	double delX = b[0]-a[0];
+	double delY = b[1]-a[1];
+	return sqrt(delX*delX+delY*delY); 
+}
+
+vtkSmartPointer<vtkIdList> getConnectedPoints(vtkSmartPointer<vtkPolyData> mesh, int point)
+{
+	vtkSmartPointer<vtkIdList> connectedVertices =
+		vtkSmartPointer<vtkIdList>::New();	
+	vtkSmartPointer<vtkIdList> cellIdList =
+	      vtkSmartPointer<vtkIdList>::New();
+	mesh->GetPointCells(point, cellIdList);
+	cout<<"Number of cell Ids "<<cellIdList->GetNumberOfIds()<<endl;
+
+	for(vtkIdType i = 0; i < cellIdList->GetNumberOfIds(); i++)
+	{
+
+		vtkSmartPointer<vtkIdList> pointIdList =
+		vtkSmartPointer<vtkIdList>::New();
+		mesh->GetCellPoints(cellIdList->GetId(i), pointIdList);
+		cout<<"Number of point Ids "<<pointIdList->GetNumberOfIds()<<endl;
+
+		if(pointIdList->GetId(0) != point)
+		{
+			connectedVertices->InsertNextId(pointIdList->GetId(0));
+		}
+		else
+		{
+			connectedVertices->InsertNextId(pointIdList->GetId(1));
+		}
+	}
+	return connectedVertices;
+}
+
+vtkSmartPointer<vtkDataSet> CurvatureOperator::process(const vtkSmartPointer<vtkDataSet> ds)
+{
+	vtkSmartPointer<vtkPolyData> pd = vtkPolyData::SafeDownCast(ds);
+	//If pd is null then we it's not a polydata object
+	//and therfore we can't compute the Curvature.
+	if(!pd)
+	{
+		cout<<"input to CurvatureOperator is not polydata!"<<endl;
+		return pd;
+	}
+	
+	vtkSmartPointer<vtkPolyData> retval = vtkSmartPointer<vtkPolyData>::New();
+	retval->DeepCopy(pd);
+	
+	int numPts = pd->GetNumberOfPoints();
+	// Empty array check
+	if (numPts==0||(pd->GetNumberOfPolys()==0 && pd->GetNumberOfLines()==0))
+	{
+		cout<<"Input to CurvatureOperator has no polygons or points!"<<endl;
+		return retval;
+	}
+
+	// vtkData
+	vtkSmartPointer<vtkIdList> vertices = vtkSmartPointer<vtkIdList>::New();
+	vtkSmartPointer<vtkIdList> neighborVertices = vtkSmartPointer<vtkIdList>::New();
+	//Holds current verteces index
+	int v[3];
+	//Stores each vertex xyz values.
+	double points[3][3];
+	double lengthBackward=0.0;
+	double lengthForward=0.0;
+	double thetaBackward=0.0;
+	double thetaForward=0.0;
+	double theta=0.0;
+	double delBackward=0.0;
+	double delForward=0.0;
+
+	retval->BuildLinks();
+	//data init
+	//int face = 0;
+	int pointID=0;
+	int numPoints = retval->GetNumberOfPoints();
+	int nv = 0;
+	//get the first face to determine the dimensionality
+	retval->GetCellPoints(0,vertices);
+	nv = vertices->GetNumberOfIds();
+	
+	//we have a 2d mesh
+	if(nv==2||nv>3)
+	{
+		vtkDoubleArray* meanCurvature = vtkDoubleArray::New();
+		meanCurvature->SetName("Mean_Curvature");
+		meanCurvature->SetNumberOfComponents(1);
+		meanCurvature->SetNumberOfTuples(numPoints);
+		double *meanCurvatureData = meanCurvature->GetPointer(0);
+		//loop through each point 
+		for (pointID = 0; pointID < numPoints; pointID++)
+		{
+			neighborVertices=getConnectedPoints(retval,pointID);
+	
+			if(neighborVertices->GetNumberOfIds()==0)
+			{
+				cout<<"no neighbors"<<endl;
+				//no neighbors = no curvature
+				meanCurvatureData[pointID]=0.0;
+				continue;
+			}
+	
+			retval->GetPoint(neighborVertices->GetId(0),points[0]);
+			retval->GetPoint(pointID,points[1]);
+			lengthBackward=distance2D(points[0],points[1]);
+			thetaBackward=std::atan(std::abs((points[0][0]-points[1][0])/(points[0][1]-points[1][1])));
+			delBackward =std::abs(thetaBackward-theta);
+
+
+			if(neighborVertices->GetNumberOfIds()==2)
+			{
+								retval->GetPoint(neighborVertices->GetId(1),points[2]);
+				lengthForward=distance2D(points[1],points[2]);
+				thetaForward=std::atan(std::abs((points[2][0]-points[1][0])/(points[2][1]-points[1][1])));
+				delForward =std::abs(thetaForward-theta);
+				cout<<"two neighbors"<<endl;
+				theta=0.5 * (thetaBackward+thetaForward);
+				meanCurvatureData[pointID]=(delBackward/(2.*lengthBackward))+(delForward/(2.*lengthForward));
+			}
+			else
+			{	
+				//TODO: One neighbor, find algorithm for 1 neighbor
+				cout<<"one neighbor"<<endl;
+				meanCurvatureData[pointID]=0.0;
+			}
+		}
+		retval->GetPointData()->AddArray(meanCurvature);
+		retval->GetPointData()->SetActiveScalars("Mean_Curvature");
+
+		return retval;
+	}
+	curvatures->SetInputData(pd);
+	curvatures->Update();
+	return curvatures->GetOutput();
+}
+void CurvatureOperator::useMeanCurvature()
+{
+curvatures->SetCurvatureTypeToMean();
+}
+void CurvatureOperator::useMaximumCurvature()
+{
+curvatures->SetCurvatureTypeToMaximum();
+}
+void CurvatureOperator::useMinimumCurvature()
+{
+curvatures->SetCurvatureTypeToMinimum();
+}

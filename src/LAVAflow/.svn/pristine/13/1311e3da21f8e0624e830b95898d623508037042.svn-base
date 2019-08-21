@@ -1,0 +1,2 @@
+/usr/bin/ar cr libLAVAPARTICLES.a  CMakeFiles/LAVAPARTICLES.dir/Particles.cxx.o
+/usr/bin/ranlib libLAVAPARTICLES.a
