@@ -1,5 +1,5 @@
 \BOOKMARK [1][-]{section.1}{Introduction}{}% 1
-\BOOKMARK [1][-]{section.2}{Finite volume discretization of conservation laws}{}% 2
+\BOOKMARK [1][-]{section.2}{Finite volume method}{}% 2
 \BOOKMARK [2][-]{subsection.2.1}{Spatial reconstruction and calculation of fluxes}{section.2}% 3
 \BOOKMARK [2][-]{subsection.2.2}{Time integration}{section.2}% 4
 \BOOKMARK [1][-]{section.3}{Multiresolution representation of data}{}% 5

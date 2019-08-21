@@ -170,55 +170,55 @@
     additional computation (the MR information is recycled after adaptation),
     while not impacting the accuracy of the solver.
 
-    In the section 2 of this manuscript, we describe the conservations laws that
-    we are interested in solving, as well as the underlying finite volume
+    In the section 2 of this manuscript, we describe the conservations laws 
+    of interest as well as the underlying finite volume
     method and discretization. In section 3, we introduce the multiresolution
     decomposition of the numerical solution. In section 4, the block-based
     adaptive scheme is introduced, which combines grid adaptation with the
     interpolatory scheme of Harten \hl{cite}.
     
-\section{Finite volume discretization of conservation laws}
+\section{Finite volume method}
 
-    % describe merging block-structured AMR with Harten's scheme
+    % introduce conservation laws
     In the present work we are interested in numerically solving conservation
     laws of the form
     \begin{equation}
     \begin{cases}
-      u_{t} + f(u)_{x} = s(u) \\    
-      u(x,0) = u_{0}(x),
+      u_{t} + \nabla \cdot f(u) = s(u) \\
+      u(x,0) = u_{0}(x).
     \end{cases}
     \label{claw}
     \end{equation}
-    where $x \in \Omega$, $t \in [t_{0},t_{fin}]$, $u$ represents a conserved
-    quantity, $f(u)$ is the flux function, and $s(u)$ is a source term. For the
-    sake of presentation, we let the scalar equation (\ref{claw}) stand in for
-    the more complicated systems of conversation laws which will be the focus of
-    our applications.  In the finite volume formulation, the solution $u(x,t)$
-    is approximated by volume averages defined within each cell $I_{i} = \left[
-    x_{i}-\frac{\Delta x}{2}, x_{i}+\frac{\Delta x}{2} \right]$ in the computational
-    domain.  The cell width $h$ is determined by the number of cells, $N$, and
-    the size of the domain $\Omega \in \left[a,b\right]$.  The cell averages are
-    given by
+    where $u \in \mathbb{R}^{m}, x \in \mathbb{R}^{n},$ and $t > 0$. Here
+    $u(t,x)$ represents a conserved quantity, $f(u)$ is the flux function, and
+    $s(u)$ is a source term. \hl{Discuss discontinuous solutions}.
+    
+    In the finite volume formulation, the spatial domain is discretized into
+    control volumes $V_{i}$, inside which the solution is approximated by volume
+    averages as
     \begin{equation}
-        \overline{u}_{i}(t) = \frac{1}{\Delta x} \int_{x_{i-1/2}}^{x_{i+1/2}} u(\xi,t) d \xi,
+        \overline{u}_{i}(t) = \frac{1}{|V_{i}|} \int_{V_{i}} u(x,t) dx.
     \end{equation}
-    where for convenience we use $i \pm 1/2$ as subscripts to indicate the left
-    and right interfaces of the target cell (i.e.  $x_{i+1/2} = x_{i} +
-    \frac{\Delta x}{2}$). The governing equations are cast into the semi-discrete
-    conservative form,
+    The governing equations are cast into the semi-discrete conservative form
+    by application of the divergence theorem, yielding
     \begin{equation}
-        \frac{d \overline{u}_{i}(t)}{dt} = L(\bm{u}) = -\frac{1}{\Delta x} \left( \hat{f}_{i+1/2} -
-        \hat{f}_{i-1/2} \right) + \overline{s}_{i},
+        \frac{d \overline{u}_{i}(t)}{dt} = L(\overline{u}) =  -\frac{1}{|V_{i}|} \sum_{\mu} |
+        \Gamma_{i,j}| \hat{f}_{i,j}
+        + \overline{s}_{i},
         \label{ode}
     \end{equation}
-    where $\overline{s} = \frac{1}{\Delta x} \int_{x_{i-1/2}}^{x_{i+1/2}} s(\xi) d
-    \xi$, and the numerical flux is evaluated as
+    where interfaces are represented as $\Gamma_{i,j} = V_{i} \cap
+    V_{j}$. The sources are given in a cell-averaged sense as
     \begin{equation}
-        \hat{f}_{i\pm1/2} = \hat{f}(u^{-}_{i\pm1/2}, u^{+}_{i\pm1/2}).
+        \overline{s} = \frac{1}{|V_{i}|} \int_{|V_{i}|} s(u) dx,
     \end{equation}
-    The states $u^{-}_{i\pm1/2}$ and $u^{+}_{i\pm1/2}$ indicate the approximate
-    value of the quantity $u$ immediately to the left and right of the cell
-    interface $x_{i\pm1/2}$. 
+    and the numerical flux is evaluated as
+    \begin{equation}
+        \hat{f}_{i,j} = \hat{f}(u^{-}_{i,j}, u^{+}_{i,j}),
+    \end{equation}
+    where the states $u^{-}_{i,j}$ and $u^{+}_{i,j}$ indicate the approximate
+    value of the quantity $u$ on opposite sides of the cell
+    interface $\Gamma_{i,j}$.
     
     %These values are reconstructed from a stencil of
     %cell averages using weighted essentially non-oscillatory schemes of
@@ -257,14 +257,13 @@
 
     % describe overview of transform, and average-interpolating wavelets
     We present here a review of the multiresolution concepts, as first
-    introduced by Harten \hl{cite} within the context of conservative finite volume
-    schemes. We illustrate the scheme for one- and two-dimensional uniform
-    grids for simplicity, but the approach can be generalized to non-uniform
-    Cartesian or Curvilinear grids. The multiresolution approach is based on a
-    hierarchy of nested discretizations on the domain of interest.  The
-    hierarchy consists of grids $l=1$ to $l=L$, labeled in order of increasing
-    resolution. Any two adjacent levels differ by a refinement factor of two.
-    The grids are defined by
+    introduced by Harten \hl{cite} within the context of conservative finite
+    volume schemes. The multiresolution approach is based on a hierarchy of
+    nested discretizations, $\bm{\mathcal{G}}_{l}$, on the domain of interest.
+
+    The hierarchy consists of grids $l=1$ to $l=L$, labeled in order of
+    increasing resolution. Any two adjacent levels differ by a refinement factor
+    of two.  The grids are defined by
     \begin{equation}
         \bm{\mathcal{G}}_{l} = \left\{ x_{i}^{l} \right\}_{i=0}^{N_{l}}, \text{ }
         \text{ } \text{ } \text{ } x_{i}^{l} = i \cdot \Delta x_{l}, \text{ }
@@ -303,65 +302,21 @@
                 \tilde{\bm{u}}^{l+1}$. 
         \end{enumerate}
         The projection operation, which preserves averages at the finer level by design, 
-        is the simple weighted average of parent cells. In one dimension, this
-        average is given by
-        \begin{equation}
-            \overline{u}^{l}_{i} = \left( \bm{P}_{l+1}^{l}
-            \overline{\bm{u}}^{l+1} \right)_{i} = \frac{1}{2} (
-            \overline{u}^{l+1}_{2i-1} + \overline{u}^{l+1}_{2i} ), \quad \forall
-            i \in \bm{\mathcal{I}}^{l}.
-        \end{equation}
-        The prediction operator is defined by a unique average-interpolating
-        polynomial to predict, based on a stencil of cell averages at grid level
-        $l-1$, the odd cell averages at the finer level $l$. The prediction
-        mapping is performed using the following centered interpolants with
-        $m\in\{0,1\}$,
-        \begin{align}
-%            \tilde{u}_{i}^{l} = \left( \bm{P}_{l-1}^{l} \bm{u}^{l-1}
-%            \right)_{i} = 
-%            \begin{cases}
-%                u_{i/2}^{l-1} - \sum_{p=1}^{s} \gamma_{p} \left( u^{l-1}_{i/2+p} -
-%                u^{l-1}_{i/2-p} \right), \text{ } \text{ } \text{ } \forall
-%                i \in \bm{\mathcal{I}}_{even}^{l} \\
-%                u_{(i+1)/2}^{l-1} + \sum_{p=1}^{s} \gamma_{p} \left(
-%                u^{l-1}_{(i+1)/2+p} - u^{l-1}_{(i+1)/2-p} \right), \text{ }
-%                \text{ } \text{ } \forall i \in \bm{\mathcal{I}}_{odd}^{l}
-%            \end{cases}
-            \tilde{u}_{2i-m}^{l+1} = u_{i}^{l} - (-1)^{m} \sum_{p=1}^{s} \gamma_{p} \left(
-                u^{l}_{i+p} - u^{l}_{i-p} \right), \quad \forall i \in \bm{\mathcal{I}}^{l}
-            \label{prediction}
-        \end{align}
-        The coefficients $\gamma_{i}$ are supplied in Table (\ref{coeff1}). The
-        order of accuracy of each interpolant is $r=2s+1$.
-        \begin{table}
-            \center
-            \begin{tabular}{|l|l|l|l|}
-            \hline
-                order    & $\gamma_{1}$ & $\gamma_{2}$ & $\gamma_{3}$ \\ \hline
-                3 & -1/8          & 0            & 0            \\ \hline
-                5 & -22/128      & 3/128        & 0            \\ \hline
-                7 & 0            & 0            & 0            \\ \hline
-            \end{tabular}
-            \label{coeff1}
-            \caption{Coefficients for centered, conservative interpolants of
-                orders 3-7. For the derivation of these coefficients, the reader is referred to Appendix (\hl{ref}).}
-        \end{table}
-        Once the prediction is made, the difference information is
+        is the simple weighted average of parent cells. 
+              Once the prediction is made, the difference information is
         obtained by computing the detail coefficients as
         \begin{equation}
             d^{l}_{i} = u^{l+1}_{2i} - \tilde{u}^{l+1}_{2i}, \quad \forall i \in \bm{\mathcal{I}}^{l}.
         \end{equation}
-        The forward transform is complete when the detail
-        coefficients have been computed on all levels $l=1,\dots,L-1$.  The
-        entire procedure can be succinctly written in terms of a matrix-vector
-        operation to yield the multiresolution representation of the data,
+        The forward transform is complete when the detail coefficients have been
+        computed on all levels $l=1,\dots,L-1$. The result of the forward
+        transform operation can be succinctly written as
         \begin{equation}
             \bm{u}^{L}_{M} = \bm{M} \bm{u}^{L} = \left( \bm{d}^{L-1}, \bm{d}^{L-2},
-            \dots, \bm{d}^{1}, \bm{u}^{1} \right)^{T}.
+            \dots, \bm{d}^{1}, \bm{u}^{1} \right)^{T},
         \end{equation}
-        Here the multiresolution operator $\bm{M}$ contains the prediction
-        operation and subsequent detail coefficient calculation for each cell
-        on each level of the hierarchy.
+        where $M$ denotes the linear transform operator, and $\bm{d}^{l} =
+        \left\{d^{l}_{i}\right\}_{i=1}^{N_{l}}$.
 
     \subsection*{Truncation}
 
@@ -419,18 +374,6 @@
             \hat{f}_{2i+1}^{l+1} \approx \sum_{p=1}^{s+1} \beta_{p} \left(
             \hat{f}^{l}_{i-p+1} + \hat{f}^{l}_{i+p} \right),
         \end{equation}
-        \begin{table}[]
-            \center
-            \begin{tabular}{|l|l|l|l|l|}
-            \hline
-                order    & $\beta_{1}$ & $\beta_{2}$ & $\beta_{3}$ & $\beta_{4}$ \\ \hline
-                3 & 9/16         & -1/16        & 0            & 0 \\ \hline
-                5 & 75/128       & -25/256      & 3/256        & 0 \\ \hline
-                7 & 1225/2048    & -245/2048    & 49/2048      & -5/2048 \\ \hline
-            \end{tabular}
-            \label{coeff2}
-            \caption{}
-        \end{table}
         where the interpolants are of degree $2s+1$. The coefficients for
         various degrees of polynomial interpolants are shown in Table (ref).
         The process repeats until all fluxes are either computed or
@@ -581,7 +524,63 @@
         equation of state which is in general not derived from that of an ideal gas.
 
 \appendix
-
+ 
+        In one dimension, this
+        average is given by
+        \begin{equation}
+            \overline{u}^{l}_{i} = \left( \bm{P}_{l+1}^{l}
+            \overline{\bm{u}}^{l+1} \right)_{i} = \frac{1}{2} (
+            \overline{u}^{l+1}_{2i-1} + \overline{u}^{l+1}_{2i} ), \quad \forall
+            i \in \bm{\mathcal{I}}^{l}.
+        \end{equation}
+        The prediction operator is defined by a unique average-interpolating
+        polynomial to predict, based on a stencil of cell averages at grid level
+        $l-1$, the odd cell averages at the finer level $l$. The prediction
+        mapping is performed using the following centered interpolants with
+        $m\in\{0,1\}$,
+        \begin{align}
+%            \tilde{u}_{i}^{l} = \left( \bm{P}_{l-1}^{l} \bm{u}^{l-1}
+%            \right)_{i} = 
+%            \begin{cases}
+%                u_{i/2}^{l-1} - \sum_{p=1}^{s} \gamma_{p} \left( u^{l-1}_{i/2+p} -
+%                u^{l-1}_{i/2-p} \right), \text{ } \text{ } \text{ } \forall
+%                i \in \bm{\mathcal{I}}_{even}^{l} \\
+%                u_{(i+1)/2}^{l-1} + \sum_{p=1}^{s} \gamma_{p} \left(
+%                u^{l-1}_{(i+1)/2+p} - u^{l-1}_{(i+1)/2-p} \right), \text{ }
+%                \text{ } \text{ } \forall i \in \bm{\mathcal{I}}_{odd}^{l}
+%            \end{cases}
+            \tilde{u}_{2i-m}^{l+1} = u_{i}^{l} - (-1)^{m} \sum_{p=1}^{s} \gamma_{p} \left(
+                u^{l}_{i+p} - u^{l}_{i-p} \right), \quad \forall i \in \bm{\mathcal{I}}^{l}
+            \label{prediction}
+        \end{align}
+        The coefficients $\gamma_{i}$ are supplied in Table (\ref{coeff1}). The
+        order of accuracy of each interpolant is $r=2s+1$.
+ 
+        \begin{table}[]
+            \center
+            \begin{tabular}{|l|l|l|l|l|}
+            \hline
+                order    & $\beta_{1}$ & $\beta_{2}$ & $\beta_{3}$ & $\beta_{4}$ \\ \hline
+                3 & 9/16         & -1/16        & 0            & 0 \\ \hline
+                5 & 75/128       & -25/256      & 3/256        & 0 \\ \hline
+                7 & 1225/2048    & -245/2048    & 49/2048      & -5/2048 \\ \hline
+            \end{tabular}
+            \label{coeff2}
+            \caption{}
+        \end{table}
+        \begin{table}
+            \center
+            \begin{tabular}{|l|l|l|l|}
+            \hline
+                order    & $\gamma_{1}$ & $\gamma_{2}$ & $\gamma_{3}$ \\ \hline
+                3 & -1/8          & 0            & 0            \\ \hline
+                5 & -22/128      & 3/128        & 0            \\ \hline
+                7 & 0            & 0            & 0            \\ \hline
+            \end{tabular}
+            \label{coeff1}
+            \caption{Coefficients for centered, conservative interpolants of
+                orders 3-7. For the derivation of these coefficients, the reader is referred to Appendix (\hl{ref}).}
+        \end{table}
 %\section{Multiresolution Analysis}
 %
 %    % describe multiresolution analysis (sourced from tymczak2000)
