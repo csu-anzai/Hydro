@@ -1,0 +1,2 @@
+/usr/bin/ar cr libLAVAUTIL.a  CMakeFiles/LAVAUTIL.dir/ScalarList.cxx.o CMakeFiles/LAVAUTIL.dir/IndexOperations.cxx.o CMakeFiles/LAVAUTIL.dir/SortOperations.cxx.o
+/usr/bin/ranlib libLAVAUTIL.a

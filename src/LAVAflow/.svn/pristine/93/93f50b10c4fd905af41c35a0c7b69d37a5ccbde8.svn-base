@@ -1,0 +1,2 @@
+/usr/bin/ar cr libLAVACLUST.a  CMakeFiles/LAVACLUST.dir/Block.cxx.o CMakeFiles/LAVACLUST.dir/SignatureBerger/SignatureBerger.cxx.o CMakeFiles/LAVACLUST.dir/FloodFill/FloodFill.cxx.o
+/usr/bin/ranlib libLAVACLUST.a

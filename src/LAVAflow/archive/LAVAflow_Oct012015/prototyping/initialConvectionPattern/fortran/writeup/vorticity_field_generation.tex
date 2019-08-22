@@ -1,0 +1,123 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath,amsbsy}
+\usepackage{bm}
+
+%\newcommand{\vect}[1]{\vec{\mathbf{#1}}}
+\newcommand{\vect}[1]{\bm{#1}}
+\newcommand{\diverg}[1]{\nabla\cdot\left(#1\right)}
+\newcommand{\partderiv}[2]{\frac{\partial #1}{\partial #2}}
+
+%opening
+\title{Generating divergence-free initial conditions for ccSN simulations}
+\author{Timothy Handy}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+\end{abstract}
+
+\section{Motivation}
+
+The pre-death evolution of a star is a chaotic, jumbled process. However, when we simulate core-collapse supernovae, we typically consider a smooth, onion-like distribution of density. In order to develop more realistic models for ccSN simulations, we need to impose density and velocity perturbations on the initial conditions. It's ideal that these perturbations do not introduce initial compression/expansion, and therefore are divergence free.
+
+We note now that there are two ways to impose an initial (divergent) velocity field given an initial density field. 
+\begin{itemize}
+\item Prescribe the velocity field directly. 
+\item Prescribe a vorticity field and solve for the velocity field (subject to additional constraint equations).
+\end{itemize}
+
+\section{Definitions}
+
+Given a scalar density field, $\rho$ and a vector velocity field, $\vect{u}$, the divergence free condition is 
+
+\begin{equation}
+\nabla\cdot(\rho\vect{u}) = 0
+\end{equation}
+
+\section{Case I: Prescribed velocity and density fields}
+
+First, let's consider the case when we have a given initial velocity field, $\vect{u^*}\vect{x})$, and density field, $\rho(\vect{x})$.
+
+Unless the initial velocity field is fairly trivial (or $\rho\equiv0$), the resulting divergence $\diverg{\rho\vect{u^*}}\neq0$. In this case, we need to perform ``divergence cleaning" in order to obtain the divergence free field. 
+
+The method and its specifics have been outlined in [Brackbill \& Barnes, Balsara \& Spicer, Toth, Dedner], but I'll recap the concept now.
+
+The Helmholtz decomposition states that a vector, $\vect{v}$, it may be decomposed into a solenoidal component and a compressive component:
+
+\begin{equation} \label{e:helmdecomp}
+\vect{v} = \nabla\times\vect{A} + \nabla\phi
+\end{equation}
+
+where $\vect{A}$ is a vector potential (the solenoidal part), and $\phi$ is a scalar potential (the compressive part). 
+
+If we take the divergence of Eq.~\ref{e:helmdecomp}, we get
+
+\begin{equation}
+\diverg{\vect{v}} = \diverg{\nabla\times\vect{A}} + \diverg{\nabla\phi}
+\end{equation}
+
+The first term on the right is identically zero (thanks calculus!), and we are left with a Poisson equation. If we define $\vect{v}=\rho\vect{u^*}$ (with $\vect{u^*}$ our initial guess at a velocity field) our Poisson equation becomes
+
+\begin{equation}
+\label{e:poissonpot}
+\nabla^2\phi = \diverg{\rho\vect{u^*}}
+\end{equation}
+
+Solving Eq.~\ref{e:poissonpot} for the potential $\phi$ allows us to obtain the divergence free velocity field, $\vect{u}$, via 
+
+\begin{equation}
+\vect{u} = \frac{\rho\vect{u^*} - \nabla\phi}{\rho}
+\end{equation}
+
+
+\section{Case II: Prescribed vorticity and density fields}
+
+Consider the case where we would like to prescribe a vorticity field, $\vect{\omega}$, and density field. This boils down to the equations
+
+\begin{align}
+\nabla\times\vect{u}&=\vect{\omega} \\
+\diverg{\rho\vect{u}}&=0
+\end{align}
+
+We'll go ahead and decouple the combined variation in density and velocity by using the product rule on the divergence expression. Doing so turns the above equations into 
+
+
+\begin{align}
+\nabla\times\vect{u}&=\vect{\omega} \\
+\diverg{\vect{u}}&=-\frac{\vect{u}\cdot\nabla\rho}{\rho}
+\end{align}
+
+\subsection{Cartesian, 2D}
+For a two dimensional, Cartesian domain, the equations from the previous section become
+
+\begin{align}
+-\partderiv{u_x}{y} + \partderiv{u_y}{x} &= \omega \\
+\partderiv{u_x}{x} + \partderiv{u_y}{y} &=-\frac{\vect{u}\cdot\nabla\rho}{\rho}
+\end{align}
+
+Taking $-\partderiv{}{y}$ of the first equation, $\partderiv{}{x}$ of the second equation, and adding them together, we get
+
+\begin{equation}
+\nabla^2{u_x} = -\partderiv{\omega}{y} - \partderiv{}{x}\left(\frac{\vect{u}\cdot\nabla\rho}{\rho}\right)
+\end{equation}
+
+
+Taking $\partderiv{}{x}$ of the first equation, $\partderiv{}{y}$ of the second equation, and adding them together, we get
+
+\begin{equation}
+\nabla^2{u_y} = \partderiv{\omega}{x} - \partderiv{}{y}\left(\frac{\vect{u}\cdot\nabla\rho}{\rho}\right)
+\end{equation}
+
+Finally, we obtain a system of two coupled Poisson-like equations for the components of the velocity field
+\begin{align}
+\nabla^2{u_x} &= -\partderiv{}{x}\left(\frac{\vect{u}\cdot\nabla\rho}{\rho}\right) - \partderiv{\omega}{y}\\
+\nabla^2{u_y} &= -\partderiv{}{y}\left(\frac{\vect{u}\cdot\nabla\rho}{\rho}\right) + \partderiv{\omega}{x} 
+\end{align}
+
+
+
+\end{document}

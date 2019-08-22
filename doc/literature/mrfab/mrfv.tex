@@ -85,13 +85,10 @@
 \section{Introduction}
 
     % paragraph introduces the need for spatially adaptive grids
-    Highly energetic and reacting flows are often characterized by disparate
-    spatial and temporal length scales. Features such as shockwaves and contact
-    discontinuities, for instance, require significantly more resolution than smooth
-    regions of the flow. Naturally, intense effort has gone into the development
-    of methods which employ adaptive strategies. The purpose of an
-    adaptive strategy is to accurately simulate such flows without expending
-    excess computational resources in relatively smooth regions of the flow.
+    Highly energetic, reacting flows are characterized by disparate spatial and
+    temporal length scales. Shock waves and burning fronts in the flow require
+    orders of magnitude more resolution than smooth regions of the flow.
+    Efficient simulation of such flows requires an adaptive strategy.
 
     % paragraph introducing adaptive mesh refinement as a concept
     The most popular strategy to accurately capture regions of interest in fluid
@@ -130,7 +127,7 @@
     refinement greater than one level. Together these consequences of AMR
     represent a non-trivial decrease in performance due to the fact that the
     mesh is not optimal (in some sense).
-
+e
     % paragraph reviews the work of harten and multiresolution methods
     Alternate approaches to dynamic grid adaptation based on wavelet theory
     became popular after the seminal papers by Harten \cite{harten1994}, were
@@ -170,13 +167,13 @@
     additional computation (the MR information is recycled after adaptation),
     while not impacting the accuracy of the solver.
 
-    In the section 2 of this manuscript, we describe the conservations laws 
+    In the section 2 of this manuscript, we describe the conservations laws
     of interest as well as the underlying finite volume
     method and discretization. In section 3, we introduce the multiresolution
     decomposition of the numerical solution. In section 4, the block-based
     adaptive scheme is introduced, which combines grid adaptation with the
     interpolatory scheme of Harten \hl{cite}.
-    
+
 \section{Finite volume method}
 
     % introduce conservation laws
@@ -192,7 +189,7 @@
     where $u \in \mathbb{R}^{m}, x \in \mathbb{R}^{n},$ and $t > 0$. Here
     $u(t,x)$ represents a conserved quantity, $f(u)$ is the flux function, and
     $s(u)$ is a source term. \hl{Discuss discontinuous solutions}.
-    
+
     In the finite volume formulation, the spatial domain is discretized into
     control volumes $V_{i}$, inside which the solution is approximated by volume
     averages as
@@ -202,7 +199,7 @@
     The governing equations are cast into the semi-discrete conservative form
     by application of the divergence theorem, yielding
     \begin{equation}
-        \frac{d \overline{u}_{i}(t)}{dt} = L(\overline{u}) =  -\frac{1}{|V_{i}|} \sum_{\mu} |
+        \frac{d \overline{u}_{i}(t)}{dt} = L(\overline{u}) =  -\frac{1}{|V_{i}|} \sum_{j} |
         \Gamma_{i,j}| \hat{f}_{i,j}
         + \overline{s}_{i},
         \label{ode}
@@ -210,7 +207,7 @@
     where interfaces are represented as $\Gamma_{i,j} = V_{i} \cap
     V_{j}$. The sources are given in a cell-averaged sense as
     \begin{equation}
-        \overline{s} = \frac{1}{|V_{i}|} \int_{|V_{i}|} s(u) dx,
+        \overline{s}_{i} = \frac{1}{|V_{i}|} \int_{|V_{i}|} s(u) dx,
     \end{equation}
     and the numerical flux is evaluated as
     \begin{equation}
@@ -219,7 +216,7 @@
     where the states $u^{-}_{i,j}$ and $u^{+}_{i,j}$ indicate the approximate
     value of the quantity $u$ on opposite sides of the cell
     interface $\Gamma_{i,j}$.
-    
+
     %These values are reconstructed from a stencil of
     %cell averages using weighted essentially non-oscillatory schemes of
     %variable order.
@@ -227,7 +224,7 @@
     \subsection{Spatial reconstruction and calculation of fluxes}
 
         % overview of PPM
-        In the vast majority of multiresolution finite volume schemes 
+        In the vast majority of multiresolution finite volume schemes
         introduced in the previously mentioned works, the reconstruction
         methods of choice belong to the class of essentially non-oscillatory
         (ENO) or weighted ENO (WENO) schemes. For flows exhibiting strong
@@ -248,22 +245,38 @@
         \begin{align}
             & \tilde{\bm{u}}_{1} = \bm{u}^{n} + c_{1} \Delta t L(\bm{u}^{n}) \\
             & \tilde{\bm{u}}_{2} = \tilde{\bm{u}}_{1} + c_{2} \Delta t L(\tilde{\bm{u}}_{1}) \\
-            & \bm{u}^{n+1} = b_{1} \tilde{\bm{u}}_{1} + b_{2} \tilde{\bm{u}}_{2}
+            & \bm{u}^{n+1} = b_{1} \tilde{\bm{u}}_{1} + b_{2} \tilde{\bm{u}}_{2}.
         \end{align}
-        where $\bm{E}$ represents the nonlinear evolution operator, and codifies the
-        temporal and spatial discretizations.
 
-\section{Multiresolution representation of data}
+\section{Adaptive multiresolution scheme on a uniform grid}
 
     % describe overview of transform, and average-interpolating wavelets
-    We present here a review of the multiresolution concepts, as first
+    We present here a brief review of the multiresolution concepts, as first
     introduced by Harten \hl{cite} within the context of conservative finite
-    volume schemes. The multiresolution approach is based on a hierarchy of
-    nested discretizations, $\bm{\mathcal{G}}_{l}$, on the domain of interest.
+    volume schemes. The scope here is restricted to one-dimensional uniform
+    grids, as the operations required for the fully adaptive block scheme are
+    identical.
 
-    The hierarchy consists of grids $l=1$ to $l=L$, labeled in order of
-    increasing resolution. Any two adjacent levels differ by a refinement factor
-    of two.  The grids are defined by
+    \subsection{Reference scheme on one-dimensional uniform grid}
+
+    On a one-dimensional uniform grid, the evolution equation \ref{ode} becomes
+    \begin{equation}
+        \frac{d \overline{u}_{i}(t)}{dt} = -\frac{1}{\Delta x} \left( \hat{f}_{i+1/2} -
+        \hat{f}_{i-1/2} \right) + \overline{s}_{i},
+        \label{ode}
+    \end{equation}
+    where the subscripts $i-1/2$, $i+1/2$ denote the left and right interfaces, respectively.
+
+    \subsection{Multiresolution representation of data}
+
+    The multiresolution approach decomposes data by introducing a hierarchy
+    of nested discretizations, $\bm{\mathcal{G}}_{l}$. The objective of the
+    multiresolution procedure is to represent the fine-grid data as a sum of
+    values at the coarsest level plus a series of differences at finer levels.
+    The result is a decomposition which provides frequency and scale
+    information of the underlying data.
+
+    The grids are defined by
     \begin{equation}
         \bm{\mathcal{G}}_{l} = \left\{ x_{i}^{l} \right\}_{i=0}^{N_{l}}, \text{ }
         \text{ } \text{ } \text{ } x_{i}^{l} = i \cdot \Delta x_{l}, \text{ }
@@ -271,54 +284,70 @@
         / 2^{L-l},
     \end{equation}
     where $\Delta x_{l}$ and $N_{l}$ denote the cell width and number of cells,
-    respectively, on level $l$. We denote the finest grid by
-    $\bm{\mathcal{G}}_{L}$. The index space of cells on each level of the
+    respectively, on level $l$. The index space of cells on each level of the
     hierarchy is denoted by $\bm{\mathcal{I}}^{l} = \left\{ 1,\dots,N_{l}
-    \right\}$. The objective of the multiresolution procedure is to transform
-    the data at the finest level, representing it instead as a sum of values at
-    the coarsest level plus a series of differences at finer levels. The result
-    is a decomposition which provides frequency and scale information of the
-    underlying data.
+    \right\}$ Given cell averages at the finest resolution,
+    $\bm{\overline{u}}^{L}$, the forward transform proceeds by performing the
+    following set of mappings on levels $l = L-1,L-2,\dots,1$:
+    \begin{enumerate}
+        \item[] \textit{Project:} The cells at level $l+1$ are projected
+            by means of averaging, onto the coarser grid
+            level $l$. The projection is defined by a linear operator
+            which performs the mapping $\bm{P}_{l+1}^{l} : \overline{\bm{u}}^{l+1}
+            \mapsto \overline{\bm{u}}^{l}$.
+        \item[] \textit{Predict}: Cell averages at level $l+1$
+            are predicted by an average-interpolating polynomial constructed
+            of cells on level $l$. The prediction operator performs
+            the mapping $\bm{P}_{l}^{l+1} : \overline{\bm{u}}^{l} \mapsto
+            \tilde{\bm{u}}^{l+1}$.
+    \end{enumerate}
+    The projection operation, which preserves averages at the finer level
+    by design, is the simple weighted average of parent cells.  In one
+    dimension, this average is given by
+    \begin{equation}
+        \overline{u}^{l}_{i} = \left( \bm{P}_{l+1}^{l}
+        \overline{\bm{u}}^{l+1} \right)_{i} = \frac{1}{2} (
+        \overline{u}^{l+1}_{2i-1} + \overline{u}^{l+1}_{2i} ), \quad \forall
+        i \in \bm{\mathcal{I}}^{l}.
+    \end{equation}
+    The prediction operator is defined by a unique average-interpolating
+    polynomial to predict, based on a stencil of cell averages at grid level
+    $l-1$, the odd cell averages at the finer level $l$. The prediction
+    mapping is performed using the following centered interpolants with
+    $m\in\{0,1\}$,
+    \begin{align}
+%            \tilde{u}_{i}^{l} = \left( \bm{P}_{l-1}^{l} \bm{u}^{l-1}
+%            \right)_{i} =
+%            \begin{cases}
+%                u_{i/2}^{l-1} - \sum_{p=1}^{s} \gamma_{p} \left( u^{l-1}_{i/2+p} -
+%                u^{l-1}_{i/2-p} \right), \text{ } \text{ } \text{ } \forall
+%                i \in \bm{\mathcal{I}}_{even}^{l} \\
+%                u_{(i+1)/2}^{l-1} + \sum_{p=1}^{s} \gamma_{p} \left(
+%                u^{l-1}_{(i+1)/2+p} - u^{l-1}_{(i+1)/2-p} \right), \text{ }
+%                \text{ } \text{ } \forall i \in \bm{\mathcal{I}}_{odd}^{l}
+%            \end{cases}
+        \tilde{u}_{2i-m}^{l+1} = u_{i}^{l} - (-1)^{m} \sum_{p=1}^{s} \gamma_{p} \left(
+            u^{l}_{i+p} - u^{l}_{i-p} \right), \quad \forall i \in \bm{\mathcal{I}}^{l}
+        \label{prediction}
+    \end{align}
+    The coefficients $\gamma_{i}$ are supplied in Table (\ref{coeff1}). The
+    order of accuracy of each interpolant is $r=2s+1$. Once the prediction is
+    made, the difference information is obtained by computing the detail
+    coefficients as
+    \begin{equation}
+        d^{l}_{i} = u^{l+1}_{2i} - \tilde{u}^{l+1}_{2i}, \quad \forall i \in \bm{\mathcal{I}}^{l}.
+    \end{equation}
+    The forward transform is complete when the detail coefficients have been
+    computed on all levels $l=1,\dots,L-1$. The result of the forward
+    transform operation can be succinctly written as
+    \begin{equation}
+        \bm{u}^{L}_{M} = \bm{M} \bm{u}^{L} = \left( \bm{d}^{L-1}, \bm{d}^{L-2},
+        \dots, \bm{d}^{1}, \bm{u}^{1} \right)^{T},
+    \end{equation}
+    where $M$ denotes the linear transform operator, and $\bm{d}^{l} =
+    \left\{d^{l}_{i}\right\}_{i=1}^{N_{l}}$.
 
-    \subsection*{Forward transform}
-
-        % describe the prediction operator, and detail coefficients
-        Given cell averages at the finest resolution, $\bm{\overline{u}}^{L}$, the forward
-        transform proceeds by performing the following set of mappings on levels $l =
-        L-1,L-2,\dots,1$:
-        \begin{enumerate}
-%            \item[] \textit{Split:} The cells at grid level $l+1$ are split into
-%                even and odd sets, $\bm{\mathcal{I}}_{even}^{l+1}$ and
-%                $\bm{\mathcal{I}}_{odd}^{l+1}$, based on their indices.
-            \item[] \textit{Project:} The cells at level $l+1$ are projected
-                by means of averaging, onto the coarser grid
-                level $l$. The projection is defined by a linear operator
-                which performs the mapping $\bm{P}_{l+1}^{l} : \overline{\bm{u}}^{l+1}
-                \mapsto \overline{\bm{u}}^{l}$. 
-            \item[] \textit{Predict}: Cell averages at level $l+1$
-                are predicted by an average-interpolating polynomial constructed
-                of cells on level $l$. The prediction operator performs
-                the mapping $\bm{P}_{l}^{l+1} : \overline{\bm{u}}^{l} \mapsto
-                \tilde{\bm{u}}^{l+1}$. 
-        \end{enumerate}
-        The projection operation, which preserves averages at the finer level by design, 
-        is the simple weighted average of parent cells. 
-              Once the prediction is made, the difference information is
-        obtained by computing the detail coefficients as
-        \begin{equation}
-            d^{l}_{i} = u^{l+1}_{2i} - \tilde{u}^{l+1}_{2i}, \quad \forall i \in \bm{\mathcal{I}}^{l}.
-        \end{equation}
-        The forward transform is complete when the detail coefficients have been
-        computed on all levels $l=1,\dots,L-1$. The result of the forward
-        transform operation can be succinctly written as
-        \begin{equation}
-            \bm{u}^{L}_{M} = \bm{M} \bm{u}^{L} = \left( \bm{d}^{L-1}, \bm{d}^{L-2},
-            \dots, \bm{d}^{1}, \bm{u}^{1} \right)^{T},
-        \end{equation}
-        where $M$ denotes the linear transform operator, and $\bm{d}^{l} =
-        \left\{d^{l}_{i}\right\}_{i=1}^{N_{l}}$.
-
-    \subsection*{Truncation}
+    \subsection{Truncation}
 
         % describe truncation proceudure
         Once the difference information has been computed, compression of the
@@ -345,23 +374,23 @@
             \tilde{\bm{d}}^{L-1}, \tilde{\bm{d}}^{L-2},
             \dots, \tilde{\bm{d}}^{1}, \bm{u}^{1} \right)^{T}.
         \end{equation}
-        
-    \subsection*{Decoding}
 
-        % describe decoding
-        The fine-grid solution is reconstructed by computing from levels
-        $l=1,\dots,L-1$ the following
-        \begin{align}
-            u_{2i}^{l+1} & = d_{i}^{l} + \tilde{u}_{2i}^{l+1} \\
-            u_{2i-1}^{l+1} & = 2 u_{i}^{l} - u_{2i}^{l+1},
-        \end{align}
-        for each cell on the level.  If the detail coefficients are truncated
-        below a nonzero $\varepsilon$, the discrete representation becomes
-        \begin{equation}
-            \bm{u}^{L}_{\varepsilon} \approx \bm{M}^{-1} \tilde{\bm{u}}^{L}_{M}.
-        \end{equation}
+%    \subsection*{Decoding}
+%
+%        % describe decoding
+%        The fine-grid solution is reconstructed by computing from levels
+%        $l=1,\dots,L-1$ the following
+%s        \begin{align}
+%s            u_{2i}^{l+1} & = d_{i}^{l} + \tilde{u}_{2i}^{l+1} \\
+%s            u_{2i-1}^{l+1} & = 2 u_{i}^{l} - u_{2i}^{l+1},
+%s        \end{align}
+%s        for each cell on the level.  If the detail coefficients are truncated
+%s        below a nonzero $\varepsilon$, the discrete representation becomes
+%s        \begin{equation}
+%s            \bm{u}^{L}_{\varepsilon} \approx \bm{M}^{-1} \tilde{\bm{u}}^{L}_{M}.
+%s        \end{equation}
 
-    \subsection*{Adaptive Calculation of Fluxes and Sources}
+    \subsection{Adaptive calculation of fluxes}
 
         % dicuss computation of fluxes and sources
         Once the detail coefficients have been obtained, the MR scheme
@@ -379,6 +408,8 @@
         The process repeats until all fluxes are either computed or
         interpolated on the fine grid $l=0$.
 
+    \subsection{Adaptive calculation of source terms}
+
         % describe adaptive calculation of sources
         To reduce the cost of calculating source terms for reactive flows, we employ
         the same multiresolution procedure. For each cell which is not in the mask,
@@ -390,9 +421,7 @@
                 \bm{\mathcal{I}}^{l+1}.
         \end{equation}
 
-    \subsection*{Error Analysis}
-
-\section{Fully Adaptive Block Scheme}
+\section{Fully adaptive block-structured multiresolution scheme}
 
     % Key ideas: Perhaps we can utilize scale-selective WENO weights as in
     % maulik 2018. If the error is below threshold, skip the rieman solve altogether
@@ -401,161 +430,132 @@
     % boundaries? Actually probably not really necessary because the
     % approximation still preserves the same order.
 
-    \subsection*{Block-Structured Mesh Adaptation}
-    % two main issues: no jump greater than one refinement level, and no
-    % incomplete trees
-    We define a mask $\bm{\mathcal{M}}(\varepsilon)$.
-
-    % illustration of parallel encoding
-    \begin{figure}[H]
-        \center
-        \input{parallel_fwt.tex}
-        \caption{A block of consisting of $N^{0} = 16$ cells is shown. Four
-        ghost cells are included on each end of the block, allowing the
-        multiresolution decomposition to descend two levels (to grid level
-        $l=2$). Interpolation stencils for the computation of detail
-        coefficients at levels $l=1, l=2$ are shown, indicating the need for ghost cells.}
-    \end{figure}
-    % illustration amr block tree structure
-    \begin{figure}[H]
-        \center
-        \input{binarytree.tex}
-        \caption{}
-    \end{figure}
-
-    % pseudocode of algorithm
-
-    % illustration of parallel issue
-    \begin{figure}[H]
-        \center
-        \input{parallel_flux.tex}
-       \caption{Two examples of flux interpolation on a hierarchy of grids
-        on Process 1: one procedure requires flux data from the adjacent
-        process, the other does not.}
-    \end{figure}
-
-    \subsection*{Buffer Region}
-
-    \subsection*{Load Balancing}
+%    \subsection*{Block-structured mesh adaptation}
+%    % two main issues: no jump greater than one refinement level, and no
+%    % incomplete trees
+%    We define a mask $\bm{\mathcal{M}}(\varepsilon)$.
+%
+%    % illustration of parallel encoding
+%    \begin{figure}[H]
+%        \center
+%        \input{parallel_fwt.tex}
+%        \caption{A block of consisting of $N^{0} = 16$ cells is shown. Four
+%        ghost cells are included on each end of the block, allowing the
+%        multiresolution decomposition to descend two levels (to grid level
+%        $l=2$). Interpolation stencils for the computation of detail
+%        coefficients at levels $l=1, l=2$ are shown, indicating the need for ghost cells.}
+%    \end{figure}
+%    % illustration amr block tree structure
+%    \begin{figure}[H]
+%        \center
+%        \input{binarytree.tex}
+%        \caption{}
+%    \end{figure}
+%
+%    % pseudocode of algorithm
+%
+%    % illustration of parallel issue
+%    \begin{figure}[H]
+%        \center
+%        \input{parallel_flux.tex}
+%       \caption{Two examples of flux interpolation on a hierarchy of grids
+%        on Process 1: one procedure requires flux data from the adjacent
+%        process, the other does not.}
+%    \end{figure}
+%
+%    \subsection*{Buffer Region}
+%
+%    \subsection*{Load Balancing}
 
 \section{Numerical Results}
 
-    \subsection*{Convergence Analysis for Smooth Advection Problem}
+%    \subsection*{Convergence Analysis for Smooth Advection Problem}
+%
+%        % problem description
+%        The 
+%        \begin{equation}
+%           u_{t} + f(u)_{x} = 0
+%            \label{euler1d}
+%        \end{equation}
+%        where $u = \left( \rho, \rho u, \rho w, E \right)^{T}$ is
+%        the state vector, the flux vector is
+%        \begin{equation}
+%            f = 
+%        \begin{pmatrix}
+%        \rho u \\ \rho u^2 + p \\ u( E + p )
+%        \end{pmatrix},
+%        \end{equation}
+%        and the total energy per unit volume is given by
+%        \begin{equation*}
+%            E = \rho \left( \frac{1}{2} u^2 + e \right),
+%        \end{equation*}
+%        where $e$ is the internal energy.
+%
+%        % convergence rates table (epsilon shouldn't be below error of scheme)
+%        % note: include estimated order of error of reference scheme)
+%        \begin{center}\vspace{1cm}
+%        \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
+%        \hline
+%                   & \multicolumn{4}{l|}{$\varepsilon = 0.0$}              & \multicolumn{4}{l|}{$\varepsilon = 10^{-12}$}         \\ \hline
+%        grid cells & $L_{1}$ error & order & $L_{\infty}$ error & order & $L_{1}$ error & order & $L_{\infty}$ error & order \\ \hline
+%        16         &               &       &                    &       &               &       &                    &       \\ \hline
+%        32         &               &       &                    &       &               &       &                    &       \\ \hline
+%        64         &               &       &                    &       &               &       &                    &       \\ \hline
+%        128        &               &       &                    &       &               &       &                    &       \\ \hline
+%        256        &               &       &                    &       &               &       &                    &       \\ \hline
+%                   & \multicolumn{4}{l|}{$\varepsilon = 10^{-6}$}          & \multicolumn{4}{l|}{$\varepsilon = 10^{-4}$}          \\ \hline
+%        grid cells & $L_{1}$ error & order & $L_{\infty}$ error & order & $L_{1}$ error & order & $L_{\infty}$ error & order \\ \hline
+%        16         &               &       &                    &       &               &       &                    &       \\ \hline
+%        32         &               &       &                    &       &               &       &                    &       \\ \hline
+%        64         &               &       &                    &       &               &       &                    &       \\ \hline
+%        128        &               &       &                    &       &               &       &                    &       \\ \hline
+%        256        &               &       &                    &       &               &       &                    &       \\ \hline
+%        \end{tabular}
+%        \end{center}\vspace{1cm}
 
-        % problem description
-        The 
-        \begin{equation}
-           u_{t} + f(u)_{x} = 0
-            \label{euler1d}
-        \end{equation}
-        where $u = \left( \rho, \rho u, \rho w, E \right)^{T}$ is
-        the state vector, the flux vector is
-        \begin{equation}
-            f = 
-        \begin{pmatrix}
-        \rho u \\ \rho u^2 + p \\ u( E + p )
-        \end{pmatrix},
-        \end{equation}
-        and the total energy per unit volume is given by
-        \begin{equation*}
-            E = \rho \left( \frac{1}{2} u^2 + e \right),
-        \end{equation*}
-        where $e$ is the internal energy.
+    \subsection*{Interacting blast waves}
 
-        % convergence rates table (epsilon shouldn't be below error of scheme)
-        % note: include estimated order of error of reference scheme)
-        \begin{center}\vspace{1cm}
-        \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
-        \hline
-                   & \multicolumn{4}{l|}{$\varepsilon = 0.0$}              & \multicolumn{4}{l|}{$\varepsilon = 10^{-12}$}         \\ \hline
-        grid cells & $L_{1}$ error & order & $L_{\infty}$ error & order & $L_{1}$ error & order & $L_{\infty}$ error & order \\ \hline
-        16         &               &       &                    &       &               &       &                    &       \\ \hline
-        32         &               &       &                    &       &               &       &                    &       \\ \hline
-        64         &               &       &                    &       &               &       &                    &       \\ \hline
-        128        &               &       &                    &       &               &       &                    &       \\ \hline
-        256        &               &       &                    &       &               &       &                    &       \\ \hline
-                   & \multicolumn{4}{l|}{$\varepsilon = 10^{-6}$}          & \multicolumn{4}{l|}{$\varepsilon = 10^{-4}$}          \\ \hline
-        grid cells & $L_{1}$ error & order & $L_{\infty}$ error & order & $L_{1}$ error & order & $L_{\infty}$ error & order \\ \hline
-        16         &               &       &                    &       &               &       &                    &       \\ \hline
-        32         &               &       &                    &       &               &       &                    &       \\ \hline
-        64         &               &       &                    &       &               &       &                    &       \\ \hline
-        128        &               &       &                    &       &               &       &                    &       \\ \hline
-        256        &               &       &                    &       &               &       &                    &       \\ \hline
-        \end{tabular}
-        \end{center}\vspace{1cm}
+    \subsection*{Mach reflection}
 
-    \subsection*{Interacting Blast Waves}
+    \subsection*{Nuclear burning}
 
-    \subsection*{Nuclear Burning}
 
-    \subsection*{Mach Reflection}
-
-        % problem description
-        Using the inviscid flow assumption, the dynamics of compressible fluids are
-        modeled using the reactive Euler equations \hl{add domain notation}
-        \begin{equation}
-           u_{t} + f(u)_{x}
-           + g(u)_{y} = s(u),
-            \label{goveq}
-        \end{equation}
-        where $u = \left( \rho, \rho u, \rho v, \rho w, E \right)^{T}$ is
-        the state vector, the flux vectors are given by
-        \begin{equation}
-            f = 
-        \begin{pmatrix}
-        \rho u \\ \rho u^2 + p \\ \rho u v \\ u( E + p )
-        \end{pmatrix}, \text{ } \text{ } \text{ }
-            g = 
-        \begin{pmatrix}
-        \rho v \\ \rho u v \\ \rho v^2 + p \\ v( E + p )
-        \end{pmatrix},
-        \end{equation}
-        and $s(u)$ represents sources. The total energy per
-        unit volume is given by
-        \begin{equation*}
-            E = \rho \left( \frac{1}{2} \mathbf{V}^{2} + e \right),
-        \end{equation*}
-        where $e$ is the internal energy and the kinetic energy contribution is
-        \begin{equation*}
-            \frac{1}{2} \mathbf{V}^{2} = \frac{1}{2} \mathbf{V}
-            \cdot \mathbf{V} = \frac{1}{2} \left( u^2 + v^2 \right).
-        \end{equation*}
-        The system of nonlinear equations is closed by an
-        equation of state which is in general not derived from that of an ideal gas.
+%        % problem description
+%        Using the inviscid flow assumption, the dynamics of compressible fluids are
+%        modeled using the reactive Euler equations \hl{add domain notation}
+%        \begin{equation}
+%           u_{t} + f(u)_{x}
+%           + g(u)_{y} = s(u),
+%            \label{goveq}
+%        \end{equation}
+%        where $u = \left( \rho, \rho u, \rho v, \rho w, E \right)^{T}$ is
+%        the state vector, the flux vectors are given by
+%        \begin{equation}
+%            f = 
+%        \begin{pmatrix}
+%        \rho u \\ \rho u^2 + p \\ \rho u v \\ u( E + p )
+%        \end{pmatrix}, \text{ } \text{ } \text{ }
+%            g = 
+%        \begin{pmatrix}
+%        \rho v \\ \rho u v \\ \rho v^2 + p \\ v( E + p )
+%        \end{pmatrix},
+%        \end{equation}
+%        and $s(u)$ represents sources. The total energy per
+%        unit volume is given by
+%        \begin{equation*}
+%            E = \rho \left( \frac{1}{2} \mathbf{V}^{2} + e \right),
+%        \end{equation*}
+%        where $e$ is the internal energy and the kinetic energy contribution is
+%        \begin{equation*}
+%            \frac{1}{2} \mathbf{V}^{2} = \frac{1}{2} \mathbf{V}
+%            \cdot \mathbf{V} = \frac{1}{2} \left( u^2 + v^2 \right).
+%        \end{equation*}
+%        The system of nonlinear equations is closed by an
+%        equation of state which is in general not derived from that of an ideal gas.
 
 \appendix
- 
-        In one dimension, this
-        average is given by
-        \begin{equation}
-            \overline{u}^{l}_{i} = \left( \bm{P}_{l+1}^{l}
-            \overline{\bm{u}}^{l+1} \right)_{i} = \frac{1}{2} (
-            \overline{u}^{l+1}_{2i-1} + \overline{u}^{l+1}_{2i} ), \quad \forall
-            i \in \bm{\mathcal{I}}^{l}.
-        \end{equation}
-        The prediction operator is defined by a unique average-interpolating
-        polynomial to predict, based on a stencil of cell averages at grid level
-        $l-1$, the odd cell averages at the finer level $l$. The prediction
-        mapping is performed using the following centered interpolants with
-        $m\in\{0,1\}$,
-        \begin{align}
-%            \tilde{u}_{i}^{l} = \left( \bm{P}_{l-1}^{l} \bm{u}^{l-1}
-%            \right)_{i} = 
-%            \begin{cases}
-%                u_{i/2}^{l-1} - \sum_{p=1}^{s} \gamma_{p} \left( u^{l-1}_{i/2+p} -
-%                u^{l-1}_{i/2-p} \right), \text{ } \text{ } \text{ } \forall
-%                i \in \bm{\mathcal{I}}_{even}^{l} \\
-%                u_{(i+1)/2}^{l-1} + \sum_{p=1}^{s} \gamma_{p} \left(
-%                u^{l-1}_{(i+1)/2+p} - u^{l-1}_{(i+1)/2-p} \right), \text{ }
-%                \text{ } \text{ } \forall i \in \bm{\mathcal{I}}_{odd}^{l}
-%            \end{cases}
-            \tilde{u}_{2i-m}^{l+1} = u_{i}^{l} - (-1)^{m} \sum_{p=1}^{s} \gamma_{p} \left(
-                u^{l}_{i+p} - u^{l}_{i-p} \right), \quad \forall i \in \bm{\mathcal{I}}^{l}
-            \label{prediction}
-        \end{align}
-        The coefficients $\gamma_{i}$ are supplied in Table (\ref{coeff1}). The
-        order of accuracy of each interpolant is $r=2s+1$.
- 
+
+
         \begin{table}[]
             \center
             \begin{tabular}{|l|l|l|l|l|}
