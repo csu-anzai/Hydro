@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.5.23)  21 AUG 2019 00:48
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.5.23)  24 AUG 2019 22:45
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1142,11 +1142,7 @@ Package: soul 2003/11/17 v2.4 letterspacing/underlining (mf)
 \SOUL@uldp=\dimen267
 \SOUL@ulht=\dimen268
 )
-(mrfv//mrfv.aux
-
-LaTeX Warning: Label `ode' multiply defined.
-
-)
+(mrfv//mrfv.aux)
 \openout1 = `mrfv.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 55.
@@ -1343,69 +1339,63 @@ LaTeX Font Info:    Font shape `T1/ptm/bx/it' in size <10> not available
 
 LaTeX Warning: Citation `berger1984' on page 1 undefined on input line 99.
 
-
-Underfull \vbox (badness 1675) has occurred while \output is active []
-
- [1
+[1
 
 
-{/usr/local/texlive/2017/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2] [3]
-
+{/usr/local/texlive/2017/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
+[2] [3] [4] [5] [6]
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 559.
+               Default added (so using `tbp') on input line 699.
 
-[4] [5pdfTeX warning (ext4): destination with the same identifier (name{table.1
-}) has been already used, duplicate ignored
 
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.649     \end{align}
-                     pdfTeX warning (ext4): destination with the same identifie
-r (name{table.2}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.649     \end{align}
-                     ] [6]
-Underfull \hbox (badness 10000) in paragraph at lines 720--724
+Underfull \hbox (badness 10000) in paragraph at lines 734--738
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 730--732
+Underfull \hbox (badness 10000) in paragraph at lines 744--746
 
  []
 
-[7pdfTeX warning (ext4): destination with the same identifier (name{table.3}) h
+[7pdfTeX warning (ext4): destination with the same identifier (name{table.1}) h
 as been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.799 \end{document}
+l.753         \end{equation}
+                            pdfTeX warning (ext4): destination with the same id
+entifier (name{table.2}) has been already used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.753         \end{equation}
+                            ] [8pdfTeX warning (ext4): destination with the sam
+e identifier (name{table.3}) has been already used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.813 \end{document}
                     ]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 799.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 799.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 813.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 813.
  (mrfv//mrfv.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 799.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 799.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 813.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 813.
 Package rerunfilecheck Info: File `mrfv.out' has not changed.
 (rerunfilecheck)             Checksum: 46E999748DBC5E4E09825A5F628053DA;615.
 
 
 LaTeX Warning: There were undefined references.
 
-
-LaTeX Warning: There were multiply-defined labels.
-
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 799.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 813.
  ) 
 Here is how much of TeX's memory you used:
- 29949 strings out of 492995
- 691598 string characters out of 6132704
- 1060033 words of memory out of 5000000
- 32759 multiletter control sequences out of 15000+600000
- 52425 words of font info for 139 fonts, out of 8000000 for 9000
+ 29953 strings out of 492995
+ 691651 string characters out of 6132704
+ 1060035 words of memory out of 5000000
+ 32762 multiletter control sequences out of 15000+600000
+ 52165 words of font info for 135 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  62i,13n,96p,723b,609s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2017/texmf-dist/fonts/enc/dvips/base/8r.enc}{/usr/local/t
@@ -1428,10 +1418,10 @@ ist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2017/texmf-dist/fonts/
 type1/urw/times/utmbi8a.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/urw
 /times/utmr8a.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/urw/times/utm
 ri8a.pfb>
-Output written on mrfv//mrfv.pdf (7 pages, 212473 bytes).
+Output written on mrfv//mrfv.pdf (8 pages, 217363 bytes).
 PDF statistics:
- 260 PDF objects out of 1000 (max. 8388607)
- 230 compressed objects within 3 object streams
- 81 named destinations out of 1000 (max. 500000)
+ 275 PDF objects out of 1000 (max. 8388607)
+ 244 compressed objects within 3 object streams
+ 88 named destinations out of 1000 (max. 500000)
  22141 words of extra memory for PDF output out of 24883 (max. 10000000)
 

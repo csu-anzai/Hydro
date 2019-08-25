@@ -35,7 +35,7 @@
     % journal of fluid mechanics
 
 
-\title{Accelerating Block-Structured Adaptive Multiresolution Schemes: Applications to Reactive Flows}
+\title{A Fully Adaptive Block-Structured Multiresolution Scheme for Reactive Flows}
 
 \author{
   Brandon Gusto\\
@@ -174,7 +174,7 @@ e
     adaptive scheme is introduced, which combines grid adaptation with the
     interpolatory scheme of Harten \hl{cite}.
 
-\section{Finite volume method}
+\section{Finite volume method for hyperbolic conservation laws}
 
     % introduce conservation laws
     In the present work we are interested in numerically solving conservation
@@ -212,14 +212,11 @@ e
     and the numerical flux is evaluated as
     \begin{equation}
         \hat{f}_{i,j} = \hat{f}(u^{-}_{i,j}, u^{+}_{i,j}),
+        \label{flux}
     \end{equation}
     where the states $u^{-}_{i,j}$ and $u^{+}_{i,j}$ indicate the approximate
     value of the quantity $u$ on opposite sides of the cell
     interface $\Gamma_{i,j}$.
-
-    %These values are reconstructed from a stencil of
-    %cell averages using weighted essentially non-oscillatory schemes of
-    %variable order.
 
     \subsection{Spatial reconstruction and calculation of fluxes}
 
@@ -227,13 +224,14 @@ e
         In the vast majority of multiresolution finite volume schemes
         introduced in the previously mentioned works, the reconstruction
         methods of choice belong to the class of essentially non-oscillatory
-        (ENO) or weighted ENO (WENO) schemes. For flows exhibiting strong
-        shocks and contact discontinuities, the higher-order WENO schemes
-        generally do not reap additional benefit (\hl{citation and also Tomek
-        can provide input here?}). In the present work, we use the piecewise
-        parabolic method (PPM) of Woodward and Collela \hl{ref} to reconstruct
-        the field and provide left and right inputs to the Riemann solver at
-        each cell interface. \hl{More here from Tomek}.
+        (ENO) or weighted ENO (WENO) schemes. These are typically
+        high-order schemes, but for flows exhibiting strong shocks and
+        contact discontinuities, they generally do not
+        reap additional benefit (\hl{citation and also Tomek can provide input
+        here?}). In the present work, we use the piecewise parabolic method
+        (PPM) of Woodward and Collela \hl{ref} to reconstruct the field and
+        provide left and right inputs to the Riemann solver at each cell
+        interface. \hl{More here from Tomek}.
 
     \subsection{Time integration}
 
@@ -259,121 +257,138 @@ e
 
     \subsection{Reference scheme on one-dimensional uniform grid}
 
-    On a one-dimensional uniform grid, the evolution equation \ref{ode} becomes
-    \begin{equation}
-        \frac{d \overline{u}_{i}(t)}{dt} = -\frac{1}{\Delta x} \left( \hat{f}_{i+1/2} -
-        \hat{f}_{i-1/2} \right) + \overline{s}_{i},
-        \label{ode}
-    \end{equation}
-    where the subscripts $i-1/2$, $i+1/2$ denote the left and right interfaces, respectively.
+        On a one-dimensional uniform grid, the evolution equation \ref{ode} becomes
+        \begin{equation}
+            \frac{d \overline{u}_{i}(t)}{dt} = -\frac{1}{\Delta x} \left( \hat{f}_{i+1/2} -
+            \hat{f}_{i-1/2} \right) + \overline{s}_{i},
+        \end{equation}
+        where the subscripts $i-1/2$, $i+1/2$ denote the left and right interfaces, respectively.
 
-    \subsection{Multiresolution representation of data}
+        \subsection{Multiresolution representation of data}
 
-    The multiresolution approach decomposes data by introducing a hierarchy
-    of nested discretizations, $\bm{\mathcal{G}}_{l}$. The objective of the
-    multiresolution procedure is to represent the fine-grid data as a sum of
-    values at the coarsest level plus a series of differences at finer levels.
-    The result is a decomposition which provides frequency and scale
-    information of the underlying data.
-
-    The grids are defined by
-    \begin{equation}
-        \bm{\mathcal{G}}_{l} = \left\{ x_{i}^{l} \right\}_{i=0}^{N_{l}}, \text{ }
-        \text{ } \text{ } \text{ } x_{i}^{l} = i \cdot \Delta x_{l}, \text{ }
-        \text{ } \Delta x_{l} = 2^{L-l} \cdot \Delta x_{L}, \text{ } \text{ } N_{l} = N_{L}
-        / 2^{L-l},
-    \end{equation}
-    where $\Delta x_{l}$ and $N_{l}$ denote the cell width and number of cells,
-    respectively, on level $l$. The index space of cells on each level of the
-    hierarchy is denoted by $\bm{\mathcal{I}}^{l} = \left\{ 1,\dots,N_{l}
-    \right\}$ Given cell averages at the finest resolution,
-    $\bm{\overline{u}}^{L}$, the forward transform proceeds by performing the
-    following set of mappings on levels $l = L-1,L-2,\dots,1$:
-    \begin{enumerate}
-        \item[] \textit{Project:} The cells at level $l+1$ are projected
-            by means of averaging, onto the coarser grid
-            level $l$. The projection is defined by a linear operator
-            which performs the mapping $\bm{P}_{l+1}^{l} : \overline{\bm{u}}^{l+1}
-            \mapsto \overline{\bm{u}}^{l}$.
-        \item[] \textit{Predict}: Cell averages at level $l+1$
-            are predicted by an average-interpolating polynomial constructed
-            of cells on level $l$. The prediction operator performs
-            the mapping $\bm{P}_{l}^{l+1} : \overline{\bm{u}}^{l} \mapsto
-            \tilde{\bm{u}}^{l+1}$.
-    \end{enumerate}
-    The projection operation, which preserves averages at the finer level
-    by design, is the simple weighted average of parent cells.  In one
-    dimension, this average is given by
-    \begin{equation}
-        \overline{u}^{l}_{i} = \left( \bm{P}_{l+1}^{l}
-        \overline{\bm{u}}^{l+1} \right)_{i} = \frac{1}{2} (
-        \overline{u}^{l+1}_{2i-1} + \overline{u}^{l+1}_{2i} ), \quad \forall
-        i \in \bm{\mathcal{I}}^{l}.
-    \end{equation}
-    The prediction operator is defined by a unique average-interpolating
-    polynomial to predict, based on a stencil of cell averages at grid level
-    $l-1$, the odd cell averages at the finer level $l$. The prediction
-    mapping is performed using the following centered interpolants with
-    $m\in\{0,1\}$,
-    \begin{align}
-%            \tilde{u}_{i}^{l} = \left( \bm{P}_{l-1}^{l} \bm{u}^{l-1}
-%            \right)_{i} =
-%            \begin{cases}
-%                u_{i/2}^{l-1} - \sum_{p=1}^{s} \gamma_{p} \left( u^{l-1}_{i/2+p} -
-%                u^{l-1}_{i/2-p} \right), \text{ } \text{ } \text{ } \forall
-%                i \in \bm{\mathcal{I}}_{even}^{l} \\
-%                u_{(i+1)/2}^{l-1} + \sum_{p=1}^{s} \gamma_{p} \left(
-%                u^{l-1}_{(i+1)/2+p} - u^{l-1}_{(i+1)/2-p} \right), \text{ }
-%                \text{ } \text{ } \forall i \in \bm{\mathcal{I}}_{odd}^{l}
-%            \end{cases}
-        \tilde{u}_{2i-m}^{l+1} = u_{i}^{l} - (-1)^{m} \sum_{p=1}^{s} \gamma_{p} \left(
-            u^{l}_{i+p} - u^{l}_{i-p} \right), \quad \forall i \in \bm{\mathcal{I}}^{l}
-        \label{prediction}
-    \end{align}
-    The coefficients $\gamma_{i}$ are supplied in Table (\ref{coeff1}). The
-    order of accuracy of each interpolant is $r=2s+1$. Once the prediction is
-    made, the difference information is obtained by computing the detail
-    coefficients as
-    \begin{equation}
-        d^{l}_{i} = u^{l+1}_{2i} - \tilde{u}^{l+1}_{2i}, \quad \forall i \in \bm{\mathcal{I}}^{l}.
-    \end{equation}
-    The forward transform is complete when the detail coefficients have been
-    computed on all levels $l=1,\dots,L-1$. The result of the forward
-    transform operation can be succinctly written as
-    \begin{equation}
-        \bm{u}^{L}_{M} = \bm{M} \bm{u}^{L} = \left( \bm{d}^{L-1}, \bm{d}^{L-2},
-        \dots, \bm{d}^{1}, \bm{u}^{1} \right)^{T},
-    \end{equation}
-    where $M$ denotes the linear transform operator, and $\bm{d}^{l} =
-    \left\{d^{l}_{i}\right\}_{i=1}^{N_{l}}$.
+        The multiresolution approach decomposes data by introducing a hierarchy of
+        nested discretizations, $\bm{\mathcal{G}}_{l}$. The objective in
+        introducing these grids is to represent the fine-grid data as a sum of
+        values at a caorse level plus a series of differences at finer levels of
+        resolution.  The result is a decomposition which provides frequency and
+        scale information of the underlying data. The grids are defined by
+        \begin{equation}
+            \bm{\mathcal{G}}_{l} = \left\{ x_{i}^{l} \right\}_{i=0}^{N_{l}}, \text{ }
+            \text{ } \text{ } \text{ } x_{i}^{l} = i \cdot \Delta x_{l}, \text{ }
+            \text{ } \Delta x_{l} = 2^{L-l} \cdot \Delta x_{L}, \text{ } \text{ } N_{l} = N_{L}
+            / 2^{L-l},
+        \end{equation}
+        where $\Delta x_{l}$ and $N_{l}$ denote the cell width and number of cells,
+        respectively, on level $l$. The index space of cells on each level of the
+        hierarchy is denoted by $\bm{\mathcal{I}}_{l} = \left\{ 1,\dots,N_{l}
+        \right\}$. Given cell averages at the finest resolution,
+        $\bm{\overline{u}}^{L}$, the encoding process proceeds by performing the
+        following set of mappings on levels $l = L-1,L-2,\dots,1$:
+        \begin{enumerate}
+            \item[] \textit{Project:} The cells at level $l+1$ are projected
+                by means of averaging, onto the coarser grid
+                level $l$. The projection is defined by a linear operator
+                which performs the mapping $\bm{P}_{l+1}^{l} : \overline{\bm{u}}^{l+1}
+                \mapsto \overline{\bm{u}}^{l}$.
+            \item[] \textit{Predict}: Cell averages at level $l+1$
+                are predicted by an average-interpolating polynomial constructed
+                of cells on level $l$. The prediction operator performs
+                the mapping $\bm{P}_{l}^{l+1} : \overline{\bm{u}}^{l} \mapsto
+                \tilde{\bm{u}}^{l+1}$.
+        \end{enumerate}
+        The projection operation, which preserves averages at the finer level
+        by design, is the simple weighted average of parent cells.  In one
+        dimension, this average is given by
+        \begin{equation}
+            \overline{u}^{l}_{i} = \left( \bm{P}_{l+1}^{l}
+            \overline{\bm{u}}^{l+1} \right)_{i} = \frac{1}{2} (
+            \overline{u}^{l+1}_{2i-1} + \overline{u}^{l+1}_{2i} ), \quad \forall
+            i \in \bm{\mathcal{I}}_{l}.
+        \end{equation}
+        The prediction operator is defined by a unique average-interpolating
+        polynomial to predict, based on a stencil of cell averages at grid level
+        $l$, the odd cell averages at the finer level $l+1$. The prediction
+        mapping is performed using the following centered interpolants with
+        $m\in\{0,1\}$,
+        \begin{align}
+    %            \tilde{u}_{i}^{l} = \left( \bm{P}_{l-1}^{l} \bm{u}^{l-1}
+    %            \right)_{i} =
+    %            \begin{cases}
+    %                u_{i/2}^{l-1} - \sum_{p=1}^{s} \gamma_{p} \left( u^{l-1}_{i/2+p} -
+    %                u^{l-1}_{i/2-p} \right), \text{ } \text{ } \text{ } \forall
+    %                i \in \bm{\mathcal{I}}_{even}^{l} \\
+    %                u_{(i+1)/2}^{l-1} + \sum_{p=1}^{s} \gamma_{p} \left(
+    %                u^{l-1}_{(i+1)/2+p} - u^{l-1}_{(i+1)/2-p} \right), \text{ }
+    %                \text{ } \text{ } \forall i \in \bm{\mathcal{I}}_{odd}^{l}
+    %            \end{cases}
+            \tilde{u}_{2i-m}^{l+1} = \left( \bm{P}_{l}^{l+1}
+            \overline{\bm{u}}^{l} \right)_{i} = u_{i}^{l} - (-1)^{m} \sum_{p=1}^{s} \gamma_{p} \left(
+                u^{l}_{i+p} - u^{l}_{i-p} \right), \quad \forall i \in \bm{\mathcal{I}}_{l}
+            \label{prediction}
+        \end{align}
+        The coefficients $\gamma_{i}$ are supplied in Table (\ref{coeff1}). The
+        order of accuracy of each interpolant is $r=2s+1$. Once the prediction is
+        made, the difference information is obtained by computing detail
+        coefficients as
+        \begin{equation}
+            d^{l}_{i} = u^{l+1}_{2i} - \tilde{u}^{l+1}_{2i}, \quad \forall i \in \bm{\mathcal{I}}_{l}.
+        \end{equation}
+        The detail coefficients are a measure of the local regularity of the
+        underlying function, and decay proportionally to that regularity as the
+        resolution increases. The encoding procedure is complete
+        when the detail coefficients have been computed on all levels
+        $l=L-1,\dots,1$. This linear transformation can also be written more
+        succinctly as
+        \begin{equation}
+            \bm{u}^{L}_{M} = \bm{M} \bm{u}^{L} = \left( \bm{d}^{L-1}, \bm{d}^{L-2},
+            \dots, \bm{d}^{1}, \bm{u}^{1} \right)^{T},
+            \label{transform}
+        \end{equation}
+        where $M$ denotes the linear transform operator, and $\bm{d}^{l} =
+        \left\{d^{l}_{i}\right\}_{i=1}^{N_{l}}$. This expression forms the
+        multiresolution representation of the fine-grid data.
 
     \subsection{Truncation}
 
         % describe truncation proceudure
-        Once the difference information has been computed, compression of the
-        fine-grid cell averages $\bm{u}^{L}$ is obtained by truncating
-        coefficients whose magnitude is below a prescribed level-dependent
-        threshold, $\varepsilon_{l}$.  In \cite{harten1994} the following
-        threshold is proposed
+        The purpose of performing such a multiresolution transformation of the
+        data is to achieve compression. Compression of the fine-grid cell
+        averages $\bm{u}^{L}$ is obtained by truncating coefficients whose
+        magnitude is below a prescribed level-dependent threshold,
+        $\varepsilon_{l}$.  In \cite{harten1994} the following threshold is
+        proposed
         \begin{equation}
             \varepsilon_{l} = \varepsilon_{L} / 2^{L-l},
         \end{equation}
         where $\varepsilon_{L}$ is the tolerance prescribed for the finest
-        level, naturally.  The detail coefficients are truncated according to
+        level. The detail coefficients are truncated according to
         \begin{equation}
             \tilde{d}^{l}_{i} =
                 \begin{cases}
                     d^{l}_{i}, \text{ } \text{if} \text{ } |d^{l}_{i}| > \varepsilon_{l} \\
                     0, \text{ } \text{if} \text{ } |d^{l}_{i}| \leq
-                    \varepsilon_{l},
+                    \varepsilon_{l}.
                 \end{cases}
         \end{equation}
-        producing the following approximate representation,
+        The resulting multiresolution decomposition is given by,
         \begin{equation}
-            \tilde{\bm{u}}^{L}_{M} = T_{\varepsilon}(\bm{u}^{L}_{M}) = \left(
+            \tilde{\bm{u}}^{L}_{M} = \bm{T}_{\varepsilon}(\bm{u}^{L}_{M}) = \left(
             \tilde{\bm{d}}^{L-1}, \tilde{\bm{d}}^{L-2},
-            \dots, \tilde{\bm{d}}^{1}, \bm{u}^{1} \right)^{T}.
+            \dots, \tilde{\bm{d}}^{1}, \bm{u}^{1} \right)^{T},
         \end{equation}
+        where $\tilde{\bm{d}}^{l} =
+        \left\{\tilde{d}^{l}_{i}\right\}_{i=1}^{N_{l}}$ now represent the array
+        of truncated detail coefficients at the given level. We may reconstruct
+        the fine-grid data using this truncated representation as
+        \begin{equation}
+            \hat{\bm{u}}^{L} = \bm{M}^{-1} \bm{T}_{\varepsilon}(\bm{u}^{L}_{M}),
+        \end{equation}
+        simply applying the inverse operation of \ref{transform}.  The error
+        associated with this truncatated representation is
+        \begin{equation}
+            ||\overline{\bm{u}}^{L} - \hat{\bm{u}}^{L}|| \leq C \varepsilon,
+        \end{equation}
+        measured in the $L_{1}$ and $L_{\infty}$ norms.
 
 %    \subsection*{Decoding}
 %
@@ -393,20 +408,23 @@ e
     \subsection{Adaptive calculation of fluxes}
 
         % dicuss computation of fluxes and sources
-        Once the detail coefficients have been obtained, the MR scheme
-        proceeds by setting a threshold $\varepsilon$ and truncating coefficients
-        which have an absolute value below the threshold. Lastly, the inverse
-        transform then starts from grid $l=L$ and at each interface either
-        computes fluxes using the fine-grid scheme, or interpolates them using
-        the MR basis. The fluxes are interpolated by
+        In \cite{harten1994}, Harten shows how the numerical flux, \ref{flux},
+        may be replaced by interpolation of $\hat{\bm{f}}^{l}$ in smooth
+        regions. We introduce here an array of fluxes which each correspond to
+        the interfaces on a given grid, $\bm{\mathcal{G}}_{l}$,
+        $\hat{\bm{f}}^{l} = \left\{ \hat{f}^{l}_{i} \right\}_{i=1}^{N_{l}+1}$.
+        Given the fluxes on some arbitrary level $l$, the odd-indexed fluxes on level $l+1$
+        may be interpolated in a point-wise sense as
         \begin{equation}
             \hat{f}_{2i+1}^{l+1} \approx \sum_{p=1}^{s+1} \beta_{p} \left(
-            \hat{f}^{l}_{i-p+1} + \hat{f}^{l}_{i+p} \right),
+            \hat{f}^{l}_{i-p+1} + \hat{f}^{l}_{i+p} \right).
         \end{equation}
-        where the interpolants are of degree $2s+1$. The coefficients for
-        various degrees of polynomial interpolants are shown in Table (ref).
-        The process repeats until all fluxes are either computed or
-        interpolated on the fine grid $l=0$.
+        The interpolants are of order $2s+2$. The coefficients for
+        various degrees of polynomial interpolants are shown in Table \ref{coeff2}
+        Even-indexed fluxes are simply copied from level $l$ as
+        \begin{equation}
+            \hat{f}^{l+1}_{2i} = \hat{f}^{l}_{i}, \quad \forall i \in \bm{\mathcal{I}}_{l}
+        \end{equation}
 
     \subsection{Adaptive calculation of source terms}
 
@@ -469,27 +487,32 @@ e
 
 \section{Numerical Results}
 
-%    \subsection*{Convergence Analysis for Smooth Advection Problem}
-%
-%        % problem description
-%        The 
-%        \begin{equation}
-%           u_{t} + f(u)_{x} = 0
-%            \label{euler1d}
-%        \end{equation}
-%        where $u = \left( \rho, \rho u, \rho w, E \right)^{T}$ is
-%        the state vector, the flux vector is
-%        \begin{equation}
-%            f = 
-%        \begin{pmatrix}
-%        \rho u \\ \rho u^2 + p \\ u( E + p )
-%        \end{pmatrix},
-%        \end{equation}
-%        and the total energy per unit volume is given by
-%        \begin{equation*}
-%            E = \rho \left( \frac{1}{2} u^2 + e \right),
-%        \end{equation*}
-%        where $e$ is the internal energy.
+    \subsection*{Convergence Analysis for Smooth Advection Problem}
+
+        % problem description
+        The adaptive multiresolution scheme is tested for a smooth advection
+        problem on uniform grids. The primary purpose of this test problem is
+        to verify that the orders of convergence are preserved when Harten's
+        scheme is active. We solve the Euler equations in one spatial dimension,
+        \begin{equation}
+           u_{t} + f(u)_{x} = 0,
+        \label{euler1d}
+        \end{equation}
+        where
+        \begin{equation}
+            u =
+            \begin{pmatrix}
+                \rho \\ \rho u \\ E
+            \end{pmatrix}, \quad
+            f =
+            \begin{pmatrix}
+                \rho u \\ \rho u^2 + p \\ u( E + p )
+            \end{pmatrix},
+        \end{equation}
+        and the total energy per unit volume is given by
+        \begin{equation*}
+            E = \rho \left( \frac{1}{2} u^2 + e \right).
+        \end{equation*}
 %
 %        % convergence rates table (epsilon shouldn't be below error of scheme)
 %        % note: include estimated order of error of reference scheme)
@@ -554,33 +577,6 @@ e
 %        equation of state which is in general not derived from that of an ideal gas.
 
 \appendix
-
-
-        \begin{table}[]
-            \center
-            \begin{tabular}{|l|l|l|l|l|}
-            \hline
-                order    & $\beta_{1}$ & $\beta_{2}$ & $\beta_{3}$ & $\beta_{4}$ \\ \hline
-                3 & 9/16         & -1/16        & 0            & 0 \\ \hline
-                5 & 75/128       & -25/256      & 3/256        & 0 \\ \hline
-                7 & 1225/2048    & -245/2048    & 49/2048      & -5/2048 \\ \hline
-            \end{tabular}
-            \label{coeff2}
-            \caption{}
-        \end{table}
-        \begin{table}
-            \center
-            \begin{tabular}{|l|l|l|l|}
-            \hline
-                order    & $\gamma_{1}$ & $\gamma_{2}$ & $\gamma_{3}$ \\ \hline
-                3 & -1/8          & 0            & 0            \\ \hline
-                5 & -22/128      & 3/128        & 0            \\ \hline
-                7 & 0            & 0            & 0            \\ \hline
-            \end{tabular}
-            \label{coeff1}
-            \caption{Coefficients for centered, conservative interpolants of
-                orders 3-7. For the derivation of these coefficients, the reader is referred to Appendix (\hl{ref}).}
-        \end{table}
 %\section{Multiresolution Analysis}
 %
 %    % describe multiresolution analysis (sourced from tymczak2000)
@@ -681,19 +677,37 @@ e
         \tilde{u}^{j+1}_{2k+1} & = u^{j}_{k} - \frac{1}{8} \left( u^{j}_{k-1} - u^{j}_{k+1} \right).
     \end{align}
     This procedure could easily be extended to non-uniformly spaced intervals,
-    giving different weights. Note that only the odd indices are counted because
-    in the multiresolution scheme the data is initially split into even and odd
-    signals. All data at level $j$ are just considered to be a copy of the
-    even-index data at level $j+1$, whereas the odd-indexed data at level $j+1$
-    is what is predicted by even-indexed data at level $j+1$. Also important are
-    the interpolants near the boundaries of the domain. Given below are the left
-    and right predictions, respectively:
+    giving different weights.
+    \begin{table}
+        \center
+        \begin{tabular}{|l|l|l|l|}
+        \hline
+            order    & $\gamma_{1}$ & $\gamma_{2}$ & $\gamma_{3}$ \\ \hline
+            3 & -1/8          & 0            & 0            \\ \hline
+            5 & -22/128      & 3/128        & 0            \\ \hline
+            7 & 0            & 0            & 0            \\ \hline
+        \end{tabular}
+        \label{coeff1}
+        \caption{Coefficients for centered, conservative interpolants of orders 3-7.}
+    \end{table}
     \begin{align}
         \tilde{u}^{j+1}_{2k+1} & = \frac{5}{8} u^{j}_{k}
         + \frac{1}{2} u^{j}_{k+1} - \frac{1}{8} u^{j}_{k+2} \\
         \tilde{u}^{j+1}_{2k+1} & = \frac{1}{8} u^{j}_{k-2}
         - \frac{1}{2} u^{j}_{k-1} + \frac{11}{8} u^{j}_{k}.
     \end{align}
+    \begin{table}[]
+        \center
+        \begin{tabular}{|l|l|l|l|l|}
+        \hline
+            order    & $\beta_{1}$ & $\beta_{2}$ & $\beta_{3}$ & $\beta_{4}$ \\ \hline
+            4 & 9/16         & -1/16        & 0            & 0 \\ \hline
+            6 & 75/128       & -25/256      & 3/256        & 0 \\ \hline
+            8 & 1225/2048    & -245/2048    & 49/2048      & -5/2048 \\ \hline
+        \end{tabular}
+        \label{coeff2}
+        \caption{Coefficients for centered, point-wise interpolation of orders 4-8}
+    \end{table}
 
     \section{WENO Reconstruction}
 
