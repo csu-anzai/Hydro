@@ -10,7 +10,7 @@
 \begin{document}
 
 \section{Introduction}
-\title{Accelerating Block-Structured Adaptive Multiresolution Schemes: Applications to
+\title{A Fully Adaptive Block-Structured Multiresolution Scheme for
 Reactive Flows}
 \author{Brandon Gusto} %
 \institute{Dept. of Scientific Computing \\ Florida State University}
@@ -43,7 +43,7 @@ Reactive Flows}
         \hat{f}_{i-1/2} \right) + \overline{s}_{i},
         \label{ode}
     \end{equation}
-    where $\overline{s} = \frac{1}{\Delta x} \int_{x_{i-1/2}}^{x_{i+1/2}} s(\xi) d
+    where $\overline{s} = \frac{1}{\Delta x} \int_{x_{i-1/2}}^{x_{i+1/2}} s(u) d
     \xi$, and the numerical flux is evaluated as
     \begin{equation}
         \hat{f}_{i\pm1/2} = \hat{f}(\overline{u}^{-}_{i\pm1/2}, \overline{u}^{+}_{i\pm1/2}).
@@ -68,12 +68,8 @@ Reactive Flows}
 
 \begin{frame}{Adaptive mesh refinement}
     These equations are typically solved on non-uniform mesh spacing:
-    \begin{figure}
-        \center
-        \includegraphics[width=0.75\textwidth]{filling.png}
-    \end{figure}
     \begin{itemize}
-        \item<2-> the refinement is associated with localized features
+        \item<2-> refinement is associated with localized features
         \item<3-> some type of estimator of the local error is needed
         \item<4-> typically a collection of cells (a block) is refined for efficiency
         \item<5-> blocks introduce inherent ``overresolution" in some regions of the mesh
@@ -179,6 +175,8 @@ Reactive Flows}
             \overline{s}^{l}_{i+p} - \overline{s}^{l}_{i-p} \right).
     \end{equation}
 \end{frame}
+
+\section{Development progress}
 
 \section{Results}
 
