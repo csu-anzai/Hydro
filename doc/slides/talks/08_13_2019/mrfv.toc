@@ -1,4 +1,4 @@
-\beamer@endinputifotherversion {3.33pt}
+\beamer@endinputifotherversion {3.26pt}
 \beamer@sectionintoc {1}{Introduction}{1}{0}{1}
 \beamer@sectionintoc {2}{Introduction}{2}{0}{2}
 \beamer@sectionintoc {3}{Multiresolution representation}{11}{0}{3}
