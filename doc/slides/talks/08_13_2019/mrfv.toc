@@ -1,6 +1,5 @@
-\beamer@endinputifotherversion {3.26pt}
 \beamer@sectionintoc {1}{Introduction}{1}{0}{1}
 \beamer@sectionintoc {2}{Introduction}{2}{0}{2}
-\beamer@sectionintoc {3}{Multiresolution representation}{11}{0}{3}
-\beamer@sectionintoc {4}{Results}{19}{0}{4}
-\beamer@sectionintoc {5}{Applications}{20}{0}{5}
+\beamer@sectionintoc {3}{Multiresolution representation}{13}{0}{3}
+\beamer@sectionintoc {4}{Grid Adaptation}{20}{0}{4}
+\beamer@sectionintoc {5}{Results}{24}{0}{5}

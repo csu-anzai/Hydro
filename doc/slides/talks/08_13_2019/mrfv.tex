@@ -23,7 +23,7 @@ Reactive Flows}
     Many engineering applications depend on numerically solving systems of conservation laws of the form
     \begin{equation}
     \begin{cases}
-      u_{t} + f(u)_{x} = s(u) \\    
+      u_{t} + f(u)_{x} = s(u) \\
       u(x,0) = u_{0}(x),
     \end{cases}
     \label{claw}
@@ -66,14 +66,24 @@ Reactive Flows}
     where the stages $k_{j}$ are solved either implicitly or explicitly.
 \end{frame}
 
+% provide example that motivates AMR
+\begin{frame}
+    \frametitle{Motivation for non-uniform refinement}
+\end{frame}
+
 \begin{frame}{Adaptive mesh refinement}
     These equations are typically solved on non-uniform mesh spacing:
+    % should setup two-column environment here...
     \begin{itemize}
         \item<2-> refinement is associated with localized features
         \item<3-> some type of estimator of the local error is needed
         \item<4-> typically a collection of cells (a block) is refined for efficiency
         \item<5-> blocks introduce inherent ``overresolution" in some regions of the mesh
     \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Constraints of AMR}
 \end{frame}
 
 %\section{Computing Limitations}
@@ -158,10 +168,24 @@ Reactive Flows}
     \end{equation*}
 \end{frame}
 
+% should show simple example of multiresolution compression of function
+\begin{frame}
+    \frametitle{Multiresolution compression of function}
+\end{frame}
+
+\section{Grid Adaptation}
+
+% describe mask
 \begin{frame}{Grid adaptation}
     (MOVIE)
 \end{frame}
 
+% describe buffer zone
+\begin{frame}
+    \frametitle{Buffer region}
+\end{frame}
+
+% give source terms their own slide
 \begin{frame}{Adaptive flux and source computations on blocks}
     Where the mask is not active (solution is smooth enough), we can also
     replace redundant flux calculations with interpolation,
@@ -176,6 +200,11 @@ Reactive Flows}
     \end{equation}
 \end{frame}
 
+% discuss possible load-balancing using multiresolution info
+\begin{frame}
+    \frametitle{Load balancing}
+\end{frame}
+
 \section{Results}
 
 \begin{frame}{Two interacting blast waves}
@@ -184,8 +213,6 @@ Reactive Flows}
     \includegraphics[scale=0.4]{blast2_early.png}
   \end{figure}
 \end{frame}
-
-\section{Applications}
 
 \begin{frame}{Laminar flame}
   \begin{figure}
