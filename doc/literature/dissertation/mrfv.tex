@@ -35,7 +35,7 @@
     % journal of fluid mechanics
 
 
-\title{A Fully Adaptive Block-Structured Multiresolution Scheme for Reactive Flows}
+\title{A multiresolution scheme for adaptive computations on block-structured AMR meshes: applications to reactive flows}
 
 \author{
   Brandon Gusto\\
@@ -56,81 +56,61 @@
 \maketitle
 
 \begin{abstract}
-    We present a generalization of Harten's original multiresolution scheme for
-    simulating reactive flows on logically rectangular block-structured adaptive
-    mesh refinement (AMR) grids in one and two dimensions. The scheme addresses
-    a major shortcoming of tree-based AMR codes, which is the creation of blocks
-    with a low filling factor; that is, many cells in such a block are resolved
-    beyond the desired error tolerance, necessitating excessive computational
-    resources.  To overcome this issue, we introduce a multiresolution
-    representation of the solution, not only to adapt the grid but also to
-    adaptively compute fluxes and sources on each block. The scheme recycles
-    regularity information obtained by the multiresolution grid adaptation in
-    order to select flux and source calculations which may be accurately
-    replaced by interpolation from the multiresolution basis. A block which
-    employs this scheme is denoted as a fully adaptive block (FAB).  The error
-    introduced by this approximation is shown to be of the same order as the
-    local truncation error of the reconstruction scheme. Thus the rate of
-    convergence of the underlying spatial reconstruction scheme is preserved.
-    Additionally with respect to parallel applications, the multiresolution
-    transform and computation of fluxes and sources on FABs is asynchronous,
-    requiring only one synchronization step which is equivalent to the filling
-    of ghost cells for each block. The efficiency of the scheme is demonstrated
-    using several one and two-dimensional problems.
+    We present a novel block-structured adaptive mesh refinement scheme
+    featuring fully adaptive calculation of fluxes and source terms. The scheme
+    addresses a major shortcoming of tree-based AMR codes: that the graded
+    nature of the AMR mesh yields blocks whose cells are resolved beyond the
+    desired error tolerance. To overcome this issue, we introduce a
+    multiresolution representation of the solution not only for the purpose of
+    grid adaptation but also to identify regions where fluxes and
+    reaction-driven source terms can be interpolated from coarser levels. The
+    error introduced by this approximation procedure is shown to be of the same
+    order as the local truncation error of the reconstruction scheme. Thus the
+    rate of convergence of the underlying spatial reconstruction scheme is
+    preserved.  Additionally with respect to parallel applications, the
+    multiresolution transform and computation of fluxes and sources on adaptive
+    blocks is asynchronous, requiring only one synchronization step which is
+    equivalent to the filling of ghost cells for each block. The efficiency of
+    the scheme is demonstrated for problems in compressible flow and
+    reaction-driven combustion.
 \end{abstract}
 
 % keywords can be removed
-\keywords{Multiresolution \and Adaptive Mesh Refinement \and Reactive Flows}
+\keywords{multiresolution \and adaptive mesh refinement \and reactive flows}
 
 \section{Introduction}
 
     % paragraph introduces the need for spatially adaptive grids
-    Highly energetic, reacting flows are characterized by disparate spatial and
-    temporal length scales. Shock waves and burning fronts in the flow require
-    orders of magnitude more resolution than smooth regions of the flow.
-    Efficient simulation of such flows requires an adaptive strategy.
+    Energetic, reacting, and turbulent flows are characterized by disparate
+    spatial and temporal length scales. In the compressible regime, flows are
+    capable of producing shock waves, resulting in steep gradients and an
+    extremely thin discontinuity. When fuels and oxidizers are present,
+    compression of the fluid via shock wave interaction facilitates the
+    chemical reaction process, which will itself become a driving force for
+    shock waves due to the large release of energy, and increase in static
+    pressure. The burning fronts wherein these reactions take place are also
+    highly spatially localized.  These features require a level of mesh
+    resolution that would make the problems intractable if applied over the
+    entire domain. Therefore, efficient simulation of such flows requires a
+    fully adaptive strategy, which we present in the following paper.
 
     % paragraph introducing adaptive mesh refinement as a concept
-    The most popular strategy to accurately capture regions of interest in fluid
-    simulations is to introduce a non-uniform spatial grid, with higher
-    resolution near discontinuities or sharp gradients.  Methods which introduce
-    a hierarchy of nested grid resolutions are generally described as adaptive
-    mesh refinement (AMR) methods. AMR methods, first introduced in
-    \cite{berger1984}, usually rely on estimates of the local truncation error
-    (LTE) of the numerical scheme to determine regions where refinement is
-    necessary for solution accuracy. Some more simple strategies may refine
-    based on the value of the gradient, or concentration of some species of
-    interest. For a full review of the LTE estimators and refinement criterion,
-    readers are referred to \hl{blank}.
+    Accurately resolving regions of interest in fluid dynamics simulations for
+    real-world applications is typically not feasible without introducing a
+    non-uniform spatial mesh. Methods which introduce a hierarchy of nested
+    grids are generally described as adaptive mesh refinement (AMR) methods.
+    First introduced in (berger1984), AMR methods typically rely on estimates
+    of the local truncation error (LTE) to determine regions where refinement
+    is necessary for solution accuracy. Some more simple strategies may refine
+    based on the magnitudes of the solution gradients, or concentration of a
+    quantity of interest. While many strategies are possible, there is not yet
+    a significant amount of mathematical theory available to quantify the
+    solution accuracy for AMR simulations. For a full review of the LTE
+    estimators and refinement criterion, readers are referred to BLANK.
 
-    % talk about block-structured AMR
-    Regarding the implementation of AMR methods on large networks of parallel
-    computers, certain engineering realities have neccessitated the reduction in
-    granularity of the adaptive refinement. To use a single computational cell
-    as the unit for refinement (i.e. cell-based refinement) introduces a number
-    of costly compromises. Firstly, such an adapted grid requires the
-    reconstruction method of choice to utilize nonuniform stencils, requiring
-    increased computational resources. More significantly, the cell-based
-    refinement requires costly data traversal. Traversing tree space requires on
-    average $\mathcal{O}(n^d)$ (\hl{confirm this?}) operations, where $n$ is the
-    number of cells per dimension, $d$. Thus most AMR codes make use of some
-    type of block-based approach. Tree-based block-structured codes, where each
-    block consists of a fixed number of cells, are a very popular choice. These
-    types of approaches are implemented in a number of AMR libraries including
-    Paramesh (\hl{cite}), p4est (\hl{cite}, and others. This approach allows for
-    simple mesh management procedures, and scales well for very large numbers of
-    processors in parallel.  One clear drawback however is the gradedness of the
-    tree, which necessitates that no branch can have an incomplete set of
-    children. This typically leads to refinement of many blocks which would not
-    be otherwise flagged by refinement indicators. A further complication
-    imposed by most finite volume solvers is that there can not be a jump in
-    refinement greater than one level. Together these consequences of AMR
-    represent a non-trivial decrease in performance due to the fact that the
-    mesh is not optimal (in some sense).
-e
     % paragraph reviews the work of harten and multiresolution methods
     Alternate approaches to dynamic grid adaptation based on wavelet theory
-    became popular after the seminal papers by Harten \cite{harten1994}, were
+    became popular after the seminal paper by Harten \cite{harten1994} was
     introduced. In this work, a multiresolution representation of the discrete
     solution on a uniform grid was used for adaptively computing the divergence
     of the flux within a finite volume framework. Rather than adapt the grid
@@ -138,14 +118,13 @@ e
     multiresolution information. In this approach, eligible fluxes in
     sufficiently smooth regions are interpolated from fluxes obtained at
     interfaces corresponding to coarser grid levels. The original scheme was
-    applied solely to hyperbolic conservation laws in one spatial dimension, but
-    was then expanded by Bihari et. al. to two-dimensional simulations in
-    (\hl{citation}), followed by the inclusion of viscous terms in
-    (\hl{citation}), and then to source terms in the context of reactive flows
-    in (\hl{bihari}). These works retained the original spirit of Harten's
-    scheme, which was to evolve the solution on a uniform grid, but use
-    multiresolution information to identify regions where flux (and/or source
-    term) computations may be avoided.
+    applied solely to hyperbolic conservation laws in one spatial dimension,
+    but was then expanded by Bihari et. al. to two-dimensional simulations in (cite),
+    followed by the inclusion of viscous terms in (cite), and then to source terms in
+    the context of reactive flows in (cite). These works retained the
+    original spirit of Harten's scheme, which was to evolve the solution on a
+    uniform grid, but use multiresolution information to identify regions where
+    flux (and/or source term) computations may be avoided.
 
     % review the multiresolution-adaptive papers
     Although Harten's original scheme was intended to be an alternative to
@@ -155,24 +134,55 @@ e
     criterion defined by the MR representation rather than with the traditional
     metrics mentioned previously. The first fully adaptive scheme was presented
     by Cohen et. al. to study hyperbolic conservation laws in two dimensions in
-    (\hl{cite}). More recently, Rossinilli et. al. explored the use of
-    wavelet-based refinement indicators for block-based adaptation.
+    (cite). \hl{list a bunch more papers.}
+
+    % talk about block-structured AMR
+    The standard AMR methods have been the workhorse in computational fluid
+    dynamics over the last several decades. The implementation of such AMR
+    methods on large networks of parallel computers have neccessitated from a
+    computational efficiency standpoint the reduction in granularity of the
+    mesh refinement. To use a single computational cell as the unit for
+    refinement (i.e. cell-based refinement) introduces a number of costly
+    compromises. Firstly, such an adapted grid requires the reconstruction
+    method of choice to utilize nonuniform stencils, requiring increased
+    computational resources. More significantly, the cell-based refinement
+    requires costly data traversal. Traversing tree space requires on average
+    $\mathcal{O}(n^d)$ operations, where $n$ is the number of cells per
+    dimension, $d$. This operation is inherently sequential, and thus not
+    conducive to massively parallel computations. Thus most AMR codes used for
+    practical applications make use of some type of block-structured approach.
+    Tree-based codes, where each block consists of a fixed number of cells, are
+    a very popular choice. These types of approaches are implemented in a
+    number of AMR libraries including Paramesh, p4est, and (list others). This
+    approach allows for very simple mesh management procedures, and scales well
+    for very large numbers of processors in parallel.  One clear drawback
+    however is the gradedness of the tree, which necessitates that no branch
+    can have an incomplete set of children.  This typically leads to refinement
+    of many blocks which would not be otherwise flagged by refinement
+    indicators. A further complication imposed by most finite volume solvers is
+    that there can not be a jump in refinement greater than one level between
+    adjacent blocks. Together these consequences of block-structured AMR
+    represent a non-trivial decrease in performance.
 
     % punchline
-    In the following work, we present a novel block-based adaptive mesh
-    refinement scheme using wavelet-based indicators, where Harten's scheme is
-    used to essentially treat each block as a uniform grid.  The indicators are
-    used for two purposes: (1) refinement, and (2) adaptively calculating fluxes
-    and source terms. We show how this scheme costs essentially nothing in
-    additional computation (the MR information is recycled after adaptation),
-    while not impacting the accuracy of the solver.
+    To address the aforementioned issues with block-structured AMR, we propose
+    a scheme which uses multiresolution-based indicators not only to adapt the
+    grid, but also to identify flux and source term calculations which may be
+    systemically replaced with interpolation.  We show how this scheme
+    increases computational performance with no additional overhead, since the
+    multiresolution information is recycled after adaptation. Perhaps most
+    importantly, we demonstrate that the scheme does not degrade the overall
+    accuracy of the solver.
 
-    In the section 2 of this manuscript, we describe the conservations laws
-    of interest as well as the underlying finite volume
-    method and discretization. In section 3, we introduce the multiresolution
-    decomposition of the numerical solution. In section 4, the block-based
-    adaptive scheme is introduced, which combines grid adaptation with the
-    interpolatory scheme of Harten \hl{cite}.
+    % description of paper
+    In section 2 of this paper, we describe the systems of conservations laws
+    that we are interested in solving, as well as the underlying finite volume
+    method and discretization.  In section 3, we introduce the multiresolution
+    decomposition of the discrete solution and the interpolation procedure in
+    one spatial dimension. In section 4, the fully adaptive block-structured
+    scheme is introduced, which combines grid adaptation with the interpolation
+    procedure. In section 5 we present the numerical results from a number of
+    one- and two-dimensional simulations.
 
 \section{Finite volume method for hyperbolic conservation laws}
 
@@ -181,40 +191,45 @@ e
     laws of the form
     \begin{equation}
     \begin{cases}
-      u_{t} + \nabla \cdot f(u) = s(u) \\
-      u(x,0) = u_{0}(x).
+        \bm{u}_{t} + \nabla \cdot \bm{F} = \bm{s}(\bm{u}) \\
+        \bm{u}(\bm{x},0) = \bm{u}_{0}(\bm{x}).
     \end{cases}
     \label{claw}
     \end{equation}
-    where $u \in \mathbb{R}^{m}, x \in \mathbb{R}^{n},$ and $t > 0$. Here
-    $u(t,x)$ represents a conserved quantity, $f(u)$ is the flux function, and
-    $s(u)$ is a source term. \hl{Discuss discontinuous solutions}.
+    where $\bm{u} \in \mathbb{R}^{m}, \bm{x} \in \mathbb{R}^{n},$ and $t > 0$.
+    Here $\bm{u}(\bm{x},t)$ represents a vector of conserved quantities,
+    $\bm{F}$ is a tensor of fluxes, and $\bm{s}$ is a source term. These
+    nonlinear, hyperbolic partial differential equations are known to produce
+    discontinuities, requiring solutions to be found in a weak sense.
+    We introduce the integral form of \ref{claw} via the finite volume method.
 
     In the finite volume formulation, the spatial domain is discretized into
     control volumes $V_{i}$, inside which the solution is approximated by volume
-    averages as
+    averages at time $t$ as
     \begin{equation}
-        \overline{u}_{i}(t) = \frac{1}{|V_{i}|} \int_{V_{i}} u(x,t) dx.
+        \overline{\bm{u}}_{i}(t) = \frac{1}{|V_{i}|} \int_{V_{i}} \bm{u}(\bm{x},t) d\bm{x}.
     \end{equation}
     The governing equations are cast into the semi-discrete conservative form
     by application of the divergence theorem, yielding
     \begin{equation}
-        \frac{d \overline{u}_{i}(t)}{dt} = L(\overline{u}) =  -\frac{1}{|V_{i}|} \sum_{j} |
-        \Gamma_{i,j}| \hat{f}_{i,j}
-        + \overline{s}_{i},
+        \frac{d \overline{\bm{u}}_{i}(t)}{dt} = L(\overline{\bm{u}}) =  -\frac{1}{|V_{i}|} \sum_{j\in \mathcal{N}_{i}} |
+        \Gamma_{i,j}| \bm{f}_{i,j}
+        + \overline{\bm{s}}_{i},
         \label{ode}
     \end{equation}
-    where interfaces are represented as $\Gamma_{i,j} = V_{i} \cap
-    V_{j}$. The sources are given in a cell-averaged sense as
+    where $\mathcal{N}_{i}$ is the set of neighboring cells, the interfaces are
+    given as $\Gamma_{i,j} = V_{i} \cap V_{j}$, and the vector $\bm{f}_{i,j}$
+    represents the corresponding row vector in the tensor $\bm{F}$ evaluated at
+    the interface.  The sources are given in a cell-averaged sense as
     \begin{equation}
-        \overline{s}_{i} = \frac{1}{|V_{i}|} \int_{|V_{i}|} s(u) dx,
+        \overline{\bm{s}}_{i} = \frac{1}{|V_{i}|} \int_{|V_{i}|} \bm{s}(\bm{u}) dx.
     \end{equation}
-    and the numerical flux is evaluated as
+    The flux $\bm{f}_{i,j}$ is approximated with a numerical flux
     \begin{equation}
-        \hat{f}_{i,j} = \hat{f}(u^{-}_{i,j}, u^{+}_{i,j}),
+        \hat{\bm{f}}_{i,j} = \hat{\bm{f}}(\bm{u}^{-}_{i,j}, \bm{u}^{+}_{i,j}),
         \label{flux}
     \end{equation}
-    where the states $u^{-}_{i,j}$ and $u^{+}_{i,j}$ indicate the approximate
+    where the states $\bm{u}^{-}_{i,j}$ and $\bm{u}^{+}_{i,j}$ indicate the approximate
     value of the quantity $u$ on opposite sides of the cell
     interface $\Gamma_{i,j}$.
 
@@ -253,7 +268,7 @@ e
     introduced by Harten \hl{cite} within the context of conservative finite
     volume schemes. The scope here is restricted to one-dimensional uniform
     grids, as the operations required for the fully adaptive block scheme are
-    identical.
+    nearly identical.
 
     \subsection{Reference scheme on one-dimensional uniform grid}
 
@@ -487,33 +502,33 @@ e
 
 \section{Numerical Results}
 
-    \subsection*{Convergence Analysis for Smooth Advection Problem}
+    \subsection*{Interacting blast waves}
 
         % problem description
-        The adaptive multiresolution scheme is tested for a smooth advection
-        problem on uniform grids. The primary purpose of this test problem is
-        to verify that the orders of convergence are preserved when Harten's
-        scheme is active. We solve the Euler equations in one spatial dimension,
-        \begin{equation}
-           u_{t} + f(u)_{x} = 0,
-        \label{euler1d}
-        \end{equation}
-        where
-        \begin{equation}
-            u =
-            \begin{pmatrix}
-                \rho \\ \rho u \\ E
-            \end{pmatrix}, \quad
-            f =
-            \begin{pmatrix}
-                \rho u \\ \rho u^2 + p \\ u( E + p )
-            \end{pmatrix},
-        \end{equation}
-        and the total energy per unit volume is given by
-        \begin{equation*}
-            E = \rho \left( \frac{1}{2} u^2 + e \right).
-        \end{equation*}
-%
+        The adaptive multiresolution scheme is tested for the problem of two
+        interacting blast waves (cite collela woodward).  We solve the Euler
+        equations in one spatial dimension,
+
+%        \begin{equation}
+%           u_{t} + f(u)_{x} = 0,
+%        \label{euler1d}
+%        \end{equation}
+%        where
+%        \begin{equation}
+%            u =
+%            \begin{pmatrix}
+%                \rho \\ \rho u \\ E
+%            \end{pmatrix}, \quad
+%            f =
+%            \begin{pmatrix}
+%                \rho u \\ \rho u^2 + p \\ u( E + p )
+%            \end{pmatrix},
+%        \end{equation}
+%        and the total energy per unit volume is given by
+%        \begin{equation*}
+%            E = \rho \left( \frac{1}{2} u^2 + e \right).
+%        \end{equation*}
+
 %        % convergence rates table (epsilon shouldn't be below error of scheme)
 %        % note: include estimated order of error of reference scheme)
 %        \begin{center}\vspace{1cm}
@@ -535,8 +550,6 @@ e
 %        256        &               &       &                    &       &               &       &                    &       \\ \hline
 %        \end{tabular}
 %        \end{center}\vspace{1cm}
-
-    \subsection*{Interacting blast waves}
 
     \subsection*{Mach reflection}
 

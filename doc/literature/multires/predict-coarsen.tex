@@ -1,0 +1,121 @@
+    \begin{tikzpicture}[thick,scale=0.4, every node/.style={scale=0.6}]
+    
+        % variables
+        \def\x{-17.0}
+        \def\y{0.0}
+        \def\yl{-8.0}
+        
+        % draw coarse level rectangles
+        \draw [fill=mygray,line width=0.4mm] (\x,0) rectangle (\x+3,2);
+        \draw [fill=mygray,line width=0.4mm] (\x+3,0) rectangle (\x+6,6);
+        \draw [fill=mygray,line width=0.4mm] (\x+6,0) rectangle (\x+9,4);
+        
+        % arrows
+        \draw[myblue,dashed,->,line width=0.65mm,>=stealth] (\x+5.25,\y-1.65) -- (\x+4.6,\y-0.1);
+        \draw[myblue,dashed,->,line width=0.65mm,>=stealth] (\x+3.75,\y-2.15) -- (\x+4.40,\y-0.1);
+        
+        % coarse level symbols
+        \node at (\x+1.5,1) { $u^{l}_{i-1}$};
+        \node at (\x+4.5,3) { $u^{l}_{i}$};
+        \node at (\x+7.5,2) { $u^{l}_{i+1}$};
+
+        % fine level rectangles
+        \draw [fill=mygray,line width=0.4mm] (\x,\yl) rectangle (\x+1.5,\yl+1);
+        \draw [fill=mygray,line width=0.4mm] (\x+1.5,\yl) rectangle (\x+3,\yl+3);
+        \draw [fill=mygray,line width=0.4mm] (\x+3,\yl) rectangle (\x+4.5,\yl+5.75);
+        \draw [fill=mygray,line width=0.4mm] (\x+4.5,\yl) rectangle (\x+6,\yl+6.25);
+        \draw [fill=mygray,line width=0.4mm] (\x+6,\yl) rectangle (\x+7.5,\yl+4.4);
+        \draw [fill=mygray,line width=0.4mm] (\x+7.5,\yl) rectangle (\x+9,\yl+3.6);
+        
+        % coarse level axis
+        \draw[line width=0.5mm] (\x,0) -- (\x+9,0);
+        \draw[line width=0.5mm] (\x,.1) -- (\x,-0.1);
+        \draw[line width=0.5mm] (\x+3,0.1) -- (\x+3,-0.1);
+        \draw[line width=0.5mm] (\x+6,0.1) -- (\x+6,-0.1);
+        \draw[line width=0.5mm] (\x+9,0.1) -- (\x+9,-0.1);
+        
+        % fine level symbols
+        \node at (\x+3.75,\yl+2.5) { $u^{l-l}_{2i}$};
+        \node at (\x+5.25,\yl+2.75) { $u^{l-1}_{2i+1}$};
+        
+        % fine level axis
+        \draw[line width=0.5mm] (\x,\yl) -- (\x+9,\yl);
+        \draw[line width=0.5mm] (\x,\yl+.1) -- (\x,\yl-0.1);
+        \draw[line width=0.5mm] (\x+3,\yl+.1) -- (\x+3,\yl-0.1);
+        \draw[line width=0.5mm] (\x+6,\yl+.1) -- (\x+6,\yl-0.1);
+        \draw[line width=0.5mm] (\x+9,\yl+.1) -- (\x+9,\yl-0.1);
+
+        % tick text
+        \node[below] at (\x,\yl-0.25) {$x^{l}_{i-1}$};
+        \node[below] at (\x+3,\yl-0.25) { $x^{l}_{i}$};
+        %\node[below] at (\x+4.5,\yl-0.25) { $x^{l}_{k+1/2}$};
+        \node[below] at (\x+6,\yl-0.25) { $x^{l}_{i+1}$};
+        \node[below] at (\x+9,\yl-0.25) { $x^{l}_{i+2}$};
+        
+        %----
+        
+        % variables
+        \def\x{3.0}
+        \def\y{0.0}
+        \def\yl{-8.0}
+        
+        % draw coarse level rectangles
+        \draw [fill=mygray,line width=0.4mm] (\x,0) rectangle (\x+3,2);
+        \draw [fill=mygray,line width=0.4mm] (\x+3,0) rectangle (\x+6,6);
+        \draw [fill=mygray,line width=0.4mm] (\x+6,0) rectangle (\x+9,4);
+        
+        % coarse level symbols
+        \node at (\x+1.5,1) {$u^{l}_{i-1}$};
+        \node at (\x+4.5,3) { $u^{l}_{i}$};
+        \node at (\x+7.5,2) { $u^{l}_{i+1}$};
+        
+        % coarse level axis
+        \draw[line width=0.5mm] (\x,0) -- (\x+9,0);
+        \draw[line width=0.5mm] (\x,.1) -- (\x,-0.1);
+        \draw[line width=0.5mm] (\x+3,0.1) -- (\x+3,-0.1);
+        \draw[line width=0.5mm] (\x+6,0.1) -- (\x+6,-0.1);
+        \draw[line width=0.5mm] (\x+9,0.1) -- (\x+9,-0.1);
+
+        % fine level rectangles
+        \draw [fill=mygray,line width=0.4mm] (\x,\yl) rectangle (\x+1.5,\yl+1);
+        \draw [fill=mygray,line width=0.4mm] (\x+1.5,\yl) rectangle (\x+3,\yl+3);
+        \draw [fill=mygray,line width=0.4mm] (\x+3,\yl) rectangle (\x+4.5,\yl+5.75);
+        \draw [fill=mygray,line width=0.4mm] (\x+4.5,\yl) rectangle (\x+6,\yl+6.25);
+        \draw [fill=mygray,line width=0.4mm] (\x+6,\yl) rectangle (\x+7.5,\yl+4.4);
+        \draw [fill=mygray,line width=0.4mm] (\x+7.5,\yl) rectangle (\x+9,\yl+3.6);
+        
+        % fine level symbols
+        \node at (\x+3.75,\yl+2.5) { $u^{l-1}_{2i}$};
+        \node at (\x+5.25,\yl+2.75) { $u^{l-1}_{2i+1}$};
+        
+        % fine level axis
+        \draw[line width=0.5mm] (\x,\yl) -- (\x+9,\yl);
+        \draw[line width=0.5mm] (\x,\yl+.1) -- (\x,\yl-0.1);
+        \draw[line width=0.5mm] (\x+3,\yl+.1) -- (\x+3,\yl-0.1);
+        \draw[line width=0.5mm] (\x+6,\yl+.1) -- (\x+6,\yl-0.1);
+        \draw[line width=0.5mm] (\x+9,\yl+.1) -- (\x+9,\yl-0.1);
+
+        % arrows
+        \draw[myred,dashed,->,line width=0.65mm,>=stealth] (\x+1.5,\y-0.1) -- (\x+5,\y-1.6);
+        \draw[myred,dashed,->,line width=0.65mm,>=stealth] (\x+4.5,\y-0.1) -- (\x+5.25,\y-1.6);
+        \draw[myred,dashed,->,line width=0.65mm,>=stealth] (\x+7.5,\y-0.1) -- (\x+5.4,\y-1.6);
+
+        % tick text
+        \node[below] at (\x,\yl-0.25) { $x^{l}_{i-1}$};
+        \node[below] at (\x+3,\yl-0.25) { $x^{l}_{i}$};
+        %\node[below] at (\x+4.5,\yl-0.25) { $x^{l}_{i+1/2}$};
+        \node[below] at (\x+6,\yl-0.25) { $x^{l}_{i+1}$};
+        \node[below] at (\x+9,\yl-0.25) { $x^{l}_{i+2}$};
+        
+        % text
+        \node at (\x-2.0,\y+5.0) {\Large Predict};
+        \node at (\x-22,\y+5.0) {\Large Coarsen};
+        
+        % math
+        \node at (\x-3.25,\yl+6.5) {\large \color{myred} $\tilde{u}_{2i+1}^{l-1} \approx u_{i}^{l} - \sum_{p=1}^{s} \gamma_{p} \left( u^{l}_{i-p} - u^{l}_{i+p} \right)$ };
+        
+        \node at (\x-5,\yl+5.0) {\large $d_{i}^{l} = u_{2i+1}^{l-1} - $\color{myred}$ \text{ } \tilde{u}_{2i+1}^{l-1}$};
+        
+        \node at (\x-21,\yl+6.5) {\large \color{myblue} $u_{i}^{l} = \frac{1}{2} \left( u_{2i}^{l-1} + u_{2i+1}^{l-1} \right)$};
+
+    \end{tikzpicture}
