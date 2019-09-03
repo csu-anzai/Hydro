@@ -209,11 +209,12 @@
         \overline{\bm{u}}_{i}(t) = \frac{1}{|V_{i}|} \int_{V_{i}} \bm{u}(\bm{x},t) d\bm{x}.
     \end{equation}
     We approximate also the source terms in a cell-averaged sense, and denote
-    them as $\overline{\bm{s}}_{i}$. Finally the fluxes at each interface are evaluated numerically as
-    \begin{equation}
-        \hat{\bm{f}} = \hat{\bm{f}}(\bm{u}^{-},\bm{u}^{+}),
-    \end{equation}
-    where $\bm{u}^{-}$ and $\bm{u}^{+}$ represent states to the left and right of the interface, respectively.
+    them as $\overline{\bm{s}}_{i}$.
+   % Finally the fluxes at each interface are evaluated numerically as
+   % \begin{equation}
+   %     \hat{\bm{f}} = \hat{\bm{f}}(\bm{u}^{-},\bm{u}^{+}),
+   % \end{equation}
+   % where $\bm{u}^{-}$ and $\bm{u}^{+}$ represent states to the left and right of the interface, respectively.
 
 %    In the finite volume formulation, the spatial domain is discretized into
 %    control volumes $V_{i}$, inside which the solution is approximated by volume
@@ -248,9 +249,9 @@
     \subsection{Spatial reconstruction and calculation of fluxes}
 
         % inform reader of high cost of of numerical flux calculation
-        The correct calculation of numerical flux is the most crucial aspect of
-        any solver for compressible flows. It is also the most time-consuming
-        portion of such a program, typically.
+        Correct calculation of the numerical flux is one of the most crucial
+        aspect of any solver for compressible flows. It is also represents the
+        most time-consuming portion of such a program, typically.
 
         % reference the use of ENO/WENO
         In the vast majority of multiresolution schemes introduced in the
@@ -264,10 +265,10 @@
         with minimal oscillations, even in the presence of discontinuities.
         However, for flows exhibiting strong shocks and contact
         discontinuities, they generally do not reap additional benefit,
-        especially considering their high computational cost. In the
-        present work, we use the piecewise parabolic method (PPM) of Woodward
-        and Collela (cite) to reconstruct the field and provide left and
-        right inputs to the Riemann solver at each cell interface.
+        especially considering their high computational cost. In the present
+        work, we use the piecewise parabolic method (PPM) of Woodward and
+        Collela (cite) to reconstruct the field and provide inputs to the
+        Riemann solver at each cell interface.
 
 %    \subsection{Time integration}
 %
@@ -407,10 +408,10 @@
                 \begin{cases}
                     d^{l}_{i}, \text{ } \text{if} \text{ } |d^{l}_{i}| > \varepsilon_{l} \\
                     0, \text{ } \text{if} \text{ } |d^{l}_{i}| \leq
-                    \varepsilon_{l}.
+                    \varepsilon_{l},
                 \end{cases}
         \end{equation}
-        The resulting multiresolution decomposition is given by,
+        yielding the multiresolution decomposition
         \begin{equation}
             \tilde{\bm{u}}^{L}_{M} = \bm{T}_{\varepsilon}(\bm{u}^{L}_{M}) = \left(
             \tilde{\bm{d}}^{L-1}, \tilde{\bm{d}}^{L-2},
@@ -424,11 +425,13 @@
             \hat{\bm{u}}^{L} = \bm{M}^{-1} \bm{T}_{\varepsilon}(\bm{u}^{L}_{M}),
         \end{equation}
         simply applying the inverse operation of \ref{transform}.  The error
-        associated with this truncatated representation is
+        between the original fine-grid data and the truncatated representation
+        is
         \begin{equation}
             ||\overline{\bm{u}}^{L} - \hat{\bm{u}}^{L}|| \leq C \varepsilon,
+            \label{bound}
         \end{equation}
-        measured in the $L_{1}$ and $L_{\infty}$ norms.
+        measured in the $L_{1}$ or $L_{\infty}$ norm. Buffer region. Introduce mask.
 
 %    \subsection*{Decoding}
 %
@@ -448,18 +451,23 @@
     \subsection{Adaptive calculation of fluxes}
 
         % dicuss computation of fluxes and sources
-        In \cite{harten1994}, Harten shows how the numerical flux, \ref{flux},
-        may be replaced by interpolation of $\hat{\bm{f}}^{l}$ in smooth
-        regions. We introduce here an array of fluxes which each correspond to
-        the interfaces on a given grid, $\bm{\mathcal{G}}_{l}$,
-        $\hat{\bm{f}}^{l} = \left\{ \hat{f}^{l}_{i} \right\}_{i=1}^{N_{l}+1}$.
-        Given the fluxes on some arbitrary level $l$, the odd-indexed fluxes on level $l+1$
-        may be interpolated in a point-wise sense as
+        In \cite{harten1994}, Harten shows how the multiresolution compression
+        may be applied to the calculation of the numerical flux, while
+        preserving the bound on the solution \ref{bound}.
+
+        On any grid $\bm{\mathcal{G}}_{l}$ the set of fluxes at each interface
+        may be written as $\hat{\bm{f}}^{l} = \left\{ \hat{f}^{l}_{i}
+        \right\}_{i=1}^{N_{l}+1}$. The fluxes are a function of the compressed
+        multiresolution solution, $\hat{\bm{u}}^{l}$, which suggests that some,
+        too may be redundant.
+
+        Given $\hat{\bm{f}}^{l}$ on some arbitrary level $l$, the odd-indexed
+        fluxes on level $l+1$ may be interpolated in a point-wise sense as
         \begin{equation}
             \hat{f}_{2i+1}^{l+1} \approx \sum_{p=1}^{s+1} \beta_{p} \left(
-            \hat{f}^{l}_{i-p+1} + \hat{f}^{l}_{i+p} \right).
+            \hat{f}^{l}_{i-p+1} + \hat{f}^{l}_{i+p} \right), \quad \forall i \in \bm{\mathcal{M}}_{l}
         \end{equation}
-        The interpolants are of order $2s+2$. The coefficients for
+        where the interpolants are of order $2s+2$. The coefficients for
         various degrees of polynomial interpolants are shown in Table \ref{coeff2}
         Even-indexed fluxes are simply copied from level $l$ as
         \begin{equation}

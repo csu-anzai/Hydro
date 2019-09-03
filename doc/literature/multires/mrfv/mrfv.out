@@ -1,14 +1,13 @@
 \BOOKMARK [1][-]{section.1}{Introduction}{}% 1
-\BOOKMARK [1][-]{section.2}{Adaptive mesh refinement}{}% 2
-\BOOKMARK [1][-]{section.3}{Finite volume method for hyperbolic conservation laws}{}% 3
-\BOOKMARK [2][-]{subsection.3.1}{Spatial reconstruction and calculation of fluxes}{section.3}% 4
-\BOOKMARK [1][-]{section.4}{Adaptive multiresolution scheme on a uniform grid}{}% 5
-\BOOKMARK [2][-]{subsection.4.1}{Reference scheme on one-dimensional uniform grid}{section.4}% 6
-\BOOKMARK [2][-]{subsection.4.2}{Multiresolution representation of data}{section.4}% 7
-\BOOKMARK [2][-]{subsection.4.3}{Truncation}{section.4}% 8
-\BOOKMARK [2][-]{subsection.4.4}{Adaptive calculation of fluxes}{section.4}% 9
-\BOOKMARK [2][-]{subsection.4.5}{Adaptive calculation of source terms}{section.4}% 10
-\BOOKMARK [1][-]{section.5}{Fully adaptive block-structured multiresolution scheme}{}% 11
-\BOOKMARK [1][-]{section.6}{Numerical Results}{}% 12
-\BOOKMARK [1][-]{appendix.A}{Derivation of Prediction Operator in One-Dimension}{}% 13
-\BOOKMARK [1][-]{appendix.B}{WENO Reconstruction}{}% 14
+\BOOKMARK [1][-]{section.2}{Finite volume method for hyperbolic conservation laws}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Spatial reconstruction and calculation of fluxes}{section.2}% 3
+\BOOKMARK [1][-]{section.3}{Adaptive multiresolution scheme on a uniform grid}{}% 4
+\BOOKMARK [2][-]{subsection.3.1}{Reference scheme on one-dimensional uniform grid}{section.3}% 5
+\BOOKMARK [2][-]{subsection.3.2}{Multiresolution representation of data}{section.3}% 6
+\BOOKMARK [2][-]{subsection.3.3}{Truncation}{section.3}% 7
+\BOOKMARK [2][-]{subsection.3.4}{Adaptive calculation of fluxes}{section.3}% 8
+\BOOKMARK [2][-]{subsection.3.5}{Adaptive calculation of source terms}{section.3}% 9
+\BOOKMARK [1][-]{section.4}{Fully adaptive block-structured multiresolution scheme}{}% 10
+\BOOKMARK [1][-]{section.5}{Numerical Results}{}% 11
+\BOOKMARK [1][-]{appendix.A}{Derivation of Prediction Operator in One-Dimension}{}% 12
+\BOOKMARK [1][-]{appendix.B}{WENO Reconstruction}{}% 13
